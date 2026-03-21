@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSYCHIC</title>
+<script src="cs_shared.js"></script>
+<style>
+
+/* ── WARP TRACKER ── */
+.warp-tracker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.warp-label { font-family:'VT323',monospace; font-size:16px; color:var(--green-dim); letter-spacing:2px; }
+.warp-value { font-family:'VT323',monospace; font-size:32px; color:var(--green); min-width:40px; text-align:center; }
+.warp-threshold { font-size:10px; color:var(--amber-dim); margin-left:4px; }
+
+/* ── PSYKER WARNING ── */
+.psyker-warning {
+  display:none;
+  padding:8px 12px;
+  border:1px solid var(--amber-dim);
+  background:var(--black);
+  color:var(--amber-dim);
+  font-size:11px;
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+.psyker-warning.visible { display:block; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display:flex; flex-wrap:wrap; gap:4px;
+  padding:6px 0; align-items:center;
+  border-bottom:1px solid var(--green-dark);
+  margin-bottom:8px;
+}
+.filter-btn {
+  font-family:'VT323',monospace; font-size:14px;
+  padding:3px 10px; background:none; border:none;
+  border-bottom:2px solid transparent;
+  color:var(--green-dim); cursor:pointer; letter-spacing:1px;
+  transition:color 0.1s,border-color 0.1s; white-space:nowrap;
+}
+.filter-btn:hover  { color:var(--green); border-bottom-color:var(--green-mid); }
+.filter-btn.active { color:var(--green-bright); border-bottom-color:var(--green); }
+.filter-search {
+  margin-left:auto; max-width:150px; font-size:12px; padding:3px 6px;
+}
+
+/* ── POWER CARDS ── */
+.power-cards { display:flex; flex-direction:column; gap:4px; }
+.power-card {
+  border:1px solid var(--green-mid);
+  background:var(--black);
+  padding:7px 8px;
+}
+.power-card-header {
+  display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;
+  margin-bottom:4px;
+}
+.power-card-name {
+  font-family:'VT323',monospace; font-size:17px;
+  color:var(--green-bright); letter-spacing:1px;
+}
+.power-disc {
+  font-size:9px; color:var(--amber-dim);
+  letter-spacing:1px; text-transform:uppercase;
+}
+.power-overt {
+  font-size:9px; padding:1px 4px;
+  border:1px solid var(--amber-dim); color:var(--amber);
+  letter-spacing:1px; font-family:'VT323',monospace;
+}
+.power-stats {
+  display:flex; flex-wrap:wrap; gap:10px;
+  font-size:10px; color:var(--green-dim); margin-bottom:4px;
+}
+.power-stat-label { color:var(--green-dim); }
+.power-stat-val   { color:var(--amber-dim); }
+.power-effect {
+  font-size:11px; color:var(--green); line-height:1.4; margin-bottom:4px;
+}
+.power-add-btn {
+  font-family:'VT323',monospace; font-size:13px;
+  padding:1px 8px; background:none;
+  border:1px solid var(--green-mid); color:var(--green-dim);
+  cursor:pointer; transition:color 0.1s,border-color 0.1s;
+}
+.power-add-btn:hover { color:var(--green-bright); border-color:var(--green); }
+
+/* ── OPERATIVE POWERS ── */
+.ops-layout {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  margin-top:10px;
+}
+@media(max-width:768px){ .ops-layout{grid-template-columns:1fr;} }
+
+/* ── PERILS TABLE ── */
+.perils-table { width:100%; border-collapse:collapse; font-size:11px; }
+.perils-table th {
+  font-family:'VT323',monospace; font-size:12px; color:var(--green-dim);
+  text-align:left; padding:3px 6px;
+  background:var(--green-dark); border-bottom:1px solid var(--green-mid);
+  letter-spacing:1px;
+}
+.perils-table td { padding:4px 6px; border-bottom:1px solid var(--green-dark); vertical-align:top; }
+.perils-table tr:hover td { background:var(--green-faint); }
+.perils-roll { font-family:'VT323',monospace; font-size:16px; color:var(--amber); width:30px; white-space:nowrap; }
+.perils-name { font-family:'VT323',monospace; font-size:13px; color:var(--green-bright); white-space:nowrap; }
+.perils-effect { font-size:10px; color:var(--green-dim); line-height:1.4; }
+
+/* ── DICE ROLLER ── */
+.dice-row { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+.dice-btn {
+  font-family:'VT323',monospace; font-size:16px;
+  padding:3px 10px; background:none; border:none;
+  border-bottom:1px solid var(--green-mid); color:var(--green-dim);
+  cursor:pointer; letter-spacing:1px; transition:color 0.1s,text-shadow 0.1s;
+}
+.dice-btn::before { content:'[ '; color:var(--green-dark); }
+.dice-btn::after  { content:' ]'; color:var(--green-dark); }
+.dice-btn:hover { color:var(--green-bright); text-shadow:0 0 8px var(--green-dim); }
+.perils-roll-btn {
+  font-family:'VT323',monospace; font-size:15px;
+  padding:3px 12px; background:none; border:none;
+  border-bottom:1px solid var(--red-dim); color:var(--red-dim);
+  cursor:pointer; letter-spacing:1px; transition:color 0.1s;
+}
+.perils-roll-btn::before { content:'[ '; opacity:0.5; }
+.perils-roll-btn::after  { content:' ]'; opacity:0.5; }
+.perils-roll-btn:hover { color:var(--red); }
+.dice-result-box {
+  border:1px solid var(--green-mid); background:var(--green-faint);
+  padding:8px 12px; text-align:center; margin-bottom:8px; min-height:60px;
+}
+.dice-result-label { font-size:9px; color:var(--green-dim); letter-spacing:2px; margin-bottom:2px; }
+.dice-result-value { font-family:'VT323',monospace; font-size:40px; color:var(--green); line-height:1; }
+.dice-result-detail { font-size:10px; color:var(--green-dim); margin-top:3px; }
+.perils-result {
+  display:none; border:1px solid var(--red-dim);
+  background:var(--black); padding:8px 10px; margin-top:6px;
+}
+.perils-result.visible { display:block; }
+.perils-result-title { font-family:'VT323',monospace; font-size:16px; color:var(--red); letter-spacing:1px; margin-bottom:4px; }
+.perils-result-text  { font-size:11px; color:var(--green); line-height:1.5; }
+
+/* ── REFERENCE DRAWER ── */
+.ref-drawer-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 10px 14px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  border-bottom: none;
+  cursor: pointer;
+  font-family: 'VT323', monospace;
+  font-size: 17px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  user-select: none;
+  transition: color 0.1s, background 0.1s;
+}
+.ref-drawer-divider:hover { color: var(--green-bright); background: var(--green-mid); }
+.ref-drawer-icon { font-size: 13px; color: var(--green-dim); transition: transform 0.2s; }
+.ref-drawer-icon.open { transform: rotate(180deg); color: var(--green); }
+.ref-drawer {
+  border: 1px solid var(--green-mid);
+  border-top: 1px solid var(--green-dim);
+  background: var(--green-faint);
+  padding: 10px;
+}
+
+/* ── FLASH ── */
+.flash-msg {
+  display:none; padding:4px 10px;
+  background:var(--green-dark); border:1px solid var(--green);
+  color:var(--green-bright); font-family:'VT323',monospace;
+  font-size:14px; letter-spacing:1px; margin-bottom:6px;
+}
+.flash-msg.visible { display:block; }
+
+</style>
+</head>
+<body>
+<div class="sheet-container">
+
+  <!-- PSYKER WARNING -->
+  <div class="psyker-warning" id="psyker-warning">
+    &#9650; THIS OPERATIVE DOES NOT HAVE THE PSYKER TALENT — PSYCHIC POWERS UNAVAILABLE
+  </div>
+
+  <!-- WARP CHARGE -->
+  <div class="warp-tracker">
+    <span class="warp-label">WARP CHARGE:</span>
+    <button class="inf-btn" onclick="adjWarp(-1)">&#9666;</button>
+    <span class="warp-value" id="v-warp">0</span>
+    <button class="inf-btn" onclick="adjWarp(1)">&#9656;</button>
+    <span class="warp-threshold" id="warp-threshold-note"></span>
+    <span style="font-size:10px;color:var(--green-dim);margin-left:6px;">Charge &#8805; Threshold triggers Perils risk.</span>
+  </div>
+
+  <!-- OPERATIVE'S POWERS + DICE -->
+  <div class="ops-layout">
+
+    <div class="panel">
+      <div class="panel-header">// OPERATIVE'S POWERS</div>
+      <div class="panel-body">
+        <div id="power-list"></div>
+        <button class="add-row-btn" onclick="addPower()">+ ADD POWER</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">// WARP DICE &amp; PERILS</div>
+      <div class="panel-body">
+        <div class="dice-row">
+          <button class="dice-btn" onclick="rollDice(1,10,'d10')">d10</button>
+          <button class="dice-btn" onclick="rollDice(2,10,'2d10')">2d10</button>
+          <button class="dice-btn" onclick="rollDice(1,100,'d100')">d100</button>
+        </div>
+        <div class="dice-result-box">
+          <div class="dice-result-label">RESULT</div>
+          <div class="dice-result-value" id="dice-result">&#8212;</div>
+          <div class="dice-result-detail" id="dice-detail"></div>
+        </div>
+        <button class="perils-roll-btn" onclick="rollPerils()">&#9651; ROLL PERILS OF THE WARP</button>
+        <div class="perils-result" id="perils-result">
+          <div class="perils-result-title" id="perils-title"></div>
+          <div class="perils-result-text"  id="perils-text"></div>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="panel-header" style="font-size:13px;margin-bottom:4px;">// PERILS REFERENCE</div>
+          <table class="perils-table">
+            <thead><tr><th>D10</th><th>NAME</th><th>EFFECT</th></tr></thead>
+            <tbody id="perils-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- POWER REFERENCE DRAWER -->
+  <div class="ref-drawer-divider" onclick="togglePowerRef()">
+    <span class="ref-drawer-icon" id="power-ref-icon">&#9660;</span>
+    <span>PSYCHIC POWER REFERENCE &amp; ADD TO SHEET</span>
+    <span style="font-size:10px;color:var(--green-dim);margin-left:8px;">&#8212; click to expand</span>
+  </div>
+
+  <div class="ref-drawer" id="power-ref-drawer" style="display:none;">
+    <div class="flash-msg" id="flash-msg"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setPowerFilter('ALL',this)">ALL</button>
+      <button class="filter-btn" onclick="setPowerFilter('MINOR',this)">MINOR</button>
+      <button class="filter-btn" onclick="setPowerFilter('BIOMANCY',this)">BIOMANCY</button>
+      <button class="filter-btn" onclick="setPowerFilter('DIVINATION',this)">DIVINATION</button>
+      <button class="filter-btn" onclick="setPowerFilter('PYROMANCY',this)">PYROMANCY</button>
+      <button class="filter-btn" onclick="setPowerFilter('TELEKINESIS',this)">TELEKINESIS</button>
+      <button class="filter-btn" onclick="setPowerFilter('TELEPATHY',this)">TELEPATHY</button>
+      <input type="text" class="filter-search" id="power-search"
+        placeholder="Search..." oninput="renderPowerRef()">
+    </div>
+    <div class="power-cards" id="power-ref-list"></div>
+  </div>
+
+</div><!-- /sheet-container -->
+
+<script>
+
+// ============================================================
+// PSYCHIC POWERS DATA  (from IM_Psychic_Powers.md)
+// ============================================================
+
+const POWERS = {
+  MINOR: [
+    { name:'Smite*',              wr:2, diff:'Difficult (−10)',  range:'Medium',    dur:'Instant',   overt:true,  effect:'Target suffers 2+WilB+SL Damage. Ignores Armour. All Psykers know this.' },
+    { name:'Call Vermin',         wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Sustained', overt:false, effect:'Control vermin in area; form swarm in Zone. Crawling = Difficult Terrain; Flying = Lightly Obscured.' },
+    { name:'Combustion',          wr:2, diff:'Routine (+20)',    range:'Medium',    dur:'Instant',   overt:false, effect:'Flammable object within Medium Range catches fire. If held/worn: must drop or become Ablaze.' },
+    { name:'Dread Presence*',     wr:2, diff:'Challenging (+0)', range:'Self',      dur:'Sustained', overt:true,  effect:'Enemies entering your Zone must win Discipline (Fear) Test or become Frightened.' },
+    { name:'Dull Pain',           wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Sustained', overt:false, effect:'Up to SL creatures within Short Range feel no pain and gain +1 Armour to all locations.' },
+    { name:'Float*',              wr:2, diff:'Routine (+20)',    range:'Self/Imm',  dur:'Sustained', overt:true,  effect:'Float at Slow Speed in any direction, ignore Difficult Terrain. Or: reduce object Enc by 1/SL.' },
+    { name:'Ignite*',             wr:1, diff:'Easy (+40)',       range:'Self',      dur:'Sustained', overt:true,  effect:'Create small flame in hand. Casts light, scorches, ignites. Cannot be conventionally extinguished.' },
+    { name:'Ill Omen',            wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Sustained', overt:false, effect:'Roll Psychic Phenomena Table SL times; choose one result to appear in target Zone.' },
+    { name:'Jinx',                wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Instant',   overt:false, effect:"Target's first Test within the next hour is made with Disadvantage." },
+    { name:'Luck',                wr:1, diff:'Easy (+40)',       range:'Self',      dur:'Instant',   overt:false, effect:'Success: next Test with Advantage. Failure: next Test with Disadvantage. Not Psychic Tests. Once/round.' },
+    { name:'Nova*',               wr:2, diff:'Routine (+20)',    range:'Self',      dur:'Instant',   overt:true,  effect:'All creatures in your Zone: 4+WilB+SL Damage. Fail Athletics Test or knocked Prone.' },
+    { name:'Preternatural Senses',wr:2, diff:'Routine (+20)',    range:'Self',      dur:'Sustained', overt:false, effect:'Low-light and heat vision. Advantage on Perception Tests. At 5+ SL: sense creatures without sight.' },
+    { name:'Soulsight',           wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Sustained', overt:false, effect:'Sense living creatures within Medium Range. More SL = more detail. Advantage vs Daemons/Psykers.' },
+    { name:'Spectral Hands',      wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Sustained', overt:false, effect:'Manipulate objects (total Enc ≤ SL) as invisible hands. Can attack with them (1 Dmg per Enc).' },
+    { name:'Spasm',               wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Sustained', overt:false, effect:'Target loses use of one limb (your choice) until start of your next turn. Fortitude Test to resist.' },
+    { name:'Twist Fate',          wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Instant',   overt:false, effect:'Reaction: remove Advantage/Disadvantage from a Test. Failure: you suffer Disadvantage until 0 Warp Charge.' },
+    { name:'Watchward',           wr:2, diff:'Routine (+20)',    range:'Self',      dur:'Sustained', overt:false, effect:'Detect if being observed by any means. More SL = more detail about observer.' }
+  ],
+  BIOMANCY: [
+    { name:'Affliction',          wr:3, diff:'Difficult (−10)',  range:'Short',     dur:'Sustained', overt:false, effect:'Target gains Blinded, Deafened, Fatigued, Poisoned, or Stunned (your choice). Fortitude Test to resist.' },
+    { name:'Bio-Lightning*',      wr:3, diff:'Hard (−20)',       range:'Medium',    dur:'Instant',   overt:true,  effect:'Target + all within Immediate Range: 4+WilB+SL Damage. Fortitude Test or Stunned.' },
+    { name:'Cleanse*',            wr:3, diff:'Difficult (−10)',  range:'Immediate', dur:'Instant',   overt:true,  effect:'Remove Poisoned or Stunned. Adds SL to disease resistance Test. Touch required.' },
+    { name:'Ferrocrete Flesh*',   wr:3, diff:'Challenging (+0)', range:'Immediate', dur:'Sustained', overt:true,  effect:'Target gains Armour = TghB to all locations. If TghB > StrB: Speed -1 step, Agility Disadvantage.' },
+    { name:'Lull',                wr:3, diff:'Difficult (−10)',  range:'Short',     dur:'Sustained', overt:false, effect:'Target falls Unconscious until start of your next turn. Fortitude Test to resist. Ends if damaged.' },
+    { name:'Metabolic Overdrive*',wr:3, diff:'Challenging (+0)', range:'Immediate', dur:'Sustained', overt:true,  effect:'Touch creature: Speed +1 step; Strength/Agility Tests gain Advantage. Fatigue on end.' },
+    { name:'Seal Wounds',         wr:2, diff:'Challenging (+0)', range:'Immediate', dur:'Instant',   overt:false, effect:'Touch: remove up to SL Minor Wounds. Cannot restore Critical Wounds or heal amputations.' },
+    { name:'Shape Flesh*',        wr:4, diff:'Very Hard (−30)',  range:'Immediate', dur:'Sustained', overt:true,  effect:'Drastically alter target physiology. Grotesque transformations possible. GM discretion on effects.' }
+  ],
+  DIVINATION: [
+    { name:'Perfect Timing',      wr:2, diff:'Challenging (+0)', range:'Short',     dur:'Instant',   overt:false, effect:'Up to SL allies may Seize Initiative as Free Action at end of next turn. +Advantage on first Test.' },
+    { name:'Prescience',          wr:1, diff:'Easy (+40)',        range:'Self',      dur:'Special',   overt:false, effect:'During Rest: gain Prescience Points = SL. Spend 1 to reroll any Test (once per Test). Lost when recast.' },
+    { name:'Psychometry*',        wr:1, diff:'Easy (+40)',        range:'Immediate', dur:'1 Minute',  overt:true,  effect:'1-min trance: read emotional impressions from object or Zone. More SL = more detail.' },
+    { name:'Question the Warp*',  wr:1, diff:'Challenging (+0)', range:'Self',      dur:'1 Minute',  overt:true,  effect:'Ask GM one question. GM secretly tests vs WilB+SL: if passes, answers truthfully; else lies.' },
+    { name:'Scrying Gaze*',       wr:1, diff:'Easy (+40)',        range:'Special',   dur:'1 Minute',  overt:true,  effect:'Remote-view any place/creature you have seen firsthand. 4+ SL: know direction and distance.' },
+    { name:'Ill Omen',            wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Sustained', overt:false, effect:'Roll Psychic Phenomena Table SL times; one chosen result appears in target Zone. (Also Minor)' },
+    { name:'Jinx',                wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Instant',   overt:false, effect:"Target's first Test within next hour made with Disadvantage. (Also Minor)" },
+    { name:'Twist Fate',          wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Instant',   overt:false, effect:'Reaction: remove Advantage/Disadvantage from another creature\'s Test. (Also Minor)' },
+    { name:'Watchward',           wr:2, diff:'Routine (+20)',    range:'Self',      dur:'Sustained', overt:false, effect:'Detect observation by any means. (Also Minor)' }
+  ],
+  PYROMANCY: [
+    { name:'Cauterise*',          wr:3, diff:'Difficult (−10)',  range:'Immediate', dur:'Instant',   overt:true,  effect:'Touch: remove Bleeding/Frightened/Stunned/Unconscious. Target takes 4−SL Damage to touched location.' },
+    { name:'Command Flames',      wr:3, diff:'Difficult (−10)',  range:'Long',      dur:'Instant',   overt:false, effect:'Manipulate fire within Long Range up to SL times: extinguish, intensify, expand, shape flames.' },
+    { name:'Fire Storm*',         wr:3, diff:'Hard (−20)',       range:'Medium',    dur:'Instant',   overt:true,  effect:'All creatures in target Zone: 6+SL Damage. Zone gains Burning Trait. Ignores Cover.' },
+    { name:'Sear',                wr:3, diff:'Difficult (−10)',  range:'Medium',    dur:'Sustained', overt:false, effect:'Object (Enc ≤ SL) becomes burning hot. Touch = WilB Damage, ignores Armour. Repeated each turn touching.' },
+    { name:'Combustion',          wr:2, diff:'Routine (+20)',    range:'Medium',    dur:'Instant',   overt:false, effect:'Flammable object catches fire. (Also Minor)' },
+    { name:'Ignite*',             wr:1, diff:'Easy (+40)',       range:'Self',      dur:'Sustained', overt:true,  effect:'Create small flame in hand. (Also Minor)' },
+    { name:'Nova*',               wr:2, diff:'Routine (+20)',    range:'Self',      dur:'Instant',   overt:true,  effect:'All in Zone: 4+WilB+SL Damage + Prone Test. (Also Minor)' },
+    { name:'Inferno*',            wr:4, diff:'Hard (−20)',       range:'Long',      dur:'Sustained', overt:true,  effect:'Large area of fire: creatures entering/starting turn take WilB+SL Damage. Ignores Cover.' }
+  ],
+  TELEKINESIS: [
+    { name:'Crush*',              wr:3, diff:'Difficult (−10)',  range:'Medium',    dur:'Instant',   overt:true,  effect:'Target suffers 4+WilB+SL Damage. Armour at hit location halved (rounded down).' },
+    { name:'Objuration Mechanicum*',wr:3,diff:'Hard (−20)',      range:'Short',     dur:'Sustained', overt:true,  effect:'All technology within Short Range ceases functioning. Powered armour loses bonuses. Weapons malfunction.' },
+    { name:'Psychic Barrier',     wr:3, diff:'Challenging (+0)', range:'Short',     dur:'Sustained', overt:false, effect:'Create telekinetic barrier in a Zone edge. Counts as Heavy Cover. Creatures can still pass through.' },
+    { name:'Psychic Maelstrom*',  wr:4, diff:'Hard (−20)',       range:'Medium',    dur:'Sustained', overt:true,  effect:'Zone becomes Difficult Terrain. Creatures inside: −2 SL all Tests. Flying creatures fall Prone.' },
+    { name:'Float*',              wr:2, diff:'Routine (+20)',    range:'Self/Imm',  dur:'Sustained', overt:true,  effect:'Float + move (Slow). Reduce object Enc by SL. (Also Minor)' },
+    { name:'Spectral Hands',      wr:2, diff:'Routine (+20)',    range:'Short',     dur:'Sustained', overt:false, effect:'Manipulate objects as invisible hands. (Also Minor)' },
+    { name:'Telekinetic Finesse', wr:2, diff:'Challenging (+0)', range:'Short',     dur:'Sustained', overt:false, effect:'Move + finely manipulate objects (Enc ≤ SL) within Short Range. Precise enough for surgery or lockpicking.' },
+    { name:'Telekinetic Leverage*',wr:2,diff:'Routine (+20)',    range:'Short',     dur:'Instant',   overt:true,  effect:'Move large objects (Enc up to 2×SL) within Short Range or hurl at target: WilB+SL Damage.' }
+  ],
+  TELEPATHY: [
+    { name:'Dominate*',           wr:4, diff:'Hard (−20)',       range:'Short',     dur:'Sustained', overt:true,  effect:'Full control of target. Acts on your turn. Discipline (Psychic) Test to resist each turn.' },
+    { name:'Hallucination*',      wr:3, diff:'Difficult (−10)',  range:'Short',     dur:'Sustained', overt:true,  effect:'Target experiences terrifying hallucinations. −2 SL all Tests. Discipline Test to resist each turn.' },
+    { name:'Mind Probe*',         wr:2, diff:'Difficult (−10)',  range:'Immediate', dur:'Instant',   overt:true,  effect:'Touch: extract specific information. Discipline Opposed Test. On success: one truth of your choice.' },
+    { name:'Mental Fortress',     wr:2, diff:'Challenging (+0)', range:'Self',      dur:'Sustained', overt:false, effect:'Advantage on Discipline (Psychic) and (Fear) Tests. +1 SL vs Psychic powers targeting you.' },
+    { name:'Overwhelming Presence*',wr:3,diff:'Difficult (−10)', range:'Short',     dur:'Instant',   overt:true,  effect:'All creatures in Zone: Discipline (Fear) Test or become Frightened of you until start of next turn.' },
+    { name:'Psychic Shriek*',     wr:2, diff:'Challenging (+0)', range:'Short',     dur:'Instant',   overt:true,  effect:'Mental blast hits all in Zone: WilB+SL Damage ignoring Armour. Discipline Test or Stunned 1 round.' },
+    { name:'Telepathic Link',     wr:1, diff:'Easy (+40)',       range:'Long',      dur:'Sustained', overt:false, effect:'Silent two-way communication with willing target within Long Range.' },
+    { name:'Terrify*',            wr:2, diff:'Challenging (+0)', range:'Medium',    dur:'Instant',   overt:true,  effect:'Target: Discipline (Fear) Test at Hard (−20) or become Frightened until end of its next turn.' }
+  ]
+};
+
+// ── Perils data ────────────────────────────────────────────
+const PERILS_TABLE = [
+  { roll:'1',  name:'Psychic Concussion',      effect:'Psyker is Stunned for 1 round.' },
+  { roll:'2',  name:'Power Drain',             effect:'Lose all remaining Warp Charges.' },
+  { roll:'3',  name:'Warp Overload',           effect:'Take WilB Damage, ignores Armour.' },
+  { roll:'4',  name:'Reality Tear',            effect:'Immediate Minor Corruption.' },
+  { roll:'5',  name:'Daemonic Attention',      effect:'GM introduces a warp complication.' },
+  { roll:'6',  name:'Feedback Loop',           effect:'Power fails; cannot manifest next round.' },
+  { roll:'7',  name:'Possession Attempt',      effect:'Discipline Test or Possessed for 1 round.' },
+  { roll:'8',  name:'Psychic Backlash',        effect:'All allies within Short Range take 1d5 Damage.' },
+  { roll:'9',  name:'Catastrophic Surge',      effect:'Power manifests at double Warp Rating effect.' },
+  { roll:'10', name:'The Neverborn Stir',      effect:'Perils escalates — roll again with +2 added.' }
+];
+
+// ── Drawer toggle ──────────────────────────────────────────
+
+function togglePowerRef() {
+  const drawer = document.getElementById('power-ref-drawer');
+  const icon   = document.getElementById('power-ref-icon');
+  const open   = drawer.style.display === 'none';
+  drawer.style.display = open ? '' : 'none';
+  icon.classList.toggle('open', open);
+  if (open) renderPowerRef();
+}
+
+// ── Filter state ───────────────────────────────────────────
+let currentPowerFilter = 'ALL';
+
+function setPowerFilter(filter, btn) {
+  currentPowerFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPowerRef();
+}
+
+// ── Render power reference ─────────────────────────────────
+function renderPowerRef() {
+  const search = (document.getElementById('power-search').value || '').toLowerCase();
+  const list   = document.getElementById('power-ref-list');
+  list.innerHTML = '';
+
+  const cats = currentPowerFilter === 'ALL'
+    ? ['MINOR','BIOMANCY','DIVINATION','PYROMANCY','TELEKINESIS','TELEPATHY']
+    : [currentPowerFilter];
+
+  cats.forEach(cat => {
+    const items = (POWERS[cat] || []).filter(p =>
+      !search || p.name.toLowerCase().includes(search) || p.effect.toLowerCase().includes(search)
+    );
+    if (!items.length) return;
+
+    // Category header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'font-family:"VT323",monospace;font-size:13px;color:var(--amber-dim);' +
+      'letter-spacing:2px;padding:4px 2px 2px;border-bottom:1px solid var(--green-dark);margin-bottom:4px;';
+    hdr.textContent = cat;
+    list.appendChild(hdr);
+
+    items.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'power-card';
+
+      const overtBadge = p.overt ? '<span class="power-overt">OVERT</span>' : '';
+      card.innerHTML =
+        '<div class="power-card-header">' +
+          '<span class="power-card-name">' + p.name + '</span>' +
+          '<span class="power-disc">' + cat + '</span>' +
+          overtBadge +
+        '</div>' +
+        '<div class="power-stats">' +
+          '<span><span class="power-stat-label">WR </span><span class="power-stat-val">' + p.wr + '</span></span>' +
+          '<span><span class="power-stat-label">DIFF </span><span class="power-stat-val">' + p.diff + '</span></span>' +
+          '<span><span class="power-stat-label">RANGE </span><span class="power-stat-val">' + p.range + '</span></span>' +
+          '<span><span class="power-stat-label">DUR </span><span class="power-stat-val">' + p.dur + '</span></span>' +
+        '</div>' +
+        '<div class="power-effect">' + p.effect + '</div>' +
+        '<button class="power-add-btn" onclick="addPowerFromRef(' +
+          JSON.stringify(p.name).replace(/'/g,"&#39;") + ',' +
+          JSON.stringify(cat).replace(/'/g,"&#39;") + ',' + p.wr +
+        ')">+ ADD TO SHEET</button>';
+
+      list.appendChild(card);
+    });
+  });
+}
+
+function addPowerFromRef(name, discipline, wr) {
+  const d = currentData();
+  if (!d.powers) d.powers = [];
+  d.powers.push({ name: name, discipline: discipline, warp_rating: wr });
+  saveCurrentData(d);
+  renderOperativePowers(d);
+  flash(name + ' added to powers');
+}
+
+// ── Operative's powers ─────────────────────────────────────
+function renderOperativePowers(d) {
+  const list = document.getElementById('power-list');
+  list.innerHTML = '';
+  (d.powers || []).forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text'; nameIn.value = p.name || '';
+    nameIn.placeholder = 'Power name';
+    nameIn.oninput = () => updatePower(i, 'name', nameIn.value);
+
+    const discIn = document.createElement('input');
+    discIn.type = 'text'; discIn.value = p.discipline || '';
+    discIn.placeholder = 'Discipline'; discIn.style.maxWidth = '90px';
+    discIn.oninput = () => updatePower(i, 'discipline', discIn.value);
+
+    const lbl = document.createElement('span');
+    lbl.textContent = 'WR'; lbl.style.cssText = 'font-size:10px;color:var(--green-dim);white-space:nowrap;';
+
+    const wrIn = document.createElement('input');
+    wrIn.type = 'number'; wrIn.value = p.warp_rating || 1;
+    wrIn.min = 1; wrIn.style.width = '40px';
+    wrIn.oninput = () => updatePower(i, 'warp_rating', wrIn.value);
+
+    const rm = document.createElement('button');
+    rm.className = 'remove-btn'; rm.innerHTML = '&#x2715;';
+    rm.onclick = () => removePower(i);
+
+    div.appendChild(nameIn); div.appendChild(discIn);
+    div.appendChild(lbl); div.appendChild(wrIn); div.appendChild(rm);
+    list.appendChild(div);
+  });
+}
+
+function addPower() {
+  const d = currentData();
+  if (!d.powers) d.powers = [];
+  d.powers.push({ name:'', discipline:'', warp_rating:1 });
+  saveCurrentData(d); renderOperativePowers(d);
+}
+
+function removePower(i) {
+  const d = currentData(); d.powers.splice(i, 1); saveCurrentData(d); renderOperativePowers(d);
+}
+
+function updatePower(i, field, val) {
+  const d = currentData(); d.powers[i][field] = val; saveCurrentData(d);
+}
+
+// ── Warp charge ────────────────────────────────────────────
+function adjWarp(delta) {
+  const d = currentData();
+  d.warp_charge = Math.max(0, (d.warp_charge || 0) + delta);
+  saveCurrentData(d);
+  document.getElementById('v-warp').textContent = d.warp_charge;
+  updateThresholdNote(d);
+}
+
+function updateThresholdNote(d) {
+  const wilB  = Math.floor(((d.chars?.wil?.base || 20) + (d.chars?.wil?.adv || 0)) / 10);
+  const charge = d.warp_charge || 0;
+  const note   = document.getElementById('warp-threshold-note');
+  if (note) note.textContent = 'Threshold: ' + wilB + (charge >= wilB ? ' — DANGER' : '');
+}
+
+// ── Dice ───────────────────────────────────────────────────
+function rollDice(num, sides, label) {
+  const rolls = Array.from({length:num}, () => Math.floor(Math.random() * sides) + 1);
+  const total = rolls.reduce((a, b) => a + b, 0);
+  document.getElementById('dice-result').textContent = total;
+  document.getElementById('dice-detail').textContent = num > 1 ? label + ': ' + rolls.join(' + ') : label;
+  document.getElementById('perils-result').classList.remove('visible');
+}
+
+function rollPerils() {
+  const roll  = Math.floor(Math.random() * 10) + 1;
+  const entry = PERILS_TABLE[roll - 1];
+  document.getElementById('dice-result').textContent = roll;
+  document.getElementById('dice-detail').textContent = 'd10 \u2014 Perils';
+  document.getElementById('perils-title').textContent = roll + ' \u2014 ' + entry.name;
+  document.getElementById('perils-text').textContent  = entry.effect;
+  document.getElementById('perils-result').classList.add('visible');
+}
+
+function renderPerilsTable() {
+  document.getElementById('perils-table-body').innerHTML = PERILS_TABLE.map(p =>
+    '<tr><td class="perils-roll">' + p.roll + '</td>' +
+    '<td class="perils-name">'    + p.name + '</td>' +
+    '<td class="perils-effect">'  + p.effect + '</td></tr>'
+  ).join('');
+}
+
+// ── Psyker check ───────────────────────────────────────────
+function checkPsyker(d) {
+  document.getElementById('psyker-warning')
+    .classList.toggle('visible', !hasPsykerTalent(d));
+}
+
+// ── Flash ──────────────────────────────────────────────────
+function flash(msg) {
+  const el = document.getElementById('flash-msg');
+  el.textContent = '+ ' + msg;
+  el.classList.add('visible');
+  clearTimeout(flash._t);
+  flash._t = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ── Init ───────────────────────────────────────────────────
+function init() {
+  const d = currentData();
+  document.getElementById('v-warp').textContent = d.warp_charge || 0;
+  updateThresholdNote(d);
+  renderOperativePowers(d);
+  renderPowerRef();
+  renderPerilsTable();
+  checkPsyker(d);
+}
+
+window.refreshIfPresent = init;
+init();
+
+</script>
+</body>
+</html>

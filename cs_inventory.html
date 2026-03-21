@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INVENTORY</title>
+<script src="cs_shared.js"></script>
+<style>
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 0;
+  align-items: center;
+  border-bottom: 1px solid var(--green-dark);
+  margin-bottom: 8px;
+}
+.filter-btn {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  padding: 3px 10px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--green-dim);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: color 0.1s, border-color 0.1s;
+  white-space: nowrap;
+}
+.filter-btn:hover  { color: var(--green); border-bottom-color: var(--green-mid); }
+.filter-btn.active { color: var(--green-bright); border-bottom-color: var(--green); }
+.filter-search {
+  margin-left: auto;
+  max-width: 160px;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+/* ── ARMOURY TABLE ── */
+.armoury-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.armoury-table th {
+  font-family: 'VT323', monospace;
+  font-size: 12px;
+  color: var(--green-dim);
+  text-align: left;
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--green-mid);
+  background: var(--green-dark);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.armoury-table td {
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--green-dark);
+  color: var(--green);
+  vertical-align: top;
+}
+.armoury-table tr:hover td { background: var(--green-faint); }
+.armoury-table .td-name {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--green-bright);
+  white-space: nowrap;
+}
+.armoury-table .td-traits {
+  font-size: 10px;
+  color: var(--green-dim);
+  max-width: 200px;
+}
+.armoury-table .td-avail { font-size: 10px; white-space: nowrap; }
+.avail-common  { color: var(--green); }
+.avail-scarce  { color: var(--amber); }
+.avail-rare    { color: var(--amber-dim); }
+.avail-exotic  { color: var(--red-dim); }
+.add-item-btn {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  padding: 1px 7px;
+  background: none;
+  border: 1px solid var(--green-mid);
+  color: var(--green-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s;
+}
+.add-item-btn:hover { color: var(--green-bright); border-color: var(--green); }
+.category-divider td {
+  font-family: 'VT323', monospace;
+  font-size: 12px;
+  color: var(--amber-dim);
+  background: var(--green-dark) !important;
+  padding: 2px 5px;
+  letter-spacing: 2px;
+}
+
+/* ── ARMOUR GRID ── */
+.armour-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.armour-loc {
+  text-align: center;
+  border: 1px solid var(--green-mid);
+  background: var(--black);
+  padding: 6px;
+}
+.armour-loc label { font-size: 10px; text-align: center; }
+.armour-loc input { text-align: center; font-size: 20px; font-family: 'VT323', monospace; }
+
+/* ── WEAPONS TABLE ── */
+.weapons-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.weapons-table th {
+  font-family: 'VT323', monospace;
+  font-size: 12px;
+  color: var(--green-dim);
+  text-align: left;
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--green-mid);
+  background: var(--green-dark);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.weapons-table td {
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--green-dark);
+}
+.weapons-table td input {
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--green-dark);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  width: 100%; padding: 1px; outline: none;
+}
+.weapons-table td input:focus { border-bottom-color: var(--green); }
+.weapons-table tr:hover td { background: var(--green-faint); }
+
+/* ── SOLARS BAR ── */
+.solars-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.solars-label { font-family: 'VT323', monospace; font-size: 16px; color: var(--green-dim); letter-spacing: 2px; }
+.solars-input {
+  width: 100px;
+  font-family: 'VT323', monospace; font-size: 22px; text-align: center;
+  background: var(--black); border: 1px solid var(--green-mid); color: var(--green-bright);
+  padding: 2px 6px; outline: none;
+}
+.solars-input:focus { border-color: var(--green); }
+
+/* ── REFERENCE DRAWER ── */
+.ref-drawer-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 10px 14px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  border-bottom: none;
+  cursor: pointer;
+  font-family: 'VT323', monospace;
+  font-size: 17px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  user-select: none;
+  transition: color 0.1s, background 0.1s;
+}
+.ref-drawer-divider:hover { color: var(--green-bright); background: var(--green-mid); }
+.ref-drawer-icon { font-size: 13px; color: var(--green-dim); transition: transform 0.2s; }
+.ref-drawer-icon.open { transform: rotate(180deg); color: var(--green); }
+.ref-drawer {
+  border: 1px solid var(--green-mid);
+  border-top: 1px solid var(--green-dim);
+  background: var(--green-faint);
+  padding: 10px;
+}
+
+/* ── FLASH MESSAGE ── */
+.flash-msg {
+  display: none;
+  padding: 4px 10px;
+  background: var(--green-dark);
+  border: 1px solid var(--green);
+  color: var(--green-bright);
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.flash-msg.visible { display: block; }
+
+</style>
+</head>
+<body>
+<div class="sheet-container">
+
+  <!-- SOLARS -->
+  <div class="solars-bar">
+    <span class="solars-label">SOLARS:</span>
+    <input class="solars-input" type="number" id="v-solars" min="0"
+      oninput="saveVital('solars',this.value)">
+    <span style="font-size:10px;color:var(--green-dim);">&#8212; currency carried</span>
+  </div>
+
+  <!-- PLAYER LOADOUT -->
+  <div class="sheet-grid">
+
+    <!-- ARMOUR LOCATIONS -->
+    <div class="panel">
+      <div class="panel-header">// ARMOUR</div>
+      <div class="panel-body">
+        <div class="armour-grid">
+          <div class="armour-loc"><label>HEAD</label><input type="number" id="arm-head" min="0" oninput="saveArmour('head',this.value)"></div>
+          <div class="armour-loc"><label>BODY</label><input type="number" id="arm-body" min="0" oninput="saveArmour('body',this.value)"></div>
+          <div class="armour-loc"><label>L ARM</label><input type="number" id="arm-larm" min="0" oninput="saveArmour('larm',this.value)"></div>
+          <div class="armour-loc"><label>R ARM</label><input type="number" id="arm-rarm" min="0" oninput="saveArmour('rarm',this.value)"></div>
+          <div class="armour-loc"><label>L LEG</label><input type="number" id="arm-lleg" min="0" oninput="saveArmour('lleg',this.value)"></div>
+          <div class="armour-loc"><label>R LEG</label><input type="number" id="arm-rleg" min="0" oninput="saveArmour('rleg',this.value)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EQUIPMENT -->
+    <div class="panel">
+      <div class="panel-header">// EQUIPMENT</div>
+      <div class="panel-body">
+        <div id="equip-list"></div>
+        <button class="add-row-btn" onclick="addEquip()">+ ADD ITEM</button>
+      </div>
+    </div>
+
+    <!-- WEAPONS -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// WEAPONS</div>
+      <div class="panel-body">
+        <div style="overflow-x:auto;">
+          <table class="weapons-table">
+            <thead>
+              <tr><th>NAME</th><th>TYPE</th><th>DMG</th><th>RANGE</th><th>MAG</th><th>ENC</th><th>AP/TRAITS</th><th>NOTES</th><th></th></tr>
+            </thead>
+            <tbody id="weapons-body"></tbody>
+          </table>
+        </div>
+        <button class="add-row-btn" onclick="addWeapon()">+ ADD WEAPON</button>
+      </div>
+    </div>
+
+    <!-- AUGMETICS -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// AUGMETICS</div>
+      <div class="panel-body">
+        <div id="augmetic-list"></div>
+        <button class="add-row-btn" onclick="addAugmetic()">+ ADD AUGMETIC</button>
+      </div>
+    </div>
+
+  </div><!-- /sheet-grid -->
+
+  <!-- ARMOURY REFERENCE DRAWER -->
+  <div class="ref-drawer-divider" onclick="toggleArmouryRef()">
+    <span class="ref-drawer-icon" id="armoury-ref-icon">&#9660;</span>
+    <span>ARMOURY REFERENCE &amp; ADD TO LOADOUT</span>
+    <span style="font-size:10px;color:var(--green-dim);margin-left:8px;">&#8212; click to expand</span>
+  </div>
+
+  <div class="ref-drawer" id="armoury-ref-drawer" style="display:none;">
+    <div class="flash-msg" id="flash-msg"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('ALL',this)">ALL</button>
+      <button class="filter-btn" onclick="setFilter('MELEE',this)">MELEE</button>
+      <button class="filter-btn" onclick="setFilter('RANGED',this)">RANGED</button>
+      <button class="filter-btn" onclick="setFilter('GRENADES',this)">GRENADES</button>
+      <button class="filter-btn" onclick="setFilter('ARMOUR',this)">ARMOUR</button>
+      <button class="filter-btn" onclick="setFilter('AUGMETICS',this)">AUGMETICS</button>
+      <button class="filter-btn" onclick="setFilter('GEAR',this)">GEAR</button>
+      <input type="text" class="filter-search" id="armoury-search"
+        placeholder="Search..." oninput="renderArmoury()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="armoury-table">
+        <thead id="armoury-thead"></thead>
+        <tbody id="armoury-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /sheet-container -->
+
+<script>
+
+// ============================================================
+// ARMOURY DATA  (from IM_Wargear.md project files)
+// ============================================================
+
+const ARMOURY = {
+  MELEE: [
+    // Chain
+    { name:'Chainaxe',         spec:'One-handed', dam:'3+StrB', enc:1, cost:600,   avail:'Rare',   traits:'Loud, Rend (3)' },
+    { name:'Chainsword',       spec:'One-handed', dam:'3+StrB', enc:1, cost:500,   avail:'Scarce', traits:'Loud, Rend (2)' },
+    { name:'Eviscerator',      spec:'Two-handed', dam:'5+StrB', enc:3, cost:800,   avail:'Rare',   traits:'Heavy (4), Loud, Rend (4), Two-handed' },
+    // Force
+    { name:'Force Staff',      spec:'Two-handed', dam:'1+StrB', enc:2, cost:7000,  avail:'Exotic', traits:'Defensive, Two-handed' },
+    { name:'Force Sword',      spec:'One-handed', dam:'2+StrB', enc:1, cost:8000,  avail:'Exotic', traits:'\u2014' },
+    // Mundane
+    { name:'Axe',              spec:'One-handed', dam:'2+StrB', enc:1, cost:80,    avail:'Common', traits:'\u2014' },
+    { name:'Brass Knuckles',   spec:'Brawling',   dam:'0+StrB', enc:0, cost:30,    avail:'Common', traits:'Subtle' },
+    { name:'Flail',            spec:'Two-handed', dam:'4+StrB', enc:2, cost:200,   avail:'Common', traits:'Heavy (4), Two-handed' },
+    { name:'Great Weapon',     spec:'Two-handed', dam:'4+StrB', enc:2, cost:300,   avail:'Scarce', traits:'Heavy (4), Two-handed' },
+    { name:'Hammer',           spec:'One-handed', dam:'2+StrB', enc:1, cost:25,    avail:'Common', traits:'\u2014' },
+    { name:'Knife',            spec:'One-handed', dam:'0+StrB', enc:0, cost:50,    avail:'Common', traits:'Subtle, Thrown (Short)' },
+    { name:'Staff',            spec:'Two-handed', dam:'1+StrB', enc:2, cost:25,    avail:'Common', traits:'Defensive, Two-handed' },
+    { name:'Sword',            spec:'One-handed', dam:'2+StrB', enc:1, cost:150,   avail:'Common', traits:'\u2014' },
+    { name:'Whip',             spec:'One-handed', dam:'0+StrB', enc:1, cost:60,    avail:'Scarce', traits:'Loud, Reach' },
+    // Shock
+    { name:'Electro-Flail',    spec:'One-handed', dam:'0+StrB', enc:1, cost:500,   avail:'Scarce', traits:'Loud, Reach, Inflict (Stunned)' },
+    { name:'Shock Maul',       spec:'One-handed', dam:'2+StrB', enc:1, cost:250,   avail:'Scarce', traits:'Loud, Inflict (Stunned)' },
+    // Power
+    { name:'Power Axe',        spec:'Two-handed', dam:'6+StrB', enc:2, cost:3400,  avail:'Rare',   traits:'Heavy (4), Penetrating (6), Two-handed' },
+    { name:'Power Fist',       spec:'Brawling',   dam:'6+StrB', enc:2, cost:4000,  avail:'Rare',   traits:'Heavy (4), Penetrating (6)' },
+    { name:'Power Knife',      spec:'One-handed', dam:'2+StrB', enc:1, cost:2000,  avail:'Rare',   traits:'Penetrating (2), Subtle, Thrown (Short)' },
+    { name:'Power Maul',       spec:'One-handed', dam:'5+StrB', enc:1, cost:3000,  avail:'Rare',   traits:'Penetrating (2)' },
+    { name:'Power Sword',      spec:'One-handed', dam:'4+StrB', enc:1, cost:3000,  avail:'Rare',   traits:'Penetrating (4)' }
+  ],
+  RANGED: [
+    // Bolt
+    { name:'Bolt Pistol',      spec:'Pistol',    dam:'8',  range:'Medium', mag:2,  enc:1, cost:4000,  avail:'Scarce', traits:'Burst, Close, Loud, Penetrating (4), Spread' },
+    { name:'Boltgun',          spec:'Long Gun',  dam:'8',  range:'Long',   mag:4,  enc:2, cost:5000,  avail:'Scarce', traits:'Loud, Penetrating (4), Rapid Fire (2), Spread, Two-handed' },
+    { name:'Heavy Bolter',     spec:'Ordnance',  dam:'10', range:'Long',   mag:6,  enc:3, cost:9000,  avail:'Rare',   traits:'Heavy (4), Penetrating (5), Loud, Rapid Fire (3), Spread, Two-handed' },
+    // Flame
+    { name:'Hand Flamer',      spec:'Pistol',    dam:'7',  range:'Short',  mag:2,  enc:1, cost:500,   avail:'Rare',   traits:'Close, Flamer, Inflict (Ablaze), Loud' },
+    { name:'Flamer',           spec:'Long Gun',  dam:'8',  range:'Medium', mag:4,  enc:2, cost:1000,  avail:'Scarce', traits:'Flamer, Inflict (Ablaze), Loud, Two-handed' },
+    // Las
+    { name:'Laspistol',        spec:'Pistol',    dam:'5',  range:'Medium', mag:2,  enc:0, cost:400,   avail:'Common', traits:'Burst, Close, Loud, Reliable' },
+    { name:'Lasgun',           spec:'Long Gun',  dam:'6',  range:'Long',   mag:4,  enc:2, cost:600,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
+    { name:'Las Carbine',      spec:'Long Gun',  dam:'5',  range:'Medium', mag:3,  enc:1, cost:800,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
+    { name:'Long Las',         spec:'Long Gun',  dam:'6',  range:'Extreme',mag:2,  enc:2, cost:1000,  avail:'Scarce', traits:'Burst, Penetrating (1), Reliable, Two-handed' },
+    { name:'Hot-Shot Laspistol',spec:'Pistol',   dam:'8',  range:'Medium', mag:2,  enc:2, cost:900,   avail:'Rare',   traits:'Burst, Loud, Penetrating (2)' },
+    { name:'Hot-Shot Lasgun',  spec:'Long Gun',  dam:'8',  range:'Long',   mag:3,  enc:3, cost:1000,  avail:'Rare',   traits:'Burst, Loud, Penetrating (2), Two-handed' },
+    { name:'Lascannon',        spec:'Ordnance',  dam:'18', range:'Extreme',mag:5,  enc:4, cost:8000,  avail:'Rare',   traits:'Heavy (4), Loud, Penetrating (10), Two-handed' },
+    // Melta
+    { name:'Inferno Pistol',   spec:'Pistol',    dam:'16', range:'Short',  mag:3,  enc:0, cost:8000,  avail:'Exotic', traits:'Close, Rend (5)' },
+    { name:'Meltagun',         spec:'Long Gun',  dam:'16', range:'Medium', mag:5,  enc:1, cost:9000,  avail:'Rare',   traits:'Rend (5), Two-handed' },
+    // Plasma
+    { name:'Plasma Pistol',    spec:'Pistol',    dam:'10', range:'Medium', mag:6,  enc:1, cost:7000,  avail:'Rare',   traits:'Close, Loud, Penetrating (6), Supercharge (4), Unstable' },
+    { name:'Plasma Gun',       spec:'Long Gun',  dam:'10', range:'Long',   mag:12, enc:1, cost:8000,  avail:'Rare',   traits:'Loud, Penetrating (6), Supercharge (4), Two-handed, Unstable' },
+    // Solid Projectile
+    { name:'Autopistol',       spec:'Pistol',    dam:'5',  range:'Medium', mag:3,  enc:0, cost:400,   avail:'Common', traits:'Close, Loud, Rapid Fire (3)' },
+    { name:'Autogun',          spec:'Long Gun',  dam:'6',  range:'Long',   mag:5,  enc:1, cost:600,   avail:'Common', traits:'Loud, Rapid Fire (3), Two-handed' },
+    { name:'Hand Cannon',      spec:'Pistol',    dam:'8',  range:'Medium', mag:4,  enc:2, cost:570,   avail:'Scarce', traits:'Close, Heavy (4), Loud, Penetrating (2)' },
+    { name:'Shotgun (Combat)', spec:'Long Gun',  dam:'6',  range:'Medium', mag:12, enc:1, cost:600,   avail:'Scarce', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
+    { name:'Shotgun (Pump)',   spec:'Long Gun',  dam:'6',  range:'Medium', mag:8,  enc:1, cost:400,   avail:'Common', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
+    { name:'Sniper Rifle',     spec:'Long Gun',  dam:'8',  range:'Extreme',mag:6,  enc:2, cost:1000,  avail:'Scarce', traits:'Loud, Two-handed' },
+    { name:'Stub Pistol',      spec:'Pistol',    dam:'6',  range:'Medium', mag:2,  enc:0, cost:250,   avail:'Common', traits:'Burst, Close, Loud' },
+    { name:'Stub Revolver',    spec:'Pistol',    dam:'6',  range:'Medium', mag:6,  enc:0, cost:200,   avail:'Common', traits:'Close, Loud, Reliable' },
+    { name:'Heavy Stubber',    spec:'Ordnance',  dam:'8',  range:'Extreme',mag:8,  enc:3, cost:2000,  avail:'Scarce', traits:'Heavy (4), Loud, Penetrating (3), Rapid Fire (4), Two-handed' },
+    // Specialised
+    { name:'Needle Pistol',    spec:'Pistol',    dam:'1',  range:'Medium', mag:4,  enc:1, cost:1500,  avail:'Exotic', traits:'Close, Inflict (Poisoned), Penetrating (6), Subtle' },
+    { name:'Needle Rifle',     spec:'Long Gun',  dam:'1',  range:'Long',   mag:6,  enc:2, cost:1700,  avail:'Exotic', traits:'Inflict (Poisoned), Penetrating (6), Subtle, Two-handed' },
+    { name:'Web Pistol',       spec:'Pistol',    dam:'\u2014', range:'Short', mag:3, enc:1, cost:1300, avail:'Rare',  traits:'Close, Inflict (Restrained)' },
+    { name:'Webber',           spec:'Long Gun',  dam:'\u2014', range:'Medium',mag:6, enc:1, cost:1500, avail:'Rare',  traits:'Inflict (Restrained), Two-handed' },
+    // Launcher
+    { name:'Grenade Launcher', spec:'Ordnance',  dam:'\u2014',range:'Long',  mag:6, enc:2, cost:1000, avail:'Rare',  traits:'Loud, Two-handed' },
+    { name:'Missile Launcher', spec:'Ordnance',  dam:'\u2014',range:'Extreme',mag:1,enc:3, cost:2000, avail:'Rare',  traits:'Heavy (4), Loud, Two-handed' }
+  ],
+  GRENADES: [
+    { name:'Frag Grenade',         spec:'Thrown/Ordnance', dam:'6',  enc:0, cost:50,   avail:'Common', traits:'Blast, Loud, Thrown (Medium), Unstable' },
+    { name:'Krak Grenade',         spec:'Thrown/Ordnance', dam:'12', enc:0, cost:60,   avail:'Rare',   traits:'Loud, Penetrating (4), Spread, Thrown (Medium), Unstable' },
+    { name:'Smoke Grenade',        spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:30, avail:'Common', traits:'Blast, Thrown (Medium), Unstable. Zone = Heavily Obscured x3 rounds' },
+    { name:'Fire Bomb',            spec:'Thrown',          dam:'\u2014',enc:1,cost:10, avail:'Common', traits:'Blast, Loud, Inflict (Ablaze), Thrown (Medium), Unstable' },
+    { name:'Choke Grenade',        spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:40, avail:'Scarce', traits:'Inflict (Stunned) x3 rounds, Thrown (Medium), Unstable' },
+    { name:'Photon Flash Grenade', spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:200,avail:'Rare',   traits:'Loud, Inflict (Blinded) all in Zone, Thrown (Medium), Unstable' },
+    { name:'Web Grenade',          spec:'Thrown',          dam:'\u2014',enc:0,cost:150,avail:'Rare',   traits:'Loud, Blast, Inflict (Restrained) all in Zone, Thrown (Medium), Unstable' },
+    { name:'Blasting Charge',      spec:'Thrown',          dam:'10', enc:0, cost:40,   avail:'Common', traits:'Loud, Spread, Thrown (Medium), Unstable' },
+    { name:'Frag Missile',         spec:'Ordnance',        dam:'8',  enc:1, cost:200,  avail:'Scarce', traits:'Blast, Loud, Unstable' },
+    { name:'Krak Missile',         spec:'Ordnance',        dam:'16', enc:1, cost:400,  avail:'Scarce', traits:'Loud, Penetrating (6), Spread, Unstable' },
+    { name:'Demolition Charge',    spec:'Engineering',     dam:'16', enc:2, cost:50,   avail:'Common', traits:'Loud, Spread, Unstable. Comes with Remote Detonator' },
+    { name:'Melta Bomb',           spec:'Engineering',     dam:'16', enc:2, cost:1000, avail:'Exotic', traits:'Rend (12), Spread, Unstable. Target only' }
+  ],
+  ARMOUR: [
+    // Basic
+    { name:'Robes/Light Leathers',    locations:'Arms, Body, Legs', armour:1, enc:1, cost:10,      avail:'Common', traits:'Subtle' },
+    { name:'Heavy Leathers',          locations:'Arms, Body, Legs', armour:2, enc:1, cost:60,      avail:'Common', traits:'\u2014' },
+    { name:'Armoured Bodyglove',      locations:'Arms, Body, Legs', armour:2, enc:1, cost:1200,    avail:'Rare',   traits:'Subtle' },
+    { name:'Armoured Greatcoat',      locations:'Arms, Body, Legs', armour:2, enc:2, cost:500,     avail:'Rare',   traits:'Subtle' },
+    { name:'Scrap-plate',             locations:'Body',             armour:3, enc:2, cost:300,     avail:'Rare',   traits:'Heavy (3)' },
+    { name:'Void Suit',               locations:'All',              armour:3, enc:2, cost:2000,    avail:'Scarce', traits:'Vacuum+pathogen protection 10hr' },
+    // Flak
+    { name:'Flak Boots',              locations:'Legs',             armour:2, enc:2, cost:100,     avail:'Common', traits:'\u2014' },
+    { name:'Flak Helmet',             locations:'Head',             armour:2, enc:2, cost:150,     avail:'Common', traits:'\u2014' },
+    { name:'Flak Gauntlets',          locations:'Arms',             armour:2, enc:1, cost:100,     avail:'Common', traits:'\u2014' },
+    { name:'Flak Vest',               locations:'Body',             armour:3, enc:2, cost:500,     avail:'Common', traits:'\u2014' },
+    { name:'Flak Jacket',             locations:'Arms, Body',       armour:3, enc:2, cost:800,     avail:'Scarce', traits:'\u2014' },
+    { name:'AM Flak Armour',          locations:'All',              armour:4, enc:4, cost:1000,    avail:'Rare',   traits:'Loud' },
+    // Mesh
+    { name:'Mesh Boots',              locations:'Legs',             armour:3, enc:1, cost:600,     avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Cowl',               locations:'Head',             armour:3, enc:1, cost:800,     avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Gauntlets',          locations:'Arms',             armour:3, enc:0, cost:600,     avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Vest',               locations:'Body',             armour:4, enc:1, cost:500,     avail:'Rare',   traits:'\u2014' },
+    { name:'Xenos Mesh',              locations:'Arms, Body, Legs', armour:4, enc:2, cost:5000,    avail:'Exotic', traits:'\u2014' },
+    // Carapace
+    { name:'Carapace Helm',           locations:'Head',             armour:5, enc:2, cost:400,     avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Gauntlets',      locations:'Arms',             armour:5, enc:2, cost:300,     avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Greaves',        locations:'Legs',             armour:5, enc:2, cost:300,     avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Chestplate',     locations:'Body',             armour:6, enc:3, cost:800,     avail:'Rare',   traits:'Heavy (4), Loud' },
+    { name:'Enforcer Carapace',       locations:'All',              armour:5, enc:4, cost:1800,    avail:'Rare',   traits:'Heavy (4), Loud' },
+    { name:'Tempestus Carapace',      locations:'All',              armour:6, enc:5, cost:4000,    avail:'Exotic', traits:'Heavy (4), Loud' },
+    // Force Fields
+    { name:'Refractor Field',         locations:'All',              armour:'1d10', enc:0, cost:1000,  avail:'Exotic', traits:'Protection field; overload 10' },
+    { name:'Conversion Field',        locations:'All',              armour:'2d10', enc:0, cost:6000,  avail:'Exotic', traits:'Protection field; overload 20; blinds on 10+ absorbed' }
+  ],
+  AUGMETICS: [
+    // Standard replacements
+    { name:'Augmetic Arm',              cost:1000,   avail:'Scarce', effect:'+1 Armour arm; +1 SL Strength Tests; melee +1 Damage' },
+    { name:'Augmetic Heart',            cost:3000,   avail:'Rare',   effect:'Action + Fortitude: remove Bleeding (Minor/Major)' },
+    { name:'Augmetic Leg',              cost:1000,   avail:'Scarce', effect:'+1 Armour leg; +1 SL Strength Tests using leg' },
+    { name:'Augmetic Respiratory System',cost:2000,  avail:'Rare',   effect:'+2 SL Fortitude vs airborne toxins and gases' },
+    { name:'Augmetic Sensory Organs',   cost:4000,   avail:'Rare',   effect:'+1 SL Tests using that sense; two = +2 SL' },
+    { name:'Augmetic Tracks/Wheels',    cost:1500,   avail:'Scarce', effect:'+1 Armour leg; Speed = Fast in clear Zones' },
+    // AdMech mechadendrites
+    { name:'Augur Array',               cost:6000,   avail:'Rare',   effect:'Auspex within Medium Range; +5 Perception. AdMech only.' },
+    { name:'Ballistic Mechadendrite',   cost:2000,   avail:'Rare',   effect:'Integrated Laspistol; never needs reloading. AdMech only.' },
+    { name:'Calculus Logi Upgrade',     cost:10000,  avail:'Rare',   effect:'+1 SL Logic (Mathematics); +5 Intelligence. AdMech only.' },
+    { name:'Manipulator Mechadendrite', cost:1400,   avail:'Rare',   effect:'+2 SL Strength; -1 SL Dexterity; Improvised Melee. AdMech only.' },
+    { name:'Medicae Mechadendrite',     cost:1400,   avail:'Rare',   effect:"Counts as Chirurgeon's Kit; unlimited uses. AdMech only." },
+    { name:'Mind Impulse Unit',         cost:10000,  avail:'Rare',   effect:'Interface with machines directly. AdMech only.' },
+    { name:'Optical Mechadendrite',     cost:1200,   avail:'Rare',   effect:'+1 SL Awareness (Sight); ignores Dark Zones. AdMech only.' },
+    { name:'Utility Mechadendrite',     cost:1000,   avail:'Rare',   effect:'+2 SL Tech Tests; Combi-Tool; Improvised Melee. AdMech only.' },
+    { name:'Vocal Implant',             cost:400,    avail:'Rare',   effect:'Voice/sounds audible up to 100m. AdMech only.' }
+  ],
+  GEAR: [
+    { name:'Auspex/Scanner',      cost:1000,  avail:'Scarce',    enc:1, notes:'Detects motion, energy, life signs within Medium Range' },
+    { name:'Auto-Quill',          cost:150,   avail:'Scarce',    enc:2, notes:'Transcribes spoken word or copies written text' },
+    { name:'Backpack/Slings',     cost:20,    avail:'Common',    enc:1, notes:'+4 max Encumbrance when worn' },
+    { name:'Cameleoline Cloak',   cost:500,   avail:'Rare',      enc:0, notes:'+2 SL Stealth Tests while stationary' },
+    { name:"Chirurgeon's Kit",    cost:500,   avail:'Rare',      enc:1, notes:'5 uses. Required for Critical Wounds/Injuries' },
+    { name:'Chrono',              cost:20,    avail:'Common',    enc:0, notes:'Displays/auto-syncs local time' },
+    { name:'Climbing Harness',    cost:100,   avail:'Common',    enc:0, notes:'50m rope; auto-arrests falls' },
+    { name:'Combi-Tool',          cost:300,   avail:'Rare',      enc:0, notes:'Required for augmetic repair' },
+    { name:'Comm Leech',          cost:1000,  avail:'Rare',      enc:1, notes:'Intercept vox signals up to 3km' },
+    { name:'Dataslate',           cost:100,   avail:'Common',    enc:0, notes:'Stores text, picts, vids. Biometric lock.' },
+    { name:'Diagnostor',          cost:2000,  avail:'Rare',      enc:1, notes:'Medicae Tests to detect illness' },
+    { name:'Disguise Kit',        cost:100,   avail:'Very Rare', enc:1, notes:'10 min to alter appearance' },
+    { name:'Entrenching Tool',    cost:20,    avail:'Common',    enc:1, notes:'Counts as Improvised (One-handed) melee' },
+    { name:'Filtration Plugs',    cost:20,    avail:'Common',    enc:0, notes:'+2 SL Fortitude vs harmful gases' },
+    { name:'Glow-Globe/Stablight',cost:30,    avail:'Common',    enc:0, notes:'Removes Poorly Lit + Dark from Zone. 5hr run' },
+    { name:'Grapnel Launcher',    cost:550,   avail:'Common',    enc:0, notes:'50m reach; lifts 2 Medium creatures' },
+    { name:'Grav Chute',          cost:2000,  avail:'Rare',      enc:2, notes:'Ignore fall damage 10 min' },
+    { name:'Holy Icon',           cost:10,    avail:'Common',    enc:0, notes:'+1 SL Discipline (Fear) Tests' },
+    { name:'Lascutter',           cost:170,   avail:'Common',    enc:2, notes:'Tech Tests to cut through solid objects' },
+    { name:'Laud Hailer',         cost:100,   avail:'Scarce',    enc:1, notes:'Voice audible up to 100m' },
+    { name:'Mag Boots',           cost:400,   avail:'Rare',      enc:0, notes:'Stick to ferromagnetic surfaces; ignore zero-G' },
+    { name:'Manacles',            cost:15,    avail:'Common',    enc:0, notes:'Restrains prisoners' },
+    { name:'Multikey',            cost:250,   avail:'Scarce',    enc:0, notes:'+20 to Dexterity (Lockpicking) Tests' },
+    { name:'Photo-Visors',        cost:300,   avail:'Scarce',    enc:0, notes:'Ignore Poorly Lit and Dark penalties' },
+    { name:'Pict Recorder',       cost:75,    avail:'Common',    enc:1, notes:'Records visual data; holds 100hrs footage' },
+    { name:'Rebreather',          cost:200,   avail:'Scarce',    enc:1, notes:'Ignore toxic/deadly air; breathe underwater. 1hr' },
+    { name:'Respirator/Gas Mask', cost:50,    avail:'Common',    enc:0, notes:'Auto-pass Tests vs airborne pathogens' },
+    { name:'Signal Jammer',       cost:500,   avail:'Rare',      enc:1, notes:'Blocks vox in zone; Tech Test to set up' },
+    { name:'Survival Gear',       cost:50,    avail:'Common',    enc:3, notes:'Bedroll, tent, canteen, rope, firestarters' },
+    { name:'Synskin',             cost:3000,  avail:'Exotic',    enc:0, notes:'= Armoured Bodyglove (Subtle); +1 SL Stealth if worn alone' },
+    { name:'Vox Bead',            cost:50,    avail:'Common',    enc:0, notes:'Short-range encrypted vox communication' }
+  ]
+};
+
+// ── Drawer toggle ──────────────────────────────────────────
+
+function toggleArmouryRef() {
+  const drawer = document.getElementById('armoury-ref-drawer');
+  const icon   = document.getElementById('armoury-ref-icon');
+  const open   = drawer.style.display === 'none';
+  drawer.style.display = open ? '' : 'none';
+  icon.classList.toggle('open', open);
+  if (open) renderArmoury();
+}
+
+// ── Filter state ───────────────────────────────────────────
+let currentFilter = 'ALL';
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderArmoury();
+}
+
+// ── Availability colour helper ─────────────────────────────
+function availClass(a) {
+  if (!a) return '';
+  const l = a.toLowerCase();
+  if (l === 'common')   return 'avail-common';
+  if (l === 'scarce')   return 'avail-scarce';
+  if (l === 'rare')     return 'avail-rare';
+  return 'avail-exotic';
+}
+
+// ── Render armoury table ───────────────────────────────────
+function renderArmoury() {
+  const search  = (document.getElementById('armoury-search').value || '').toLowerCase();
+  const thead   = document.getElementById('armoury-thead');
+  const tbody   = document.getElementById('armoury-tbody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  const categories = currentFilter === 'ALL'
+    ? ['MELEE','RANGED','GRENADES','ARMOUR','AUGMETICS','GEAR']
+    : [currentFilter];
+
+  categories.forEach(cat => {
+    const items = (ARMOURY[cat] || []).filter(item =>
+      !search || item.name.toLowerCase().includes(search)
+    );
+    if (!items.length) return;
+
+    // Category divider row
+    const divRow = document.createElement('tr');
+    divRow.className = 'category-divider';
+    divRow.innerHTML = '<td colspan="9">' + cat + '</td>';
+    tbody.appendChild(divRow);
+
+    // Header row for this category
+    const hdr = document.createElement('tr');
+    if (cat === 'MELEE') {
+      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
+    } else if (cat === 'RANGED') {
+      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>RANGE</th><th>MAG</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
+    } else if (cat === 'GRENADES') {
+      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
+    } else if (cat === 'ARMOUR') {
+      hdr.innerHTML = '<th>NAME</th><th>LOCATIONS</th><th>ARMOUR</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
+    } else if (cat === 'AUGMETICS') {
+      hdr.innerHTML = '<th>NAME</th><th>COST</th><th>AVAIL</th><th>EFFECT</th><th></th>';
+    } else {
+      hdr.innerHTML = '<th>NAME</th><th>COST</th><th>AVAIL</th><th>ENC</th><th>NOTES</th><th></th>';
+    }
+    tbody.appendChild(hdr);
+
+    items.forEach(item => {
+      const tr = document.createElement('tr');
+      let cells = '';
+      const ac = availClass(item.avail);
+      const addBtn = '<button class="add-item-btn" onclick="addToSheet(\'' + cat + '\',' + JSON.stringify(item).replace(/'/g,"&#39;") + ')">+ ADD</button>';
+
+      if (cat === 'MELEE') {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.enc + '</td>' +
+          '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+      } else if (cat === 'RANGED') {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.range + '</td>' +
+          '<td>' + item.mag + '</td><td>' + item.enc + '</td><td>' + item.cost + '</td>' +
+          '<td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+      } else if (cat === 'GRENADES') {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.enc + '</td>' +
+          '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+      } else if (cat === 'ARMOUR') {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.locations + '</td><td>' + item.armour + '</td><td>' + item.enc + '</td>' +
+          '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+      } else if (cat === 'AUGMETICS') {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td class="td-traits">' + item.effect + '</td><td>' + addBtn + '</td>';
+      } else {
+        cells = '<td class="td-name">' + item.name + '</td>' +
+          '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
+          '<td>' + (item.enc !== undefined ? item.enc : '\u2014') + '</td>' +
+          '<td class="td-traits">' + item.notes + '</td><td>' + addBtn + '</td>';
+      }
+      tr.innerHTML = cells;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+// ── Add item to operative sheet ────────────────────────────
+
+function addToSheet(cat, item) {
+  const d = currentData();
+  let msg = '';
+
+  if (cat === 'MELEE') {
+    if (!d.weapons) d.weapons = [];
+    d.weapons.push({
+      name: item.name, type: 'Melee/' + item.spec,
+      damage: item.dam, range: 'Melee', clip: '\u2014',
+      ap: '\u2014', traits: item.traits, notes: 'Enc ' + item.enc
+    });
+    msg = item.name + ' added to WEAPONS';
+    saveCurrentData(d); renderWeapons(d);
+
+  } else if (cat === 'RANGED') {
+    if (!d.weapons) d.weapons = [];
+    d.weapons.push({
+      name: item.name, type: 'Ranged/' + item.spec,
+      damage: item.dam, range: item.range,
+      clip: String(item.mag), ap: '\u2014',
+      traits: item.traits, notes: 'Enc ' + item.enc
+    });
+    msg = item.name + ' added to WEAPONS';
+    saveCurrentData(d); renderWeapons(d);
+
+  } else if (cat === 'GRENADES') {
+    if (!d.weapons) d.weapons = [];
+    d.weapons.push({
+      name: item.name, type: 'Grenade/' + item.spec,
+      damage: item.dam, range: 'Thrown', clip: '1',
+      ap: '\u2014', traits: item.traits, notes: 'Enc ' + item.enc
+    });
+    msg = item.name + ' added to WEAPONS';
+    saveCurrentData(d); renderWeapons(d);
+
+  } else if (cat === 'ARMOUR') {
+    if (!d.equipment) d.equipment = [];
+    d.equipment.push(item.name + ' (AP ' + item.armour + ', ' + item.locations + ')');
+    msg = item.name + ' added to EQUIPMENT';
+    saveCurrentData(d); renderEquip(d);
+
+  } else if (cat === 'AUGMETICS') {
+    if (!d.augmetics) d.augmetics = [];
+    d.augmetics.push(item.name + ': ' + item.effect);
+    msg = item.name + ' added to AUGMETICS';
+    saveCurrentData(d); renderAugmetics(d);
+
+  } else {
+    if (!d.equipment) d.equipment = [];
+    d.equipment.push(item.name);
+    msg = item.name + ' added to EQUIPMENT';
+    saveCurrentData(d); renderEquip(d);
+  }
+
+  flash(msg);
+}
+
+function flash(msg) {
+  const el = document.getElementById('flash-msg');
+  el.textContent = '+ ' + msg;
+  el.classList.add('visible');
+  clearTimeout(flash._t);
+  flash._t = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ── Weapons ────────────────────────────────────────────────
+
+function renderWeapons(d) {
+  const tbody = document.getElementById('weapons-body');
+  tbody.innerHTML = '';
+  (d.weapons || []).forEach((w, i) => {
+    const tr = document.createElement('tr');
+    ['name','type','damage','range','clip','enc','traits','notes'].forEach(f => {
+      const td  = document.createElement('td');
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.value = w[f] || '';
+      inp.oninput = () => updateWeapon(i, f, inp.value);
+      td.appendChild(inp); tr.appendChild(td);
+    });
+    const td = document.createElement('td');
+    const rm = document.createElement('button');
+    rm.className = 'remove-btn'; rm.innerHTML = '&#x2715;';
+    rm.onclick = () => removeWeapon(i);
+    td.appendChild(rm); tr.appendChild(td);
+    tbody.appendChild(tr);
+  });
+}
+
+function addWeapon() {
+  const d = currentData();
+  if (!d.weapons) d.weapons = [];
+  d.weapons.push({ name:'', type:'', damage:'', range:'', clip:'', enc:'', traits:'', notes:'' });
+  saveCurrentData(d); renderWeapons(d);
+}
+
+function removeWeapon(i) {
+  const d = currentData();
+  d.weapons.splice(i, 1);
+  saveCurrentData(d); renderWeapons(d);
+}
+
+function updateWeapon(i, field, val) {
+  const d = currentData();
+  d.weapons[i][field] = val;
+  saveCurrentData(d);
+}
+
+// ── Equipment & Augmetics ──────────────────────────────────
+
+function renderEquip(d)     { renderSimpleList('equip-list',    d.equipment || [], 'equip'); }
+function renderAugmetics(d) { renderSimpleList('augmetic-list', d.augmetics || [], 'augmetic'); }
+
+function renderSimpleList(containerId, items, type) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.value = item || ''; inp.placeholder = 'Item...';
+    inp.oninput = () => updateSimpleItem(type, i, inp.value);
+    const rm = document.createElement('button');
+    rm.className = 'remove-btn'; rm.innerHTML = '&#x2715;';
+    rm.onclick = () => removeSimpleItem(type, i);
+    div.appendChild(inp); div.appendChild(rm);
+    list.appendChild(div);
+  });
+}
+
+function addEquip()    { addSimpleItem('equip'); }
+function addAugmetic() { addSimpleItem('augmetic'); }
+
+function addSimpleItem(type) {
+  const d   = currentData();
+  const key = type === 'equip' ? 'equipment' : 'augmetics';
+  if (!d[key]) d[key] = [];
+  d[key].push('');
+  saveCurrentData(d);
+  if (type === 'equip') renderEquip(d); else renderAugmetics(d);
+}
+
+function removeSimpleItem(type, i) {
+  const d   = currentData();
+  const key = type === 'equip' ? 'equipment' : 'augmetics';
+  d[key].splice(i, 1);
+  saveCurrentData(d);
+  if (type === 'equip') renderEquip(d); else renderAugmetics(d);
+}
+
+function updateSimpleItem(type, i, val) {
+  const d   = currentData();
+  const key = type === 'equip' ? 'equipment' : 'augmetics';
+  d[key][i] = val;
+  saveCurrentData(d);
+}
+
+// ── Armour ─────────────────────────────────────────────────
+
+function loadArmour(d) {
+  ['head','body','larm','rarm','lleg','rleg'].forEach(loc => {
+    setVal('arm-' + loc, (d.armour || {})[loc] || 0);
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────
+
+function init() {
+  const d = currentData();
+  setVal('v-solars', d.vitals?.solars ?? 0);
+  loadArmour(d);
+  renderWeapons(d);
+  renderEquip(d);
+  renderAugmetics(d);
+}
+
+window.refreshIfPresent = init;
+init();
+
+</script>
+</body>
+</html>

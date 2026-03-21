@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOOLS</title>
+<script src="cs_shared.js"></script>
+<style>
+
+/* ── SLOT BUTTONS ── */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.slot-btn {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  background: var(--green-faint);
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  padding: 6px 4px;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 1px;
+  transition: all 0.1s;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.slot-btn:hover { border-color: var(--green-mid); color: var(--green); }
+.slot-btn.active {
+  border-color: var(--green);
+  color: var(--green-bright);
+  background: var(--green-dark);
+  text-shadow: 0 0 6px var(--green);
+}
+.slot-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* ── COLLAPSIBLE ── */
+.collapsible-header {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  letter-spacing: 2px;
+  padding: 5px 10px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  color: var(--green-bright);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  user-select: none;
+}
+.collapsible-header:hover { color: var(--amber); border-color: var(--amber-dim); }
+.collapsible-toggle { font-size: 18px; line-height: 1; min-width: 14px; }
+.collapsible-body {
+  border: 1px solid var(--green-mid);
+  border-top: none;
+  padding: 10px;
+  background: var(--green-faint);
+}
+.collapsible-body.hidden { display: none; }
+.collapsible-wrap { margin-bottom: 10px; }
+
+/* ── XP BAR ── */
+.xp-bar-wrap {
+  background: var(--black);
+  border: 1px solid var(--green-mid);
+  height: 8px;
+  margin: 4px 0 8px;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: var(--green-dim);
+  transition: width 0.2s;
+}
+.xp-summary {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--green-dim);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.xp-summary span b {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--green-bright);
+}
+
+/* ── LEVEL-UP GRID ── */
+.lu-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+@media (max-width: 600px) { .lu-cols { grid-template-columns: 1fr; } }
+
+.lu-panel-title {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  border-bottom: 1px solid var(--green-dark);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+.lu-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--green-faint);
+}
+.lu-label { flex: 1; font-size: 11px; color: var(--green-dim); letter-spacing: 1px; }
+.lu-val {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  min-width: 32px;
+  text-align: center;
+}
+.lu-cost { font-size: 10px; color: var(--amber-dim); min-width: 36px; text-align: right; }
+.lu-btn {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  background: none;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  padding: 0 6px;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: all 0.1s;
+}
+.lu-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green-bright); }
+.lu-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── ADVANCE LOG ── */
+.adv-log {
+  margin-top: 8px;
+  border: 1px solid var(--green-dark);
+  background: var(--black);
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 4px 6px;
+}
+.adv-log-entry {
+  font-size: 10px;
+  color: var(--green-dim);
+  padding: 1px 0;
+  border-bottom: 1px solid var(--green-faint);
+}
+.adv-log-entry:last-child { border-bottom: none; }
+
+/* ── WIZARD ── */
+.wiz-progress {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+.wiz-step-pip {
+  flex: 1;
+  height: 4px;
+  background: var(--green-dark);
+  transition: background 0.2s;
+}
+.wiz-step-pip.done { background: var(--green-dim); }
+.wiz-step-pip.active { background: var(--green); }
+
+.wiz-step-label {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.card {
+  border: 1px solid var(--green-dark);
+  background: var(--black);
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.card:hover { border-color: var(--green-mid); }
+.card.selected {
+  border-color: var(--green);
+  background: var(--green-dark);
+}
+.card-title {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--green-bright);
+  margin-bottom: 2px;
+}
+.card-body { font-size: 10px; color: var(--green-dim); line-height: 1.3; }
+.card-tag {
+  display: inline-block;
+  font-size: 9px;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber-dim);
+  padding: 0 3px;
+  margin-top: 3px;
+  letter-spacing: 1px;
+}
+
+.wiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--green-dark);
+}
+.wiz-xp-badge {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--amber);
+  padding: 2px 8px;
+  border: 1px solid var(--amber-dim);
+}
+
+/* Point buy allocation bar */
+.pb-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--green-faint);
+}
+.pb-label { min-width: 28px; font-size: 11px; color: var(--green-dim); }
+.pb-val { font-family: 'VT323', monospace; font-size: 18px; min-width: 30px; text-align: center; }
+.pb-points-left {
+  font-family: 'VT323', monospace; font-size: 18px;
+  color: var(--amber); text-align: center; margin-bottom: 6px;
+}
+
+/* Name gen */
+.name-style-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+}
+.name-suggestion {
+  cursor: pointer;
+  color: var(--green-dim);
+  padding: 2px 6px;
+  border: 1px solid var(--green-dark);
+  font-size: 12px;
+  transition: all 0.1s;
+}
+.name-suggestion:hover { color: var(--green-bright); border-color: var(--green); }
+
+/* Skills step grid */
+.skill-wiz-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px auto;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--green-faint);
+  font-size: 11px;
+}
+.skill-wiz-row .adv-pips {
+  display: flex; gap: 2px;
+}
+.adv-pip {
+  width: 10px; height: 10px;
+  border: 1px solid var(--green-dark);
+  background: var(--black);
+  display: inline-block;
+}
+.adv-pip.filled { background: var(--green-dim); border-color: var(--green); }
+.adv-pip.locked { background: var(--green-dark); border-color: var(--green-mid); }
+
+/* Talent selection */
+.talent-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.talent-choice {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 8px;
+  border: 1px solid var(--green-dark);
+  background: var(--black);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.talent-choice.selected { border-color: var(--green); background: var(--green-dark); }
+.talent-choice:hover:not(.selected) { border-color: var(--green-mid); }
+.talent-choice .tc-check {
+  font-family: 'VT323', monospace; font-size: 16px;
+  color: var(--green-dim); min-width: 16px;
+}
+.talent-choice.selected .tc-check { color: var(--green-bright); }
+.talent-choice .tc-name {
+  font-family: 'VT323', monospace; font-size: 14px;
+  color: var(--green); letter-spacing: 1px;
+}
+.talent-choice .tc-desc { font-size: 10px; color: var(--green-dim); margin-top: 2px; }
+
+/* Duty radio */
+.duty-grid { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+
+/* Review table */
+.review-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.review-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--green-faint);
+}
+.review-table td:first-child { color: var(--green-dim); width: 40%; }
+.review-section {
+  font-family: 'VT323', monospace; font-size: 14px;
+  color: var(--amber); letter-spacing: 1px;
+  padding: 6px 0 2px;
+  border-bottom: 1px solid var(--green-mid);
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+
+/* Char method selection */
+.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.rolled-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+.roll-stat-cell {
+  text-align: center;
+  border: 1px solid var(--green-dark);
+  padding: 4px;
+  background: var(--black);
+}
+.roll-stat-abbr { font-size: 9px; color: var(--green-dim); letter-spacing: 1px; }
+.roll-stat-val {
+  font-family: 'VT323', monospace; font-size: 22px;
+  color: var(--green-bright);
+}
+.roll-stat-inp {
+  width: 100%;
+  background: var(--black);
+  border: none;
+  border-bottom: 1px solid var(--green-mid);
+  color: var(--green);
+  font-family: 'VT323', monospace; font-size: 20px;
+  text-align: center;
+  outline: none;
+}
+
+/* Wargear chooser */
+.wg-item { font-size: 11px; color: var(--green-dim); padding: 2px 0; }
+.wg-choose { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
+.wg-opt {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid var(--green-dark);
+  cursor: pointer; background: var(--black);
+  transition: all 0.1s; color: var(--green-dim);
+}
+.wg-opt.selected { border-color: var(--green); color: var(--green-bright); background: var(--green-dark); }
+.wg-opt:hover:not(.selected) { border-color: var(--green-mid); color: var(--green); }
+
+/* Modal overlay */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--black);
+  border: 1px solid var(--green-mid);
+  padding: 16px 20px;
+  min-width: 260px;
+  max-width: 90vw;
+}
+.modal-title {
+  font-family: 'VT323', monospace; font-size: 18px;
+  letter-spacing: 2px; color: var(--green-bright);
+  margin-bottom: 10px;
+}
+.modal-btns { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+
+</style>
+</head>
+<body>
+<div class="sheet-container">
+  <div class="sheet-grid">
+
+    <!-- ══ OPERATIVE SLOTS ══ -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// OPERATIVE SLOTS</div>
+      <div class="panel-body">
+        <div class="slot-grid" id="slot-grid"></div>
+        <div class="slot-actions">
+          <button class="action-btn" onclick="renameSlot()">RENAME</button>
+          <button class="action-btn" onclick="exportSlot()">EXPORT</button>
+          <label class="action-btn" style="cursor:pointer;">
+            IMPORT<input type="file" accept=".json" onchange="importSlot(event)" style="display:none">
+          </label>
+          <button class="action-btn danger" onclick="clearSlot()">CLEAR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LEVEL UP ══ -->
+    <div class="collapsible-wrap sheet-full">
+      <div class="collapsible-header" onclick="toggleSection('lu')">
+        <span class="collapsible-toggle" id="lu-toggle">▶</span>
+        // LEVEL UP — SPEND XP
+      </div>
+      <div class="collapsible-body hidden" id="lu-body">
+
+        <!-- XP summary -->
+        <div class="xp-summary">
+          <span>TOTAL <b id="lu-total">0</b> XP</span>
+          <span>SPENT <b id="lu-spent">0</b> XP</span>
+          <span>AVAILABLE <b id="lu-avail">0</b> XP</span>
+        </div>
+        <div class="xp-bar-wrap"><div class="xp-bar-fill" id="lu-bar"></div></div>
+        <div class="field-row cols-2" style="margin-bottom:8px;">
+          <div class="field">
+            <label>EDIT TOTAL XP POOL</label>
+            <input type="number" id="lu-xp-input" min="0" style="max-width:120px;"
+              oninput="setTotalXP(this.value)">
+          </div>
+        </div>
+
+        <div class="lu-cols">
+          <!-- Characteristics -->
+          <div>
+            <div class="lu-panel-title">// CHARACTERISTICS</div>
+            <div id="lu-chars"></div>
+          </div>
+          <!-- Skills -->
+          <div>
+            <div class="lu-panel-title">// SKILLS</div>
+            <div id="lu-skills"></div>
+          </div>
+        </div>
+
+        <!-- Advance log -->
+        <div class="lu-panel-title" style="margin-top:10px;">// ADVANCE LOG</div>
+        <div class="adv-log" id="adv-log">
+          <div class="adv-log-entry text-dim">— no advances recorded —</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ CHARACTER WIZARD ══ -->
+    <div class="collapsible-wrap sheet-full">
+      <div class="collapsible-header" onclick="toggleSection('wiz')">
+        <span class="collapsible-toggle" id="wiz-toggle">▶</span>
+        // CHARACTER WIZARD — CREATE NEW OPERATIVE
+      </div>
+      <div class="collapsible-body hidden" id="wiz-body">
+        <div class="wiz-progress" id="wiz-progress"></div>
+        <div id="wiz-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div class="modal-overlay" id="rename-modal">
+  <div class="modal-box">
+    <div class="modal-title">RENAME OPERATIVE</div>
+    <label>SLOT NAME</label>
+    <input type="text" id="rename-input" maxlength="20" placeholder="Operative name...">
+    <div class="modal-btns">
+      <button class="action-btn" onclick="closeModal('rename-modal')">CANCEL</button>
+      <button class="action-btn" onclick="confirmRename()">CONFIRM</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear confirm modal -->
+<div class="modal-overlay" id="clear-modal">
+  <div class="modal-box">
+    <div class="modal-title">CLEAR SLOT DATA?</div>
+    <div style="font-size:11px;color:var(--green-dim);margin-bottom:8px;">
+      All data for this slot will be erased. This cannot be undone.
+    </div>
+    <div class="modal-btns">
+      <button class="action-btn" onclick="closeModal('clear-modal')">CANCEL</button>
+      <button class="action-btn danger" onclick="confirmClear()">CLEAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save wizard modal -->
+<div class="modal-overlay" id="save-modal">
+  <div class="modal-box">
+    <div class="modal-title">SAVE TO SLOT</div>
+    <div style="font-size:11px;color:var(--green-dim);margin-bottom:8px;">
+      Choose which slot to save this operative to:
+    </div>
+    <div id="save-slot-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+    <div class="modal-btns">
+      <button class="action-btn" onclick="closeModal('save-modal')">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ════════════════════════════════════════════════════════
+// SECTION TOGGLE
+// ════════════════════════════════════════════════════════
+
+function toggleSection(id) {
+  const body    = document.getElementById(id + '-body');
+  const toggle  = document.getElementById(id + '-toggle');
+  const hidden  = body.classList.toggle('hidden');
+  toggle.textContent = hidden ? '▶' : '▼';
+  if (!hidden && id === 'lu') renderLevelUp();
+  if (!hidden && id === 'wiz') renderWizard();
+}
+
+
+// ════════════════════════════════════════════════════════
+// SLOT MANAGEMENT
+// ════════════════════════════════════════════════════════
+
+function renderSlots() {
+  const grid = document.getElementById('slot-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < SLOT_COUNT; i++) {
+    const d    = getSlotData(i);
+    const name = d.name ? d.name.slice(0, 14) : '[ EMPTY ]';
+    const btn  = document.createElement('button');
+    btn.className = 'slot-btn' + (i === currentSlot ? ' active' : '');
+    btn.title     = 'SLOT ' + (i + 1) + (d.name ? ': ' + d.name : '');
+    btn.innerHTML = '<span style="font-size:9px;color:var(--green-dark)">S' + (i+1) + '</span><br>' + name.toUpperCase();
+    btn.onclick   = () => switchSlot(i);
+    grid.appendChild(btn);
+  }
+}
+
+function switchSlot(i) {
+  setActiveSlot(i);
+  renderSlots();
+  if (window.parent && window.parent.loadHeader) window.parent.loadHeader();
+  if (!document.getElementById('lu-body').classList.contains('hidden')) renderLevelUp();
+}
+
+function renameSlot() {
+  const d = currentData();
+  document.getElementById('rename-input').value = d.name || '';
+  openModal('rename-modal');
+  setTimeout(() => document.getElementById('rename-input').focus(), 50);
+}
+
+function confirmRename() {
+  const val = document.getElementById('rename-input').value.trim();
+  const d   = currentData();
+  d.name    = val;
+  saveCurrentData(d);
+  closeModal('rename-modal');
+  renderSlots();
+  if (window.parent && window.parent.loadHeader) window.parent.loadHeader();
+}
+
+function exportSlot() {
+  const d    = currentData();
+  const name = (d.name || 'operative').replace(/\s+/g, '_').toLowerCase();
+  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url; a.download = name + '_slot.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importSlot(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      saveCurrentData(data);
+      renderSlots();
+      if (window.parent && window.parent.loadHeader) window.parent.loadHeader();
+      if (!document.getElementById('lu-body').classList.contains('hidden')) renderLevelUp();
+    } catch(err) {
+      alert('Invalid JSON file.');
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearSlot() { openModal('clear-modal'); }
+
+function confirmClear() {
+  saveCurrentData(defaultSlotData());
+  closeModal('clear-modal');
+  renderSlots();
+  if (window.parent && window.parent.loadHeader) window.parent.loadHeader();
+  if (!document.getElementById('lu-body').classList.contains('hidden')) renderLevelUp();
+}
+
+
+// ════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════════════════════════════
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// Enter key confirms rename
+document.getElementById('rename-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmRename();
+});
+
+
+// ════════════════════════════════════════════════════════
+// LEVEL UP
+// ════════════════════════════════════════════════════════
+
+function renderLevelUp() {
+  const d       = currentData();
+  const total   = Number(d.xp) || 0;
+  const spent   = calcSpentXP(d);
+  const avail   = total - spent;
+  const pct     = total > 0 ? Math.min(100, Math.round(spent / total * 100)) : 0;
+
+  document.getElementById('lu-total').textContent  = total;
+  document.getElementById('lu-spent').textContent  = spent;
+  document.getElementById('lu-avail').textContent  = avail;
+  document.getElementById('lu-bar').style.width    = pct + '%';
+  document.getElementById('lu-xp-input').value     = total;
+
+  renderLUChars(d, avail);
+  renderLUSkills(d, avail);
+  renderAdvLog(d);
+}
+
+function setTotalXP(val) {
+  const d = currentData();
+  d.xp    = Math.max(0, parseInt(val) || 0);
+  saveCurrentData(d);
+  renderLevelUp();
+}
+
+// ── Characteristics panel ──
+
+function renderLUChars(d, avail) {
+  const container = document.getElementById('lu-chars');
+  container.innerHTML = '';
+  CHARACTERISTICS.forEach(c => {
+    const cur  = getCharTotal(d, c.key);
+    const cost = charAdvXP(cur + 1);
+    const maxed = cur >= 80;
+    const canAfford = avail >= cost;
+
+    const row = document.createElement('div');
+    row.className = 'lu-row';
+    row.innerHTML =
+      '<span class="lu-label">' + c.name + '</span>' +
+      '<span class="lu-val" id="lu-char-' + c.key + '">' + cur + '</span>' +
+      '<span class="lu-cost">' + (maxed ? 'MAX' : cost + ' XP') + '</span>' +
+      '<button class="lu-btn" id="lu-char-btn-' + c.key + '"' +
+        (maxed || !canAfford ? ' disabled' : '') +
+        ' onclick="advanceChar(\'' + c.key + '\')">+1</button>';
+    container.appendChild(row);
+  });
+}
+
+function advanceChar(key) {
+  const d    = currentData();
+  const cur  = getCharTotal(d, key);
+  if (cur >= 80) return;
+  const cost  = charAdvXP(cur + 1);
+  const spent = calcSpentXP(d);
+  const avail = (Number(d.xp) || 0) - spent;
+  if (avail < cost) return;
+
+  if (!d.chars[key]) d.chars[key] = { base: 20, adv: 0, temp: 0 };
+  d.chars[key].adv = (Number(d.chars[key].adv) || 0) + 1;
+  logAdvance(d, c.name + ' +1 (' + cur + '→' + (cur+1) + ') [' + cost + ' XP]');
+  saveCurrentData(d);
+  renderLevelUp();
+
+  function c() { return CHARACTERISTICS.find(x => x.key === key) || { name: key }; }
+}
+
+function renderLUSkills(d, avail) {
+  const container = document.getElementById('lu-skills');
+  container.innerHTML = '';
+  SKILLS.forEach(s => {
+    const adv  = Number(d.skills?.[s.key]) || 0;
+    const cost = SKILL_ADVANCE_COSTS_LU[adv] || null;
+    const maxed = adv >= 4;
+    const canAfford = cost !== null && avail >= cost;
+
+    const pips = Array.from({ length: 4 }, (_, i) =>
+      '<span style="display:inline-block;width:8px;height:8px;border:1px solid ' +
+      (i < adv ? 'var(--green);background:var(--green-dim)' : 'var(--green-dark);background:var(--black)') +
+      ';margin-right:1px;"></span>'
+    ).join('');
+
+    const row = document.createElement('div');
+    row.className = 'lu-row';
+    row.innerHTML =
+      '<span class="lu-label">' + s.name + '</span>' +
+      '<span style="display:flex;gap:1px;align-items:center;" id="lu-skill-pips-' + s.key + '">' + pips + '</span>' +
+      '<span class="lu-cost">' + (maxed ? 'MAX' : (cost + ' XP')) + '</span>' +
+      '<button class="lu-btn" id="lu-skill-btn-' + s.key + '"' +
+        (maxed || !canAfford ? ' disabled' : '') +
+        ' onclick="advanceSkill(\'' + s.key + '\')">+1</button>';
+    container.appendChild(row);
+  });
+}
+
+function advanceSkill(key) {
+  const d    = currentData();
+  const adv  = Number(d.skills?.[key]) || 0;
+  if (adv >= 4) return;
+  const cost  = SKILL_ADVANCE_COSTS_LU[adv];
+  const spent = calcSpentXP(d);
+  const avail = (Number(d.xp) || 0) - spent;
+  if (avail < cost) return;
+
+  d.skills[key] = adv + 1;
+  const sName = SKILLS.find(s => s.key === key)?.name || key;
+  logAdvance(d, sName + ' Adv ' + (adv+1) + ' [' + cost + ' XP]');
+  saveCurrentData(d);
+  renderLevelUp();
+}
+
+function logAdvance(d, msg) {
+  if (!d.advanceLog) d.advanceLog = [];
+  d.advanceLog.unshift(new Date().toLocaleTimeString() + ' — ' + msg);
+  if (d.advanceLog.length > 10) d.advanceLog.length = 10;
+}
+
+function renderAdvLog(d) {
+  const el = document.getElementById('adv-log');
+  el.innerHTML = '';
+  const log = d.advanceLog || [];
+  if (!log.length) {
+    el.innerHTML = '<div class="adv-log-entry text-dim">— no advances recorded —</div>';
+    return;
+  }
+  log.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'adv-log-entry';
+    div.textContent = entry;
+    el.appendChild(div);
+  });
+}
+
+
+// ════════════════════════════════════════════════════════
+// CHARACTER WIZARD DATA
+// ════════════════════════════════════════════════════════
+
+const ORIGINS = [
+  { name:'Agri World',       bonus:{ ws:0,bs:0,str:5,tgh:5,ag:5,int:0,per:0,wil:5,fel:0 }, item:'Shoddy Entrenching Tool', roll:'01–10' },
+  { name:'Feudal World',     bonus:{ ws:5,bs:0,str:5,tgh:0,ag:0,int:0,per:0,wil:5,fel:5 }, item:'Shoddy Writing Kit',      roll:'11–20' },
+  { name:'Feral World',      bonus:{ ws:5,bs:0,str:5,tgh:5,ag:0,int:0,per:5,wil:0,fel:0 }, item:'Shoddy Survival Gear',    roll:'21–30' },
+  { name:'Forge World',      bonus:{ ws:0,bs:5,str:0,tgh:5,ag:5,int:5,per:0,wil:0,fel:0 }, item:'Vial of Sacred Unguents', roll:'31–40' },
+  { name:'Hive World',       bonus:{ ws:0,bs:5,str:0,tgh:0,ag:5,int:0,per:5,wil:0,fel:5 }, item:'Ugly Filtration Plugs',   roll:'41–70' },
+  { name:'Shrine World',     bonus:{ ws:0,bs:0,str:0,tgh:0,ag:0,int:5,per:5,wil:5,fel:5 }, item:'Holy Icon',               roll:'71–80' },
+  { name:'Schola Progenium', bonus:{ ws:5,bs:5,str:0,tgh:5,ag:0,int:0,per:0,wil:0,fel:5 }, item:'Chrono',                  roll:'81–90' },
+  { name:'Voidborn',         bonus:{ ws:0,bs:0,str:0,tgh:0,ag:5,int:5,per:5,wil:5,fel:0 }, item:'Shoddy Mag Boots',        roll:'91–00' },
+];
+
+const FACTIONS_DATA = [
+  {
+    name: 'Adeptus Astra Telepathica', short: 'AAT',
+    bonus: { wil:5, int:5, per:5, tgh:5 },
+    skills: ['Awareness','Discipline','Intuition','Linguistics','Navigation','Psychic Mastery'],
+    talent: 'Psyker + Sanctioned Psyker (or Blank, or Condemn the Witch + Mental Fortress)',
+    influence: 'Adeptus Astra Telepathica',
+    equipment: 'Knife (Mono-edge), Robes, Divination Instrument, 500 solars',
+    duties: [
+      { name:'Black Ship Crewmember', bonus:{wil:5,tgh:5}, skills:{Awareness:1,Discipline:2,Intuition:2}, talents:['Condemn the Witch','Mental Fortress'], equipment:'' },
+      { name:'Sanctioned Psyker',     bonus:{wil:5,per:5}, skills:{Awareness:1,Discipline:2,Psychic_Mastery:2}, talents:['Psyker','Sanctioned Psyker'], equipment:'+1 Inf Astra Militarum' },
+      { name:'Sister-in-Waiting',     bonus:{wil:5,tgh:5}, skills:{Awareness:2,Discipline:2,Navigation:1}, talents:['Blank'], equipment:'' },
+    ]
+  },
+  {
+    name: 'Adeptus Mechanicus', short: 'AdMech',
+    bonus: { int:5, tgh:5, ag:5, per:5 },
+    skills: ['Dexterity','Logic','Lore','Medicae','Piloting','Tech'],
+    talent: 'Augmetic ×2 (choice)',
+    influence: 'Adeptus Mechanicus',
+    equipment: 'Robes, Dataslate, Sacred Unguents, 100 solars',
+    duties: [
+      { name:'Apprentice Enginseer', bonus:{int:5,ag:5},  skills:{Logic:1,Piloting:2,Tech:2},   talents:[], equipment:'Augmetic Respiratory System, Augmetic Arm' },
+      { name:'Apprentice Genetor',  bonus:{int:5,tgh:5}, skills:{Logic:1,Medicae:2,Tech:2},   talents:[], equipment:'Augmetic Sensory Organ (eye), Augmetic Heart' },
+      { name:'Apprentice Logis',    bonus:{int:5,per:5}, skills:{Logic:2,Lore:1,Tech:2},    talents:[], equipment:'Augmetic Sensory Organ (eye), Augmetic Locomotion' },
+    ]
+  },
+  {
+    name: 'Administratum', short: 'Admin',
+    bonus: { int:5, per:5, wil:5, fel:5 },
+    skills: ['Dexterity','Linguistics','Logic','Lore','Medicae','Navigation'],
+    talent: 'Data Delver',
+    influence: 'Administratum',
+    equipment: 'Robes, Dataslate, Writing Kit, 800 solars',
+    duties: [
+      { name:'Clerk',         bonus:{int:5,fel:5}, skills:{Dexterity:1,Linguistics:1,Lore:2,Navigation:1}, talents:[], equipment:'Pict Recorder' },
+      { name:'Officio Medicae',bonus:{int:5,per:5}, skills:{Dexterity:1,Logic:1,Lore:1,Medicae:2},        talents:[], equipment:"Chirurgeon's Tools" },
+      { name:'Scrivener',     bonus:{int:5,wil:5}, skills:{Dexterity:1,Linguistics:2,Lore:2},            talents:[], equipment:'Auto Quill' },
+    ]
+  },
+  {
+    name: 'Astra Militarum', short: 'AM',
+    bonus: { tgh:5, ws:5, bs:5, str:5 },
+    skills: ['Athletics','Discipline','Fortitude','Melee','Ranged','Stealth'],
+    talent: 'Drilled',
+    influence: 'Astra Militarum',
+    equipment: 'Knife, Astra Militarum Flak Armour, Frag Grenade, 300 solars',
+    duties: [
+      { name:'Melee Specialist', bonus:{tgh:5,ws:5}, skills:{Athletics:1,Discipline:1,Fortitude:1,Melee:2},  talents:[], equipment:'Laspistol, Chainsword' },
+      { name:'Scout',            bonus:{tgh:5,bs:5}, skills:{Athletics:1,Melee:1,Ranged:1,Stealth:2},        talents:[], equipment:'Cameleoline Cloak, Las Carbine' },
+      { name:'Trooper',          bonus:{tgh:5,bs:5}, skills:{Athletics:1,Discipline:2,Ranged:2},             talents:[], equipment:'Lasgun, Entrenching Tool' },
+    ]
+  },
+  {
+    name: 'Adeptus Ministorum', short: 'Ministorum',
+    bonus: { wil:5, int:5, per:5, fel:5 },
+    skills: ['Discipline','Intuition','Lore','Medicae','Presence','Rapport'],
+    talent: 'Faithful (Imperial Cult)',
+    influence: 'Adeptus Ministorum',
+    equipment: 'Robes, Holy Icon, Slings, 600 solars',
+    duties: [
+      { name:'Missionary',       bonus:{str:5,wil:5}, skills:{Discipline:1,Lore:1,Navigation:1,Melee:2},     talents:[], equipment:'Autopistol, Chainsword, Laud Hailer, 200 solars' },
+      { name:'Preacher',         bonus:{wil:5,fel:5}, skills:{Intuition:1,Lore:1,Presence:2,Rapport:1},      talents:[], equipment:'Holy Icon, Staff (Ornamental), Laud Hailer, 590 solars' },
+      { name:'Sister Novitiate', bonus:{wil:5,int:5}, skills:{Discipline:1,Lore:1,Medicae:2,Ranged:1},       talents:[], equipment:"Autopistol, Carapace Chestplate, Chirurgeon's Kit, 200 solars" },
+    ]
+  },
+  {
+    name: 'The Inquisition', short: 'Inquisition',
+    bonus: { per:5, tgh:5, int:5, wil:5 },
+    skills: ['Awareness','Discipline','Intuition','Logic','Lore','Presence'],
+    talent: 'Ever Vigilant',
+    influence: 'Inquisition',
+    equipment: 'Laspistol, Armoured Bodyglove, Glow-globe, Manacles, 400 solars',
+    duties: [
+      { name:'Acolyte',   bonus:{per:5,tgh:5}, skills:{Awareness:1,Discipline:1,Intuition:1,Logic:1,Presence:1}, talents:[], equipment:'Comm Leech' },
+      { name:'Exorcist',  bonus:{per:5,wil:5}, skills:{Awareness:1,Discipline:1,Intuition:1,Lore:1,Presence:1},  talents:[], equipment:'Auspex' },
+      { name:'Sage',      bonus:{per:5,int:5}, skills:{Intuition:1,Logic:2,Lore:2},                               talents:[], equipment:'Auspex' },
+    ]
+  },
+  {
+    name: 'Navis Imperialis', short: 'Naval',
+    bonus: { ag:5, str:5, tgh:5, per:5 },
+    skills: ['Awareness','Logic','Navigation','Piloting','Reflexes','Tech'],
+    talent: 'Void Legs',
+    influence: 'Navis Imperialis',
+    equipment: 'Laspistol or Pump-action Shotgun; Voidsuit or Flak Vest + Mag Boots; 500 solars',
+    duties: [
+      { name:'Aeronautica Pilot', bonus:{ag:5,per:5}, skills:{Awareness:1,Navigation:1,Piloting:2,Reflexes:1},       talents:[], equipment:'Laspistol, Photo-visors, Voidsuit, 500 solars' },
+      { name:'Armsman',           bonus:{ag:5,tgh:5}, skills:{Awareness:1,Logic:1,Navigation:1,Piloting:1,Reflexes:1},talents:[], equipment:'Flak Vest, Lascutter, Mag Boots, Pump-action Shotgun, 500 solars' },
+      { name:'Navis Officer',     bonus:{ag:5,fel:5}, skills:{Awareness:1,Navigation:1,Reflexes:1},                  talents:[], equipment:'Laspistol, Voidsuit, 480 solars' },
+    ]
+  },
+  {
+    name: 'Infractionist', short: 'Infract.',
+    bonus: { ag:5, tgh:5, per:5, fel:5 },
+    skills: ['Athletics','Dexterity','Fortitude','Rapport','Reflexes','Stealth'],
+    talent: 'Well-prepared',
+    influence: 'Infractionists',
+    equipment: 'Knife, Backpack, Stub Auto or Revolver, Light or Heavy Leathers, 5d10 solars',
+    duties: [
+      { name:'Fixer',      bonus:{ag:5,fel:5}, skills:{Athletics:1,Dexterity:1,Rapport:2,Stealth:1},      talents:[], equipment:'Stub Revolver, Light Leathers, Hammer (Shoddy), Lascutter (Shoddy)' },
+      { name:'Ganger',     bonus:{ag:5,tgh:5}, skills:{Dexterity:1,Rapport:1,Reflexes:1,Stealth:2},       talents:[], equipment:'Stub Pistol, Heavy Leathers, Axe (Shoddy), Stummer (Shoddy)' },
+      { name:'Hiverunner', bonus:{ag:5,per:5}, skills:{Athletics:2,Fortitude:1,Reflexes:1,Stealth:1},     talents:[], equipment:'Stub Pistol, Light Leathers, Brass Knuckles (Shoddy), Grapnel (Shoddy)' },
+    ]
+  },
+  {
+    name: 'Rogue Trader Dynasty', short: 'RT',
+    bonus: { fel:5, ag:5, int:5, per:5 },
+    skills: ['Intuition','Linguistics','Navigation','Piloting','Presence','Rapport'],
+    talent: 'Dealmaker',
+    influence: 'Rogue Trader Dynasties',
+    equipment: 'Armoured Bodyglove, Multicompass, 1200 solars',
+    duties: [
+      { name:'Adventurer', bonus:{fel:5,bs:5}, skills:{Athletics:1,Intuition:1,Ranged:2,Rapport:1},              talents:[], equipment:'Autopistol, Carapace Chestplate (Ornamental)' },
+      { name:'Catalogist', bonus:{fel:5,ag:5}, skills:{Intuition:1,Linguistics:1,Navigation:2,Piloting:1},       talents:[], equipment:'Auto-quill, Backpack, Chrono, Dataslate, Pict Recorder, Robes, 700 solars' },
+      { name:'Diplomat',   bonus:{fel:5,per:5}, skills:{Intuition:1,Linguistics:1,Presence:1,Rapport:2},          talents:[], equipment:'Chrono, Regicide Set, Robes (Ornamental), Slings, 1100 solars' },
+    ]
+  },
+];
+
+const ROLES_DATA = [
+  {
+    name: 'Interlocutor', focus: 'Social, negotiation, interrogation',
+    talentPool: ['Air of Authority','Briber','Gothic Gibberish','Dealmaker','Distracting','Gallows Humour','Lickspittle','Overseer'],
+    talentPick: 4,
+    skillPool: ['Awareness','Discipline','Intuition','Linguistics','Presence','Rapport'],
+    skillAdvances: 3,
+    equipment: 'Knife, Laspistol or Stub Revolver, Survival Gear, Vox Bead',
+    equipChoose: ['Laud Hailer','Pict Recorder','Vox-caster'],
+    equipChooseCount: 1,
+    rollFace: 'D6: 1',
+  },
+  {
+    name: 'Mystic', focus: 'Psychic powers, warp knowledge',
+    talentPool: ['Condemn the Witch','Fated','Forbidden Knowledge','Mental Fortress','Sanctioned Psyker'],
+    talentPick: 2,
+    grantPsyker: true,
+    skillPool: ['Awareness','Discipline','Intuition','Lore','Navigation','Psychic Mastery'],
+    skillAdvances: 3,
+    equipment: 'Knife or Staff, Laspistol or Stub Revolver, Survival Gear, Vox Bead',
+    equipChoose: ['Psy Focus','Auspex'],
+    equipChooseCount: 1,
+    rollFace: 'D6: 2',
+  },
+  {
+    name: 'Penumbra', focus: 'Stealth, infiltration, assassination',
+    talentPool: ['Burglar','Familiar Terrain','Read Lips','Secret Identity','Skulker','Unremarkable'],
+    talentPick: 2,
+    skillPool: ['Athletics','Awareness','Dexterity','Ranged','Reflexes','Stealth'],
+    skillAdvances: 3,
+    equipment: '2× Knife, Autopistol or Laspistol, Lasgun or Sniper Rifle, Silencer, Smoke Grenade, Survival Gear, Vox Bead',
+    equipChoose: ['Auspex','Comm Leech','Disguise Kit','Drop Harness','Grapnel & Line','Magnoculars','Multikey','Pict Recorder','Photo-visors','Signal Jammer'],
+    equipChooseCount: 2,
+    rollFace: 'D6: 3',
+  },
+  {
+    name: 'Savant', focus: 'Knowledge, research, medicine, tech',
+    talentPool: ['Artist','Attentive Assistant','Chirurgeon','Data Delver','Eidetic Memory','Lawbringer'],
+    talentPick: 2,
+    skillPool: ['Logic','Lore','Medicae','Navigation','Piloting','Tech'],
+    skillAdvances: 3,
+    equipment: "Knife, Laspistol or Stub Revolver, Slings, Dataslate, Survival Gear, Vox Bead",
+    equipChoose: ["Auspex","Auto-quill","Chirurgeon's Tools","Combi-tool","Dataslate (Encrypted)","Magnoculars"],
+    equipChooseCount: 2,
+    rollFace: 'D6: 4',
+  },
+  {
+    name: 'Warrior', focus: 'Combat, violence, arms',
+    talentPool: ['Deadeye','Disarm','Drilled','Duellist','Tactical Movement','Two-handed Cleave'],
+    talentPick: 2,
+    skillPool: ['Athletics','Fortitude','Medicae','Melee','Ranged','Reflexes'],
+    skillAdvances: 3,
+    equipment: 'Knife, Laspistol or Autopistol, Lasgun or Autogun or Shotgun, Frag Grenade, Survival Gear, Vox Bead',
+    equipChoose: ['Chainsword','Combat Shotgun','Flak Vest','Grenade Launcher','Heavy Stubber','Krak Grenade'],
+    equipChooseCount: 1,
+    rollFace: 'D6: 5',
+  },
+  {
+    name: 'Zealot', focus: 'Faith, endurance, fanaticism',
+    talentPool: ['Faithful (Imperial Cult)','Flagellant','Frenzy','Hatred','Icon Bearer','Martyrdom'],
+    talentPick: 2,
+    skillPool: ['Discipline','Fortitude','Linguistics','Lore','Melee','Presence'],
+    skillAdvances: 3,
+    equipment: 'Knife, Laspistol or Stub Revolver, Survival Gear, Vox Bead, Holy Icon',
+    equipChoose: ['Carapace Chestplate','Chainsword','Flail','Laud Hailer','Robes (Ornamental)'],
+    equipChooseCount: 1,
+    rollFace: 'D6: 6',
+  },
+];
+
+const NAME_POOLS = {
+  'Low Gothic':  {
+    given:   ['Aldric','Brenin','Cassia','Davan','Elowen','Ferrus','Griselda','Hakon','Ilsa','Jorath','Kessa','Lorenz','Mira','Naved','Orcal','Petra','Quillon','Renna','Sigrun','Tova'],
+    family:  ['Voss','Kell','Brant','Stern','Falk','Weth','Draven','Carn','Holtz','Murn','Rade','Thorn','Seld','Vane','Graul','Wrex','Ferr','Nolt','Streck','Blane']
+  },
+  'High Gothic': {
+    given:   ['Aurelius','Benedictus','Celestine','Dominicus','Eustatius','Flavian','Gratianus','Honorius','Ignatius','Justinian','Kallista','Lucius','Marcellus','Numerius','Octavia','Perpetua','Quintus','Roscius','Servius','Titianus'],
+    family:  ['Caelorum','Veritas','Sanctus','Nox','Imperatrix','Validus','Luminus','Aeternus','Ferrum','Gloriana','Tenebris','Orbis','Pius','Maximus','Fidelis','Victan','Durus','Parvus','Solus','Vindex']
+  },
+  'Archaic':     {
+    given:   ['Hrothgar','Ulfric','Sigvard','Ingrid','Brynja','Thorvald','Oswin','Edwyn','Godric','Aelswith','Wulfric','Ethelbert','Morwenna','Cynric','Aldhelm','Leofric','Cwichelm','Ermintrude','Aethelflaed','Beornwulf'],
+    family:  ['of the Ash','of Ironhold','the Unbowed','the Scarred','of the Fell','the Exile','of the Deep','the Unyielding','of Last Shore','the Watcher','of Cold Forge','the Devoted','of Pale Flame','the Grim','the Silent','of Barren Field','of Rust','the Marked','the Blind','the Faithful']
+  },
+  'Informal':    {
+    given:   ['Bix','Cal','Doss','Fenn','Grix','Hask','Ink','Jarv','Kol','Lox','Mok','Nix','Orv','Prex','Quinn','Rix','Skar','Tex','Unn','Vex'],
+    family:  ['Seven','Cutback','Twitch','Noface','Rust','Crabwise','Skip','Hollow','Poke','Greasehand','Shortleg','Nail','Splice','Crumb','Hitch','Soot','Rattle','Ash','Grub','Void']
+  },
+  'Esoteric':    {
+    given:   ['Sigma-9','Pattern VII','Witness-of-Stars','He-Who-Calculates','Null-Cipher','Vector Prime','Emissary','Threshold','Seeker-of-Truth','Red-in-Tooth','Whisper','The-Third-Born','Omega-Null','Pale-Sister','Iron-Catechism','Vox-Eternal','Ash-of-Saints','Remnant','The-Unseen','Quietude'],
+    family:  ['Leptis-Secundus','of the Pale Throne','Warp-Touched','the Unregistered','Pattern-Null','of-Many-Names','the Forgotten','17-Shard','Sub-Alpha','of-No-Record','Omega-Cipher','of-the-Void','the Twice-Erased','Null-Manifest','the Inscribed','Pattern-Sigma','of-Silent-Stars','Error-Corrigenda','the Unwitnessed','Seventh-Scroll']
+  }
+};
+
+
+// ════════════════════════════════════════════════════════
+// CHARACTER WIZARD STATE
+// ════════════════════════════════════════════════════════
+
+let wiz = null;
+const WIZ_STEPS = 8;
+
+function resetWizard() {
+  wiz = {
+    step: 1,
+    charMethod: null,
+    chars: { ws:20, bs:20, str:20, tgh:20, ag:20, int:20, per:20, wil:20, fel:20 },
+    charMethodXP: 0,
+    rolledStats: null,   // raw rolls before rearrange
+    pointBuyPoints: 90,
+    origin: null,
+    originRolled: false,
+    originXP: 0,
+    faction: null,
+    factionRolled: false,
+    factionXP: 0,
+    duty: null,
+    role: null,
+    roleRolled: false,
+    roleXP: 0,
+    talents: [],         // chosen talent names
+    skills: {},          // key -> total advances allocated
+    factionSkills: {},   // key -> advances locked by faction/duty
+    name: '',
+    wargearChoices: {},  // roleEquipKey -> selection
+    totalXP: 0,
+  };
+  SKILLS.forEach(s => { wiz.skills[s.key] = 0; wiz.factionSkills[s.key] = 0; });
+}
+
+function renderWizard() {
+  if (!wiz) resetWizard();
+  renderWizProgress();
+  renderWizStep();
+}
+
+function renderWizProgress() {
+  const el = document.getElementById('wiz-progress');
+  el.innerHTML = '';
+  for (let i = 1; i <= WIZ_STEPS; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'wiz-step-pip' + (i < wiz.step ? ' done' : i === wiz.step ? ' active' : '');
+    el.appendChild(pip);
+  }
+}
+
+function wizNext() {
+  if (!wizValidateStep()) return;
+  if (wiz.step < WIZ_STEPS) { wiz.step++; renderWizard(); } else { wizFinish(); }
+}
+function wizBack() {
+  if (wiz.step > 1) { wiz.step--; renderWizard(); }
+}
+
+function wizValidateStep() {
+  switch (wiz.step) {
+    case 1: return wiz.charMethod !== null;
+    case 2: return wiz.origin !== null;
+    case 3: return wiz.faction !== null && wiz.duty !== null;
+    case 4: {
+      const role = ROLES_DATA.find(r => r.name === wiz.role);
+      if (!role) return false;
+      const needed = role.talentPick;
+      return wiz.talents.length >= needed;
+    }
+    case 5: return true;
+    case 6: return wiz.name.trim().length > 0;
+    case 7: return true;
+    case 8: return true;
+    default: return true;
+  }
+}
+
+function renderWizStep() {
+  const el = document.getElementById('wiz-content');
+  el.innerHTML = '';
+  const steps = [null, wizStep1, wizStep2, wizStep3, wizStep4, wizStep5, wizStep6, wizStep7, wizStep8];
+  if (steps[wiz.step]) steps[wiz.step](el);
+}
+
+
+// ── Step 1: Characteristics ──────────────────────────────
+
+function wizStep1(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 1 // CHARACTERISTICS</div>';
+
+  const methodGrid = document.createElement('div');
+  methodGrid.className = 'method-grid';
+
+  const methods = [
+    { id:'order',    label:'ROLL IN ORDER',      desc:'+50 XP bonus. Roll 2d10+20 for each stat in order.' },
+    { id:'rearrange',label:'ROLL & REARRANGE',    desc:'+25 XP bonus. Roll 2d10+20 nine times, assign freely.' },
+    { id:'freeroll', label:'FREE ROLL',            desc:'No XP bonus. Roll 2d10+20, rearrange freely.' },
+    { id:'pointbuy', label:'POINT BUY',            desc:'No XP bonus. 90 points to distribute (min 4, max 18 per stat, base 20).' },
+  ];
+
+  methods.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'card' + (wiz.charMethod === m.id ? ' selected' : '');
+    card.innerHTML = '<div class="card-title">' + m.label + '</div><div class="card-body">' + m.desc + '</div>';
+    card.onclick = () => { wiz.charMethod = m.id; wiz.charMethodXP = m.id==='order'?50:m.id==='rearrange'?25:0; renderWizStep(); };
+    methodGrid.appendChild(card);
+  });
+  el.appendChild(methodGrid);
+
+  if (wiz.charMethod === 'order' || wiz.charMethod === 'rearrange' || wiz.charMethod === 'freeroll') {
+    const rollSection = document.createElement('div');
+    rollSection.style.marginTop = '8px';
+
+    const rollBtn = document.createElement('button');
+    rollBtn.className = 'action-btn';
+    rollBtn.textContent = 'ROLL STATS';
+    rollBtn.onclick = () => {
+      const rolled = CHARACTERISTICS.map(() => Math.floor(Math.random()*10)+Math.floor(Math.random()*10)+22);
+      wiz.rolledStats = rolled;
+      if (wiz.charMethod === 'order') {
+        CHARACTERISTICS.forEach((c,i) => { wiz.chars[c.key] = rolled[i]; });
+      } else {
+        CHARACTERISTICS.forEach((c,i) => { wiz.chars[c.key] = rolled[i]; });
+      }
+      renderWizStep();
+    };
+    rollSection.appendChild(rollBtn);
+
+    if (wiz.rolledStats || wiz.charMethod !== 'order') {
+      const grid = document.createElement('div');
+      grid.className = 'rolled-stats-grid';
+      CHARACTERISTICS.forEach((c,i) => {
+        const cell = document.createElement('div');
+        cell.className = 'roll-stat-cell';
+        cell.innerHTML = '<div class="roll-stat-abbr">' + c.name + '</div>';
+        if (wiz.charMethod === 'order') {
+          const span = document.createElement('div');
+          span.className = 'roll-stat-val';
+          span.textContent = wiz.chars[c.key];
+          cell.appendChild(span);
+        } else {
+          const inp = document.createElement('input');
+          inp.className = 'roll-stat-inp';
+          inp.type = 'number'; inp.min = 4; inp.max = 38;
+          inp.value = wiz.chars[c.key];
+          inp.oninput = () => { wiz.chars[c.key] = parseInt(inp.value)||20; };
+          cell.appendChild(inp);
+        }
+        grid.appendChild(cell);
+      });
+      rollSection.appendChild(grid);
+      if (wiz.charMethod !== 'order') {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:10px;color:var(--green-dim);margin-top:4px;';
+        hint.textContent = 'Assign the rolled values to any characteristics you choose.';
+        rollSection.appendChild(hint);
+      }
+    }
+    el.appendChild(rollSection);
+  }
+
+  if (wiz.charMethod === 'pointbuy') {
+    renderPointBuy(el);
+  }
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wiz.step > 1 ? wizBack : null);
+}
+
+function renderPointBuy(el) {
+  let totalAlloc = Object.values(wiz.chars).reduce((s,v) => s + (v - 20), 0);
+  let remaining  = 90 - totalAlloc;
+
+  const wrap = document.createElement('div');
+  wrap.style.marginTop = '10px';
+
+  const rem = document.createElement('div');
+  rem.className = 'pb-points-left';
+  rem.innerHTML = '<span id="pb-remaining">' + remaining + '</span> POINTS REMAINING';
+  wrap.appendChild(rem);
+
+  CHARACTERISTICS.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'pb-row';
+    const alloc = (wiz.chars[c.key] || 20) - 20;
+    row.innerHTML =
+      '<span class="pb-label">' + c.name + '</span>' +
+      '<button class="lu-btn" onclick="pbAdj(\'' + c.key + '\',-1)">-</button>' +
+      '<span class="pb-val" id="pb-val-' + c.key + '">' + (wiz.chars[c.key] || 20) + '</span>' +
+      '<button class="lu-btn" onclick="pbAdj(\'' + c.key + '\',1)">+</button>';
+    wrap.appendChild(row);
+  });
+  el.appendChild(wrap);
+}
+
+function pbAdj(key, delta) {
+  const cur   = wiz.chars[key] || 20;
+  const alloc = cur - 20;
+  const total = Object.values(wiz.chars).reduce((s,v) => s + (v-20), 0);
+  const rem   = 90 - total;
+  if (delta > 0 && (alloc >= 18 || rem < 1)) return;
+  if (delta < 0 && alloc <= 4) return;
+  wiz.chars[key] = cur + delta;
+  renderWizStep();
+}
+
+
+// ── Step 2: Origin ───────────────────────────────────────
+
+function wizStep2(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 2 // ORIGIN</div>';
+
+  const rollBtn = document.createElement('button');
+  rollBtn.className = 'action-btn';
+  rollBtn.style.marginBottom = '8px';
+  rollBtn.innerHTML = 'ROLL D100 <span style="font-size:10px;color:var(--amber-dim)">(+25 XP)</span>';
+  rollBtn.onclick = () => {
+    const r  = Math.floor(Math.random()*100) + 1;
+    const orig = rollOrigin(r);
+    wiz.origin = orig.name;
+    wiz.originRolled = true;
+    wiz.originXP = 25;
+    renderWizStep();
+  };
+  el.appendChild(rollBtn);
+
+  const grid = document.createElement('div');
+  grid.className = 'card-grid';
+  ORIGINS.forEach(o => {
+    const bonuses = Object.entries(o.bonus).filter(([,v]) => v > 0).map(([k,v]) => k.toUpperCase()+'+'+v).join(', ');
+    const card = document.createElement('div');
+    card.className = 'card' + (wiz.origin === o.name ? ' selected' : '');
+    card.innerHTML =
+      '<div class="card-title">' + o.name.toUpperCase() + '</div>' +
+      '<div class="card-body">' + bonuses + '</div>' +
+      '<div class="card-body" style="margin-top:3px;color:var(--amber-dim);">' + o.item + '</div>' +
+      '<div class="card-body" style="font-size:9px;margin-top:2px;">' + o.roll + '</div>';
+    card.onclick = () => {
+      wiz.origin = o.name;
+      if (!wiz.originRolled) wiz.originXP = 0;
+      renderWizStep();
+    };
+    grid.appendChild(card);
+  });
+  el.appendChild(grid);
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+function rollOrigin(r) {
+  if (r <= 10) return ORIGINS[0];
+  if (r <= 20) return ORIGINS[1];
+  if (r <= 30) return ORIGINS[2];
+  if (r <= 40) return ORIGINS[3];
+  if (r <= 70) return ORIGINS[4];
+  if (r <= 80) return ORIGINS[5];
+  if (r <= 90) return ORIGINS[6];
+  return ORIGINS[7];
+}
+
+
+// ── Step 3: Faction ──────────────────────────────────────
+
+function wizStep3(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 3 // FACTION</div>';
+
+  const rollBtn = document.createElement('button');
+  rollBtn.className = 'action-btn';
+  rollBtn.style.marginBottom = '8px';
+  rollBtn.innerHTML = 'ROLL D100 <span style="font-size:10px;color:var(--amber-dim)">(+75 XP)</span>';
+  rollBtn.onclick = () => {
+    const r = Math.floor(Math.random()*100)+1;
+    const f = FACTIONS_DATA[Math.floor(Math.random()*FACTIONS_DATA.length)];
+    wiz.faction = f.name;
+    wiz.factionRolled = true;
+    wiz.factionXP = 75;
+    wiz.duty = null;
+    renderWizStep();
+  };
+  el.appendChild(rollBtn);
+
+  const factionGrid = document.createElement('div');
+  factionGrid.className = 'card-grid';
+  FACTIONS_DATA.forEach(f => {
+    const bonuses = Object.entries(f.bonus).filter(([,v])=>v>0).map(([k,v])=>k.toUpperCase()+'+'+v).join(', ');
+    const card = document.createElement('div');
+    card.className = 'card' + (wiz.faction === f.name ? ' selected' : '');
+    card.innerHTML =
+      '<div class="card-title">' + f.short.toUpperCase() + '</div>' +
+      '<div class="card-body">' + bonuses + '</div>' +
+      '<div class="card-body" style="margin-top:2px;font-size:9px;color:var(--amber-dim);">' + f.talent + '</div>';
+    card.onclick = () => {
+      wiz.faction = f.name;
+      if (!wiz.factionRolled) wiz.factionXP = 0;
+      wiz.duty = null;
+      renderWizStep();
+    };
+    factionGrid.appendChild(card);
+  });
+  el.appendChild(factionGrid);
+
+  if (wiz.faction) {
+    const fac = FACTIONS_DATA.find(f => f.name === wiz.faction);
+    if (fac) {
+      const dutyTitle = document.createElement('div');
+      dutyTitle.style.cssText = 'font-family:VT323,monospace;font-size:15px;letter-spacing:2px;color:var(--green-dim);margin:10px 0 6px;';
+      dutyTitle.textContent = '// SELECT DUTY';
+      el.appendChild(dutyTitle);
+
+      const dutyGrid = document.createElement('div');
+      dutyGrid.className = 'duty-grid';
+      fac.duties.forEach(d => {
+        const skStr = Object.entries(d.skills).map(([k,v]) => k.replace(/_/g,' ')+' ('+v+')').join(', ');
+        const card = document.createElement('div');
+        card.className = 'card' + (wiz.duty === d.name ? ' selected' : '');
+        card.innerHTML =
+          '<div class="card-title">' + d.name.toUpperCase() + '</div>' +
+          '<div class="card-body">Skills: ' + skStr + '</div>' +
+          (d.talents.length ? '<div class="card-body">Talents: ' + d.talents.join(', ') + '</div>' : '') +
+          (d.equipment ? '<div class="card-body">+' + d.equipment + '</div>' : '');
+        card.onclick = () => { wiz.duty = d.name; applyDutySkills(); renderWizStep(); };
+        dutyGrid.appendChild(card);
+      });
+      el.appendChild(dutyGrid);
+    }
+  }
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+function applyDutySkills() {
+  SKILLS.forEach(s => { wiz.factionSkills[s.key] = 0; });
+  if (!wiz.faction || !wiz.duty) return;
+  const fac  = FACTIONS_DATA.find(f => f.name === wiz.faction);
+  if (!fac) return;
+  const duty = fac.duties.find(d => d.name === wiz.duty);
+  if (!duty) return;
+  Object.entries(duty.skills).forEach(([rawKey, adv]) => {
+    const normalized = rawKey.replace(/ /g,'_').toLowerCase();
+    const found = SKILLS.find(s => s.key === normalized || s.name.toLowerCase() === rawKey.toLowerCase() || s.name.replace(/ /g,'_').toLowerCase() === normalized);
+    if (found) {
+      wiz.factionSkills[found.key] = adv;
+      if ((wiz.skills[found.key]||0) < adv) wiz.skills[found.key] = adv;
+    }
+  });
+}
+
+
+// ── Step 4: Role ─────────────────────────────────────────
+
+function wizStep4(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 4 // ROLE</div>';
+
+  const rollBtn = document.createElement('button');
+  rollBtn.className = 'action-btn';
+  rollBtn.style.marginBottom = '8px';
+  rollBtn.innerHTML = 'ROLL D6 <span style="font-size:10px;color:var(--amber-dim)">(+25 XP)</span>';
+  rollBtn.onclick = () => {
+    const r = Math.floor(Math.random()*6);
+    wiz.role = ROLES_DATA[r].name;
+    wiz.roleRolled = true;
+    wiz.roleXP = 25;
+    wiz.talents = [];
+    renderWizStep();
+  };
+  el.appendChild(rollBtn);
+
+  const roleGrid = document.createElement('div');
+  roleGrid.className = 'card-grid';
+  ROLES_DATA.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card' + (wiz.role === r.name ? ' selected' : '');
+    card.innerHTML =
+      '<div class="card-title">' + r.name.toUpperCase() + '</div>' +
+      '<div class="card-body">' + r.focus + '</div>' +
+      '<div class="card-body" style="margin-top:2px;font-size:9px;">Skills: ' + r.skillPool.join(', ') + '</div>' +
+      (r.grantPsyker ? '<span class="card-tag">PSYKER</span>' : '');
+    card.onclick = () => { wiz.role = r.name; if (!wiz.roleRolled) wiz.roleXP = 0; wiz.talents = []; renderWizStep(); };
+    roleGrid.appendChild(card);
+  });
+  el.appendChild(roleGrid);
+
+  if (wiz.role) {
+    const role = ROLES_DATA.find(r => r.name === wiz.role);
+    const talentTitle = document.createElement('div');
+    talentTitle.style.cssText = 'font-family:VT323,monospace;font-size:15px;letter-spacing:2px;color:var(--green-dim);margin:10px 0 4px;';
+    talentTitle.textContent = '// CHOOSE ' + role.talentPick + ' TALENT' + (role.talentPick > 1 ? 'S' : '') + ' FROM POOL';
+    el.appendChild(talentTitle);
+
+    if (role.grantPsyker) {
+      const pg = document.createElement('div');
+      pg.style.cssText = 'font-size:10px;color:var(--amber-dim);margin-bottom:4px;';
+      pg.textContent = '★ Psyker talent automatically granted.';
+      el.appendChild(pg);
+    }
+
+    const tlist = document.createElement('div');
+    tlist.className = 'talent-list';
+    role.talentPool.forEach(t => {
+      const selected = wiz.talents.includes(t);
+      const item = document.createElement('div');
+      item.className = 'talent-choice' + (selected ? ' selected' : '');
+      const desc = TALENT_DATA[t] || '';
+      item.innerHTML =
+        '<div class="tc-check">' + (selected ? '◈' : '◇') + '</div>' +
+        '<div><div class="tc-name">' + t + '</div>' + (desc ? '<div class="tc-desc">' + desc.slice(0,120) + (desc.length>120?'…':'') + '</div>' : '') + '</div>';
+      item.onclick = () => {
+        if (selected) {
+          wiz.talents = wiz.talents.filter(x => x !== t);
+        } else if (wiz.talents.length < role.talentPick) {
+          wiz.talents.push(t);
+        }
+        renderWizStep();
+      };
+      tlist.appendChild(item);
+    });
+    el.appendChild(tlist);
+  }
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+
+// ── Step 5: Skills ───────────────────────────────────────
+
+function wizStep5(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 5 // SKILLS</div>';
+
+  const role = wiz.role ? ROLES_DATA.find(r => r.name === wiz.role) : null;
+  const rolePool = role ? role.skillPool.map(s => s.toLowerCase().replace(/ /g,'_')) : [];
+
+  const hint = document.createElement('div');
+  hint.style.cssText = 'font-size:10px;color:var(--green-dim);margin-bottom:8px;';
+  hint.innerHTML = 'Locked advances from faction/duty shown in dark. Role pool highlighted in amber. Max 2 total advances per skill during creation.';
+  el.appendChild(hint);
+
+  const headerRow = document.createElement('div');
+  headerRow.className = 'skill-wiz-row';
+  headerRow.style.fontFamily = 'VT323,monospace';
+  headerRow.style.fontSize   = '12px';
+  headerRow.style.color      = 'var(--green-dim)';
+  headerRow.innerHTML =
+    '<span>SKILL</span>' +
+    '<span>ADVANCES</span>' +
+    '<span style="font-size:9px;">CHAR</span>' +
+    '<span></span>';
+  el.appendChild(headerRow);
+
+  SKILLS.forEach(s => {
+    const locked  = wiz.factionSkills[s.key] || 0;
+    const current = Math.max(locked, wiz.skills[s.key] || 0);
+    const inPool  = rolePool.includes(s.key);
+    const maxAdv  = 2;
+    const canAdd  = current < maxAdv;
+    const canSub  = current > locked;
+
+    const row = document.createElement('div');
+    row.className = 'skill-wiz-row';
+    if (inPool) row.style.color = 'var(--amber-dim)';
+
+    const pips = Array.from({length: maxAdv}, (_, i) => {
+      let cls = 'adv-pip';
+      if (i < locked)  cls += ' locked';
+      else if (i < current) cls += ' filled';
+      return '<span class="' + cls + '"></span>';
+    }).join('');
+
+    row.innerHTML =
+      '<span style="font-size:11px;">' + s.name + '</span>' +
+      '<span class="adv-pips">' + pips + '</span>' +
+      '<span style="font-size:9px;color:var(--green-dark);">' + s.char.toUpperCase() + '</span>' +
+      '<span style="display:flex;gap:3px;">' +
+        '<button class="lu-btn" style="font-size:11px;" ' + (canSub?'':'disabled') + ' onclick="wizSkillAdj(\'' + s.key + '\',-1)">-</button>' +
+        '<button class="lu-btn" style="font-size:11px;" ' + (canAdd?'':'disabled') + ' onclick="wizSkillAdj(\'' + s.key + '\',1)">+</button>' +
+      '</span>';
+
+    el.appendChild(row);
+  });
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+function wizSkillAdj(key, delta) {
+  const locked  = wiz.factionSkills[key] || 0;
+  const current = Math.max(locked, wiz.skills[key] || 0);
+  const next    = current + delta;
+  if (next < locked || next > 2) return;
+  wiz.skills[key] = next;
+  renderWizStep();
+}
+
+
+// ── Step 6: Name ─────────────────────────────────────────
+
+function wizStep6(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 6 // DESIGNATION</div>';
+
+  const field = document.createElement('div');
+  field.className = 'field';
+  field.innerHTML = '<label>OPERATIVE DESIGNATION</label>';
+  const nameInp = document.createElement('input');
+  nameInp.type = 'text';
+  nameInp.id   = 'wiz-name-inp';
+  nameInp.value = wiz.name;
+  nameInp.placeholder = 'Enter designation...';
+  nameInp.maxLength = 40;
+  nameInp.oninput = () => { wiz.name = nameInp.value; };
+  field.appendChild(nameInp);
+  el.appendChild(field);
+
+  const styleLabel = document.createElement('div');
+  styleLabel.style.cssText = 'font-size:10px;color:var(--green-dim);margin:8px 0 4px;letter-spacing:1px;';
+  styleLabel.textContent = 'GENERATE SUGGESTIONS:';
+  el.appendChild(styleLabel);
+
+  const styleRow = document.createElement('div');
+  styleRow.className = 'name-style-row';
+  Object.keys(NAME_POOLS).forEach(style => {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = style.toUpperCase();
+    btn.onclick = () => generateNames(style, el);
+    styleRow.appendChild(btn);
+  });
+  el.appendChild(styleRow);
+
+  const suggestArea = document.createElement('div');
+  suggestArea.id = 'wiz-name-suggestions';
+  suggestArea.style.display = 'flex';
+  suggestArea.style.flexWrap = 'wrap';
+  suggestArea.style.gap = '6px';
+  suggestArea.style.marginTop = '6px';
+  el.appendChild(suggestArea);
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+function generateNames(style, el) {
+  const pool = NAME_POOLS[style];
+  const suggestions = Array.from({length: 5}, () => {
+    const g = pool.given[Math.floor(Math.random()*pool.given.length)];
+    const f = pool.family[Math.floor(Math.random()*pool.family.length)];
+    return g + ' ' + f;
+  });
+  const area = document.getElementById('wiz-name-suggestions');
+  if (!area) return;
+  area.innerHTML = '';
+  suggestions.forEach(n => {
+    const span = document.createElement('span');
+    span.className = 'name-suggestion';
+    span.textContent = n;
+    span.onclick = () => {
+      wiz.name = n;
+      const inp = document.getElementById('wiz-name-inp');
+      if (inp) inp.value = n;
+    };
+    area.appendChild(span);
+  });
+}
+
+
+// ── Step 7: Wargear ──────────────────────────────────────
+
+function wizStep7(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 7 // WARGEAR</div>';
+
+  const origin  = ORIGINS.find(o => o.name === wiz.origin);
+  const facData = FACTIONS_DATA.find(f => f.name === wiz.faction);
+  const duty    = facData ? facData.duties.find(d => d.name === wiz.duty) : null;
+  const role    = ROLES_DATA.find(r => r.name === wiz.role);
+
+  const section = (title) => {
+    const t = document.createElement('div');
+    t.style.cssText = 'font-family:VT323,monospace;font-size:14px;letter-spacing:1px;color:var(--amber-dim);padding:4px 0 2px;border-bottom:1px solid var(--green-dark);margin:8px 0 4px;';
+    t.textContent = title;
+    el.appendChild(t);
+  };
+
+  const item = (text) => {
+    const d = document.createElement('div');
+    d.className = 'wg-item';
+    d.innerHTML = '▸ ' + text;
+    el.appendChild(d);
+  };
+
+  section('ORIGIN — ' + (wiz.origin || '?'));
+  if (origin) item(origin.item);
+
+  section('FACTION — ' + (wiz.faction ? facData?.short || wiz.faction : '?'));
+  if (facData) item(facData.equipment);
+
+  section('DUTY — ' + (wiz.duty || '?'));
+  if (duty) item(duty.equipment || '(no additional equipment)');
+
+  section('ROLE — ' + (wiz.role || '?'));
+  if (role) {
+    item(role.equipment + ' (fixed)');
+    if (role.equipChoose && role.equipChoose.length > 0) {
+      const chooseLabel = document.createElement('div');
+      chooseLabel.style.cssText = 'font-size:10px;color:var(--green-dim);margin:6px 0 3px;';
+      chooseLabel.textContent = 'CHOOSE ' + role.equipChooseCount + ':';
+      el.appendChild(chooseLabel);
+
+      const key    = wiz.role + '_equip';
+      const chosen = wiz.wargearChoices[key] || [];
+
+      const wgWrap = document.createElement('div');
+      wgWrap.className = 'wg-choose';
+      role.equipChoose.forEach(opt => {
+        const selected = chosen.includes(opt);
+        const btn = document.createElement('button');
+        btn.className = 'wg-opt' + (selected ? ' selected' : '');
+        btn.textContent = opt;
+        btn.onclick = () => {
+          if (selected) {
+            wiz.wargearChoices[key] = chosen.filter(c => c !== opt);
+          } else if (chosen.length < role.equipChooseCount) {
+            wiz.wargearChoices[key] = [...chosen, opt];
+          }
+          renderWizStep();
+        };
+        wgWrap.appendChild(btn);
+      });
+      el.appendChild(wgWrap);
+    }
+  }
+
+  renderWizNav(el, 'NEXT ▶', wizNext, wizBack);
+}
+
+
+// ── Step 8: Review ───────────────────────────────────────
+
+function wizStep8(el) {
+  el.innerHTML = '<div class="wiz-step-label">STEP 8 // REVIEW</div>';
+
+  const origin  = ORIGINS.find(o => o.name === wiz.origin) || {};
+  const facData = FACTIONS_DATA.find(f => f.name === wiz.faction) || {};
+  const role    = ROLES_DATA.find(r => r.name === wiz.role) || {};
+
+  // Compute final chars
+  const finalChars = {};
+  CHARACTERISTICS.forEach(c => {
+    let val = wiz.chars[c.key] || 20;
+    if (origin.bonus) val += (origin.bonus[c.key] || 0);
+    if (facData.bonus) val += (facData.bonus[c.key] || 0);
+    const duty = facData.duties ? facData.duties.find(d => d.name === wiz.duty) : null;
+    if (duty && duty.bonus) val += (duty.bonus[c.key] || 0);
+    finalChars[c.key] = val;
+  });
+
+  const tghB = Math.floor(finalChars.tgh / 10);
+  const strB = Math.floor(finalChars.str / 10);
+  const wilB = Math.floor(finalChars.wil / 10);
+  const perB = Math.floor(finalChars.per / 10);
+  const agB  = Math.floor(finalChars.ag  / 10);
+
+  const totalXP = wiz.charMethodXP + wiz.originXP + wiz.factionXP + wiz.roleXP;
+  wiz.totalXP   = totalXP;
+
+  // Header
+  const nameDiv = document.createElement('div');
+  nameDiv.style.cssText = 'font-family:VT323,monospace;font-size:22px;color:var(--green-bright);margin-bottom:4px;letter-spacing:2px;';
+  nameDiv.textContent = (wiz.name || '[UNNAMED]').toUpperCase();
+  el.appendChild(nameDiv);
+
+  const meta = document.createElement('div');
+  meta.style.cssText = 'font-size:10px;color:var(--green-dim);margin-bottom:10px;';
+  meta.textContent = (wiz.origin||'?') + ' • ' + (wiz.faction||'?') + ' (' + (wiz.duty||'?') + ') • ' + (wiz.role||'?') + ' | Starting XP: ' + totalXP;
+  el.appendChild(meta);
+
+  // Chars table
+  const sec1 = document.createElement('div'); sec1.className = 'review-section'; sec1.textContent = '// CHARACTERISTICS'; el.appendChild(sec1);
+  const charGrid = document.createElement('div');
+  charGrid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;';
+  CHARACTERISTICS.forEach(c => {
+    const cell = document.createElement('div');
+    cell.style.cssText = 'text-align:center;border:1px solid var(--green-dark);padding:4px;background:var(--black);';
+    cell.innerHTML = '<div style="font-size:9px;color:var(--green-dim);">' + c.name + '</div><div style="font-family:VT323,monospace;font-size:20px;color:var(--green-bright);">' + finalChars[c.key] + '</div>';
+    charGrid.appendChild(cell);
+  });
+  el.appendChild(charGrid);
+
+  // Derived
+  const sec2 = document.createElement('div'); sec2.className = 'review-section'; sec2.textContent = '// DERIVED STATS'; el.appendChild(sec2);
+  const derived = [
+    ['Max Wounds',  strB + (2*tghB) + wilB],
+    ['Crit Max',    tghB],
+    ['Initiative',  perB + agB],
+    ['Fate',        3],
+    ['Enc Max',     strB + tghB],
+  ];
+  const dt = document.createElement('table'); dt.className = 'review-table';
+  derived.forEach(([k,v]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + k + '</td><td style="font-family:VT323,monospace;font-size:16px;">' + v + '</td>';
+    dt.appendChild(tr);
+  });
+  el.appendChild(dt);
+
+  // Skills
+  const sec3 = document.createElement('div'); sec3.className = 'review-section'; sec3.textContent = '// SKILLS WITH ADVANCES'; el.appendChild(sec3);
+  const st = document.createElement('table'); st.className = 'review-table';
+  SKILLS.forEach(s => {
+    const adv = wiz.skills[s.key] || 0;
+    if (!adv) return;
+    const base = finalChars[s.char] || 20;
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + s.name + '</td><td style="font-family:VT323,monospace;">' + adv + ' adv (+' + (adv*5) + ')  =  ' + (base + adv*5) + '</td>';
+    st.appendChild(tr);
+  });
+  if (!st.children.length) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="2" style="color:var(--green-dark)">No skill advances</td>';
+    st.appendChild(tr);
+  }
+  el.appendChild(st);
+
+  // Talents
+  const sec4 = document.createElement('div'); sec4.className = 'review-section'; sec4.textContent = '// TALENTS'; el.appendChild(sec4);
+  const allTalents = [...wiz.talents];
+  if (role.grantPsyker) allTalents.unshift('Psyker');
+  // Faction talent
+  const facTalent = facData.talent;
+  if (facTalent) allTalents.unshift(facTalent.split('(')[0].trim());
+  const tDiv = document.createElement('div');
+  tDiv.style.cssText = 'font-size:11px;color:var(--green-dim);';
+  tDiv.textContent = allTalents.length ? allTalents.join(', ') : 'None';
+  el.appendChild(tDiv);
+
+  // Equipment
+  const sec5 = document.createElement('div'); sec5.className = 'review-section'; sec5.textContent = '// WARGEAR'; el.appendChild(sec5);
+  const wgDiv = document.createElement('div');
+  wgDiv.style.cssText = 'font-size:10px;color:var(--green-dim);';
+  const wgList = [];
+  if (origin.item) wgList.push(origin.item);
+  if (facData.equipment) wgList.push(facData.equipment);
+  const dutyObj = facData.duties ? facData.duties.find(d => d.name === wiz.duty) : null;
+  if (dutyObj && dutyObj.equipment) wgList.push(dutyObj.equipment);
+  if (role.equipment) wgList.push(role.equipment);
+  const roleChoices = wiz.wargearChoices[wiz.role + '_equip'] || [];
+  if (roleChoices.length) wgList.push('(chosen): ' + roleChoices.join(', '));
+  wgDiv.textContent = wgList.join(' | ') || 'None';
+  el.appendChild(wgDiv);
+
+  const xpNote = document.createElement('div');
+  xpNote.style.cssText = 'margin-top:10px;padding:6px 10px;border:1px solid var(--amber-dim);font-size:11px;color:var(--amber-dim);';
+  xpNote.textContent = 'STARTING XP: ' + totalXP + ' (method: +' + wiz.charMethodXP + ', origin: +' + wiz.originXP + ', faction: +' + wiz.factionXP + ', role: +' + wiz.roleXP + ')';
+  el.appendChild(xpNote);
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'action-btn';
+  saveBtn.style.cssText = 'margin-top:12px;font-size:14px;';
+  saveBtn.textContent = 'EXPORT TO OPERATIVE FILE';
+  saveBtn.onclick = () => showSaveModal(finalChars, allTalents, totalXP, wgList);
+  el.appendChild(saveBtn);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'action-btn danger';
+  resetBtn.style.cssText = 'margin-top:6px;font-size:12px;';
+  resetBtn.textContent = 'START OVER';
+  resetBtn.onclick = () => { resetWizard(); renderWizard(); };
+  el.appendChild(resetBtn);
+
+  // Back only (no next on last step)
+  const navDiv = document.createElement('div');
+  navDiv.className = 'wiz-nav';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'action-btn';
+  backBtn.textContent = '◀ BACK';
+  backBtn.onclick = wizBack;
+  navDiv.appendChild(backBtn);
+  navDiv.appendChild(document.createElement('span'));
+  el.appendChild(navDiv);
+}
+
+
+// ── Wizard: save to slot ─────────────────────────────────
+
+function showSaveModal(finalChars, talents, totalXP, wgList) {
+  const list = document.getElementById('save-slot-list');
+  list.innerHTML = '';
+  for (let i = 0; i < SLOT_COUNT; i++) {
+    const d    = getSlotData(i);
+    const name = d.name || '[ EMPTY ]';
+    const btn  = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.style.cssText = 'text-align:left;width:100%;';
+    btn.textContent = 'SLOT ' + (i+1) + ': ' + name.toUpperCase();
+    btn.onclick = () => { saveWizardToSlot(i, finalChars, talents, totalXP, wgList); closeModal('save-modal'); };
+    list.appendChild(btn);
+  }
+  openModal('save-modal');
+}
+
+function saveWizardToSlot(slot, finalChars, talents, totalXP, wgList) {
+  const data = defaultSlotData();
+
+  // Name & meta
+  data.name    = wiz.name;
+  data.origin  = wiz.origin;
+  data.faction = wiz.faction;
+  data.role    = wiz.role;
+  data.xp      = totalXP;
+
+  // Characteristics — set as base values
+  CHARACTERISTICS.forEach(c => {
+    data.chars[c.key] = { base: finalChars[c.key], adv: 0, temp: 0 };
+  });
+
+  // Skills
+  SKILLS.forEach(s => { data.skills[s.key] = wiz.skills[s.key] || 0; });
+
+  // Derived stats
+  const derived = calcDerivedStats(data);
+  data.vitals.wounds_max  = derived.wounds_max;
+  data.vitals.wounds_cur  = derived.wounds_max;
+  data.vitals.crit_max    = derived.crit_max;
+  data.vitals.initiative  = derived.initiative;
+  data.vitals.enc_max     = derived.enc_max;
+  data.vitals.fate_cur    = 3;
+  data.vitals.fate_max    = 3;
+
+  // Talents
+  data.talents = talents.map(t => ({ name: t, desc: TALENT_DATA[t] || '' }));
+
+  // Influence
+  const facObj = FACTIONS_DATA.find(f => f.name === wiz.faction);
+  if (facObj && facObj.influence && FACTIONS.includes(facObj.influence)) {
+    data.influence[facObj.influence] = 1;
+  }
+
+  // Equipment as notes
+  data.background = 'Equipment: ' + wgList.join(' | ');
+
+  saveSlotData(slot, data);
+  setActiveSlot(slot);
+  renderSlots();
+  if (window.parent && window.parent.loadHeader) window.parent.loadHeader();
+
+  alert('Operative saved to Slot ' + (slot + 1) + '.\nXP: ' + totalXP + '\n\nActivate the operative to continue.');
+}
+
+
+// ── Wizard nav helper ────────────────────────────────────
+
+function renderWizNav(el, nextLabel, nextFn, backFn) {
+  const nav = document.createElement('div');
+  nav.className = 'wiz-nav';
+
+  if (backFn) {
+    const b = document.createElement('button');
+    b.className = 'action-btn';
+    b.textContent = '◀ BACK';
+    b.onclick = backFn;
+    nav.appendChild(b);
+  } else {
+    nav.appendChild(document.createElement('span'));
+  }
+
+  const xpBadge = document.createElement('div');
+  xpBadge.className = 'wiz-xp-badge';
+  const xpTotal = wiz.charMethodXP + wiz.originXP + wiz.factionXP + wiz.roleXP;
+  xpBadge.textContent = 'XP: ' + xpTotal;
+  nav.appendChild(xpBadge);
+
+  const n = document.createElement('button');
+  n.className = 'action-btn';
+  n.textContent = nextLabel;
+  n.onclick = nextFn;
+  nav.appendChild(n);
+
+  el.appendChild(nav);
+}
+
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+
+window.refreshIfPresent = function() {
+  renderSlots();
+  if (!document.getElementById('lu-body').classList.contains('hidden')) renderLevelUp();
+};
+
+renderSlots();
+</script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHARACTERISTICS</title>
+<script src="cs_shared.js"></script>
+<style>
+
+/* ── CHARACTERISTICS GRID ── */
+.char-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-left: 1px solid var(--green-dark);
+  border-top: 1px solid var(--green-dark);
+}
+@media (max-width: 768px) {
+  .char-stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.char-stat-cell {
+  border-right: 1px solid var(--green-dark);
+  border-bottom: 1px solid var(--green-dark);
+  text-align: center;
+  padding: 0;
+}
+.csc-abbr {
+  background: var(--green-dark);
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  padding: 4px;
+  border-bottom: 1px solid var(--green-dark);
+}
+.csc-full {
+  font-size: 7px;
+  color: var(--green-dark);
+  padding: 2px;
+  letter-spacing: 1px;
+}
+.csc-val-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--green);
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  text-align: center;
+  padding: 6px 4px;
+  outline: none;
+}
+.csc-val-input:focus { background: var(--green-dark); }
+.csc-charb {
+  font-size: 9px;
+  color: var(--green-dim);
+  padding-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+/* ── SKILLS TABLE ── */
+.skill-table-wrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--green-dark);
+}
+@media (max-width: 768px) {
+  .skill-table-wrap { grid-template-columns: 1fr; }
+}
+.skill-col { border-right: 1px solid var(--green-dark); }
+.skill-col:last-child { border-right: none; }
+.skill-col-hdr {
+  display: grid;
+  grid-template-columns: 1fr 44px 56px 46px;
+  padding: 4px 6px;
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-mid);
+}
+.skill-col-hdr span {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  color: var(--green-dim);
+  letter-spacing: 1px;
+  text-align: center;
+}
+.skill-col-hdr span:first-child { text-align: left; }
+.skill-tbl-row {
+  display: grid;
+  grid-template-columns: 1fr 44px 56px 46px;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--green-dark);
+  align-items: center;
+  background: var(--black);
+}
+.skill-tbl-row:hover { background: var(--green-faint); }
+.skill-tbl-name {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--green-dim);
+  line-height: 1.1;
+}
+.skill-tbl-name.has-advance { color: var(--green-bright); }
+.skill-tbl-char {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  color: var(--green-dim);
+  text-align: center;
+}
+.skill-tbl-adv {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+.skill-adv {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  color: var(--amber);
+  min-width: 16px;
+  text-align: center;
+}
+.skill-tbl-total {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--green-bright);
+  text-align: right;
+  padding-right: 2px;
+}
+
+/* ── SPEC ROW ── */
+.spec-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto auto auto;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+  border: 1px solid var(--green-dark);
+  padding: 4px;
+  background: var(--black);
+  font-size: 12px;
+}
+.spec-adv {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  text-align: center;
+  color: var(--green);
+  width: 20px;
+}
+.spec-total {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--green-bright);
+  min-width: 30px;
+  text-align: right;
+}
+
+/* ── TALENT BUTTON ── */
+.talent-name-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  background: none;
+  border: none;
+  border-left: 2px solid var(--green-mid);
+  color: var(--green);
+  cursor: pointer;
+  padding: 2px 6px;
+  text-align: left;
+  flex: 1;
+  transition: color 0.1s, border-color 0.1s, text-shadow 0.1s;
+}
+.talent-name-btn:hover {
+  border-left-color: var(--green-bright);
+  color: var(--green-bright);
+  text-shadow: 0 0 6px var(--green-dim);
+}
+
+/* ── XP BAR ── */
+.xp-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.xp-item { text-align: center; }
+.xp-label { font-size: 10px; color: var(--green-dim); letter-spacing: 1px; }
+.xp-value { font-family: 'VT323', monospace; font-size: 20px; color: var(--green-bright); }
+.xp-value.spent { color: var(--amber); }
+.xp-value.avail { color: var(--green); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--black);
+  border: 1px solid var(--green);
+  max-width: 500px;
+  width: 95%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-header {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  padding: 8px 12px;
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-mid);
+  color: var(--green-bright);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 2px;
+}
+.modal-close {
+  background: none; border: none;
+  color: var(--green-dark); cursor: pointer;
+  font-size: 18px; font-family: 'VT323', monospace;
+  transition: color 0.1s, text-shadow 0.1s;
+}
+.modal-close:hover { color: var(--red); text-shadow: 0 0 6px var(--red-dim); }
+.modal-body { padding: 12px; font-size: 13px; line-height: 1.6; }
+
+</style>
+</head>
+<body>
+<div class="sheet-container">
+
+  <!-- XP BAR -->
+  <div class="xp-bar">
+    <div class="xp-item">
+      <div class="xp-label">TOTAL XP</div>
+      <div class="xp-value" id="xp-total">0</div>
+    </div>
+    <div class="xp-item">
+      <div class="xp-label">SPENT</div>
+      <div class="xp-value spent" id="xp-spent">0</div>
+    </div>
+    <div class="xp-item">
+      <div class="xp-label">AVAILABLE</div>
+      <div class="xp-value avail" id="xp-avail">0</div>
+    </div>
+  </div>
+
+  <div class="sheet-grid">
+
+    <!-- CHARACTERISTICS -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// CHARACTERISTICS</div>
+      <div class="panel-body" style="padding:0;">
+        <div class="char-stat-grid" id="char-stat-grid"></div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// SKILLS</div>
+      <div class="panel-body" style="padding:0;">
+        <div class="skill-table-wrap" id="skill-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- SPECIALISATIONS -->
+    <div class="panel">
+      <div class="panel-header">// SPECIALISATIONS</div>
+      <div class="panel-body">
+        <div id="spec-list"></div>
+        <button class="add-row-btn" onclick="addSpec()">+ ADD SPECIALISATION</button>
+      </div>
+    </div>
+
+    <!-- TALENTS -->
+    <div class="panel">
+      <div class="panel-header">// TALENTS</div>
+      <div class="panel-body">
+        <div id="talent-list"></div>
+        <button class="add-row-btn" onclick="addTalent()">+ ADD TALENT</button>
+      </div>
+    </div>
+
+  </div><!-- /sheet-grid -->
+</div><!-- /sheet-container -->
+
+<!-- TALENT MODAL -->
+<div class="modal-overlay" id="modal-talent">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-talent-name">TALENT</span>
+      <button class="modal-close" onclick="closeModal('modal-talent')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-talent-body"></div>
+  </div>
+</div>
+
+<script>
+
+// ── XP display ─────────────────────────────────────────────
+
+function updateXP() {
+  const d = currentData();
+  const total = d.xp || 0;
+  const spent = calcSpentXP(d);
+  const avail = Math.max(0, total - spent);
+  document.getElementById('xp-total').textContent = total;
+  document.getElementById('xp-spent').textContent = spent;
+  document.getElementById('xp-avail').textContent = avail;
+}
+
+function flashXP() {
+  const el = document.getElementById('xp-avail');
+  if (!el) return;
+  el.style.color = 'var(--red)';
+  setTimeout(() => { el.style.color = 'var(--green)'; }, 600);
+}
+
+// ── Characteristics ────────────────────────────────────────
+
+function renderChars(d) {
+  const grid = document.getElementById('char-stat-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  CHARACTERISTICS.forEach(c => {
+    const cd  = d.chars?.[c.key] || { base:20, adv:0, temp:0 };
+    const val = (Number(cd.base)||20) + (Number(cd.adv)||0);
+    const bon = Math.floor(val / 10);
+    const cell = document.createElement('div');
+    cell.className = 'char-stat-cell';
+    cell.innerHTML =
+      '<div class="csc-abbr">' + c.name + '</div>' +
+      '<div class="csc-full">' + (CHAR_FULLNAMES[c.key]||'') + '</div>' +
+      '<input class="csc-val-input" id="cv-' + c.key + '" type="number" value="' + val + '" min="1" ' +
+        'oninput="onCharInput(\'' + c.key + '\',this.value)">' +
+      '<div class="csc-charb" id="cbn-' + c.key + '">CharB ' + bon + '</div>';
+    grid.appendChild(cell);
+  });
+}
+
+function onCharInput(key, raw) {
+  const val = parseInt(raw) || 20;
+  const el = document.getElementById('cbn-' + key);
+  if (el) el.textContent = 'CharB ' + Math.floor(val / 10);
+  const d = currentData();
+  if (!d.chars[key]) d.chars[key] = { base:20, adv:0, temp:0 };
+  d.chars[key].base = val;
+  d.chars[key].adv  = 0;
+  saveCurrentData(d);
+  // Refresh all skill totals since char value changed
+  renderSkills(d);
+}
+
+// ── Skills ─────────────────────────────────────────────────
+
+function renderSkills(d) {
+  const wrap = document.getElementById('skill-table-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  [SKILLS.slice(0,7), SKILLS.slice(7,14), SKILLS.slice(14)].forEach(colSkills => {
+    const col = document.createElement('div');
+    col.className = 'skill-col';
+    const hdr = document.createElement('div');
+    hdr.className = 'skill-col-hdr';
+    hdr.innerHTML = '<span>SKILL</span><span>CHAR</span><span>ADV</span><span>TOTAL</span>';
+    col.appendChild(hdr);
+    colSkills.forEach(s => {
+      const skillAdv  = d.skills?.[s.key] || 0;
+      const charTotal = getCharTotal(d, s.char);
+      const total     = charTotal + skillAdv * 5;
+      const charAbbr  = (CHARACTERISTICS.find(c => c.key === s.char) || { name: s.char.toUpperCase() }).name;
+      const row = document.createElement('div');
+      row.className = 'skill-tbl-row';
+      row.innerHTML =
+        '<div>' +
+          '<div class="skill-tbl-name' + (skillAdv > 0 ? ' has-advance' : '') + '" id="skn-' + s.key + '">' + s.name + '</div>' +
+          '<div style="font-size:9px;color:var(--green-dim);">' + charAbbr + '</div>' +
+        '</div>' +
+        '<div class="skill-tbl-char">' + charAbbr + '</div>' +
+        '<div class="skill-tbl-adv">' +
+          '<button class="adv-btn" onclick="adjSkill(\'' + s.key + '\',-1)">&#9666;</button>' +
+          '<span class="skill-adv" id="sa-' + s.key + '">' + skillAdv + '</span>' +
+          '<button class="adv-btn" onclick="adjSkill(\'' + s.key + '\',1)">&#9656;</button>' +
+        '</div>' +
+        '<div class="skill-tbl-total" id="st-' + s.key + '">' + total + '</div>';
+      col.appendChild(row);
+    });
+    wrap.appendChild(col);
+  });
+}
+
+function adjSkill(key, delta) {
+  const d = currentData();
+  const cur    = d.skills[key] || 0;
+  const newAdv = cur + delta;
+  if (newAdv < 0 || newAdv > 4) return;
+  const cost  = delta > 0 ? SKILL_XP[newAdv] : -SKILL_XP[cur];
+  const avail = (d.xp || 0) - calcSpentXP(d);
+  if (delta > 0 && cost > avail) { flashXP(); return; }
+  d.skills[key] = newAdv;
+  saveCurrentData(d);
+  updateSkillDisplay(key, d);
+  updateXP();
+}
+
+function updateSkillDisplay(key, d) {
+  const s        = SKILLS.find(x => x.key === key);
+  const adv      = d.skills[key] || 0;
+  const total    = getCharTotal(d, s.char) + adv * 5;
+  const sa  = document.getElementById('sa-' + key);
+  const st  = document.getElementById('st-' + key);
+  const skn = document.getElementById('skn-' + key);
+  if (sa)  sa.textContent = adv;
+  if (st)  st.textContent = total;
+  if (skn) skn.className = 'skill-tbl-name' + (adv > 0 ? ' has-advance' : '');
+}
+
+// ── Specialisations ────────────────────────────────────────
+
+function renderSpecs(d) {
+  const list = document.getElementById('spec-list');
+  list.innerHTML = '';
+  (d.specs || []).forEach((sp, i) => list.appendChild(createSpecRow(sp, i, d)));
+}
+
+function createSpecRow(sp, i, d) {
+  const parentAdv     = d.skills?.[sp.skill] || 0;
+  const parentCharKey = SKILLS.find(s => s.key === sp.skill)?.char || 'int';
+  const total         = getCharTotal(d, parentCharKey) + parentAdv * 5 + (sp.adv || 0) * 5;
+
+  const div = document.createElement('div');
+  div.className = 'spec-row';
+  div.id = 'spec-row-' + i;
+
+  const sel = document.createElement('select');
+  sel.style.fontSize = '12px';
+  SKILLS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.key; opt.textContent = s.name;
+    if (s.key === sp.skill) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => updateSpec(i, 'skill', sel.value);
+
+  const nameIn = document.createElement('input');
+  nameIn.type = 'text'; nameIn.value = sp.name || '';
+  nameIn.placeholder = 'Specialisation';
+  nameIn.oninput = () => updateSpec(i, 'name', nameIn.value);
+
+  const minBtn  = document.createElement('button');
+  minBtn.className = 'adv-btn'; minBtn.textContent = '◂';
+  minBtn.onclick = () => adjSpec(i, -1);
+
+  const advSpan = document.createElement('span');
+  advSpan.className = 'spec-adv'; advSpan.textContent = sp.adv || 0;
+  advSpan.id = 'spec-adv-' + i;
+
+  const plusBtn = document.createElement('button');
+  plusBtn.className = 'adv-btn'; plusBtn.textContent = '▸';
+  plusBtn.onclick = () => adjSpec(i, 1);
+
+  const totSpan = document.createElement('span');
+  totSpan.className = 'spec-total'; totSpan.textContent = total;
+  totSpan.id = 'spec-tot-' + i;
+
+  const rmBtn = document.createElement('button');
+  rmBtn.className = 'remove-btn'; rmBtn.innerHTML = '&#x2715;';
+  rmBtn.onclick = () => removeSpec(i);
+
+  div.appendChild(sel); div.appendChild(nameIn);
+  div.appendChild(minBtn); div.appendChild(advSpan); div.appendChild(plusBtn);
+  div.appendChild(totSpan); div.appendChild(rmBtn);
+  return div;
+}
+
+function addSpec() {
+  const d = currentData();
+  d.specs.push({ skill:'athletics', name:'', adv:0 });
+  saveCurrentData(d); renderSpecs(d);
+}
+
+function removeSpec(i) {
+  const d = currentData();
+  d.specs.splice(i, 1);
+  saveCurrentData(d); renderSpecs(d); updateXP();
+}
+
+function updateSpec(i, field, val) {
+  const d = currentData();
+  d.specs[i][field] = val;
+  saveCurrentData(d); renderSpecs(d);
+}
+
+function adjSpec(i, delta) {
+  const d = currentData();
+  const sp     = d.specs[i];
+  const newAdv = (sp.adv || 0) + delta;
+  if (newAdv < 0 || newAdv > 4) return;
+  const cost  = delta > 0 ? SKILL_XP[newAdv] : -SKILL_XP[sp.adv || 0];
+  const avail = (d.xp || 0) - calcSpentXP(d);
+  if (delta > 0 && cost > avail) { flashXP(); return; }
+  d.specs[i].adv = newAdv;
+  saveCurrentData(d); renderSpecs(d); updateXP();
+}
+
+// ── Talents ────────────────────────────────────────────────
+
+function renderTalents(d) {
+  const list = document.getElementById('talent-list');
+  list.innerHTML = '';
+  (d.talents || []).forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+
+    const btn = document.createElement('button');
+    btn.className = 'talent-name-btn';
+    btn.textContent = t.name || '[UNNAMED TALENT]';
+    btn.onclick = () => showTalentModal(t.name);
+
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text'; nameIn.value = t.name || '';
+    nameIn.placeholder = 'Talent name';
+    nameIn.oninput = () => {
+      btn.textContent = nameIn.value || '[UNNAMED TALENT]';
+      updateTalent(i, 'name', nameIn.value);
+    };
+
+    const noteIn = document.createElement('input');
+    noteIn.type = 'text'; noteIn.value = t.notes || '';
+    noteIn.placeholder = 'Notes'; noteIn.style.maxWidth = '120px';
+    noteIn.oninput = () => updateTalent(i, 'notes', noteIn.value);
+
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'remove-btn'; rmBtn.innerHTML = '&#x2715;';
+    rmBtn.onclick = () => removeTalent(i);
+
+    div.appendChild(btn); div.appendChild(nameIn);
+    div.appendChild(noteIn); div.appendChild(rmBtn);
+    list.appendChild(div);
+  });
+}
+
+function addTalent() {
+  const d = currentData();
+  if (!d.talents) d.talents = [];
+  d.talents.push({ name:'', notes:'' });
+  saveCurrentData(d); renderTalents(d);
+}
+
+function removeTalent(i) {
+  const d = currentData();
+  d.talents.splice(i, 1);
+  saveCurrentData(d); renderTalents(d);
+}
+
+function updateTalent(i, field, val) {
+  const d = currentData();
+  d.talents[i][field] = val;
+  saveCurrentData(d);
+}
+
+function showTalentModal(name) {
+  const desc = TALENT_DATA[name];
+  document.getElementById('modal-talent-name').textContent = (name || 'TALENT').toUpperCase();
+  document.getElementById('modal-talent-body').innerHTML = desc
+    ? '<p>' + desc + '</p>'
+    : '<p style="color:var(--green-dim);">No rules entry found. Refer to your rulebook.</p>';
+  openModal('modal-talent');
+}
+
+// ── Modal ──────────────────────────────────────────────────
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+// ── Init ───────────────────────────────────────────────────
+
+function init() {
+  const d = currentData();
+  renderChars(d);
+  renderSkills(d);
+  renderSpecs(d);
+  renderTalents(d);
+  updateXP();
+}
+
+// Expose so parent shell can trigger a refresh if slot changes
+window.refreshIfPresent = init;
+
+init();
+
+</script>
+</body>
+</html>

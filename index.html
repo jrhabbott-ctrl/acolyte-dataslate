@@ -1,0 +1,3618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACOLYTE DATASLATE — ORDO HERETICUS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+:root {
+  --green: #00ff41;
+  --green-dim: #00aa2b;
+  --green-dark: #003010;
+  --green-faint: #000f05;
+  --green-bright: #80ffaa;
+  --green-mid: #004a18;
+  --red: #ff3300;
+  --red-dim: #992200;
+  --amber: #ffb000;
+  --amber-dim: #aa7400;
+  --black: #020802;
+  --grey: #1a2a1a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--black);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanlines */
+body::before {
+  content:'';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ─── LOGIN SCREEN ─────────────────────────────────────────────── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--black);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 500;
+}
+
+.login-box {
+  width: 100%; max-width: 480px;
+  border: 1px solid var(--green-dim);
+  padding: 0;
+  background: var(--green-faint);
+}
+
+.login-header {
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-dim);
+  padding: 14px 20px;
+  text-align: center;
+}
+
+.login-title {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green-dim);
+  margin-bottom: 4px;
+}
+
+.login-sub {
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.login-body { padding: 28px 24px; }
+
+.login-label {
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.login-input {
+  width: 100%;
+  background: var(--green-dark);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  padding: 10px 14px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.login-input:focus { border-color: var(--green); box-shadow: 0 0 8px var(--green-dark); }
+
+.login-btn {
+  width: 100%;
+  margin-top: 16px;
+  background: var(--green-dark);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  padding: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.login-btn:hover { background: var(--green-mid); border-color: var(--green); }
+
+.login-warning {
+  margin-top: 20px;
+  font-size: 9px;
+  color: var(--green-dark);
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+/* ─── MAIN APP ──────────────────────────────────────────────────── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+
+/* Top bar */
+.topbar {
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-dim);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  flex-shrink: 0;
+  position: sticky; top: 0; z-index: 100;
+}
+
+.topbar-left {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.topbar-logo {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green-dim);
+}
+
+.topbar-sep { color: var(--green-dark); font-size: 14px; }
+
+.operative-id {
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.topbar-status {
+  display: flex; align-items: center; gap: 16px;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.logout-btn {
+  background: none;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logout-btn:hover { border-color: var(--green-dim); color: var(--green); }
+
+/* Nav tabs */
+.nav {
+  background: var(--black);
+  border-bottom: 1px solid var(--green-dark);
+  display: flex;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+  position: relative;
+}
+.nav::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) {
+  .nav { justify-content: center; }
+  .nav #gm-nav-btn { margin-left: 0 !important; position: absolute; right: 0; top: 0; bottom: 0; border-left: 1px solid var(--green-dark); }
+}
+
+.nav-tab {
+  padding: 10px 20px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border-right: 1px solid var(--green-dark);
+  background: none;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.nav-tab:hover { color: var(--green); background: var(--green-faint); }
+.nav-tab.active { color: var(--green); border-bottom-color: var(--green); background: var(--green-faint); }
+
+/* Mobile nav — scrollable horizontal tab bar */
+.nav-mobile {
+  display: none;
+  background: var(--black);
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+.nav-mobile::-webkit-scrollbar { display: none; }
+.nav-mobile-bar {
+  display: inline-flex;
+  align-items: stretch;
+  min-width: 100%;
+}
+.nav-mobile-current { display: none; }
+.nav-mobile-toggle  { display: none; }
+.nav-mobile-menu    { display: none !important; }
+.nav-mobile-gm {
+  padding: 0 14px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber-dim);
+  font-family: 'Share Tech Mono', monospace;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--amber-dark);
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.nav-mobile-gm:active { background: rgba(255,176,0,0.07); }
+.nav-mobile-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--green-dark);
+  border-bottom: 2px solid transparent;
+  font-family: 'Share Tech Mono', monospace;
+  white-space: nowrap;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.nav-mobile-item:active { background: var(--green-faint); color: var(--green); }
+.nav-mobile-item.active {
+  color: var(--green);
+  background: var(--green-faint);
+  border-bottom-color: var(--green);
+}
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .nav-mobile { display: block; }
+}
+
+/* Content area */
+.content { flex: 1; padding: 20px; overflow-y: auto; }
+
+/* Sections */
+.section { display: none; }
+.section.active { display: block; }
+
+/* Section header */
+.sec-header {
+  border: 1px solid var(--green-dim);
+  border-bottom: none;
+  background: var(--green-dark);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sec-title {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--green);
+}
+
+.sec-count {
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.card {
+  border: 1px solid var(--green-dim);
+  background: var(--green-faint);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.card:hover { border-color: var(--green); background: var(--green-dark); }
+
+.card-header {
+  background: var(--green-dark);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--green-dim);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+
+.card-title {
+  font-size: 13px;
+  color: var(--green);
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+
+.card-badge {
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border: 1px solid;
+  white-space: nowrap;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.badge-low { color: var(--green); border-color: var(--green-dim); }
+.badge-med { color: var(--amber); border-color: var(--amber-dim); }
+.badge-high { color: var(--red); border-color: var(--red-dim); }
+.badge-unk { color: var(--green-dim); border-color: var(--green-dark); }
+.badge-ally { color: var(--green-bright); border-color: var(--green-dim); }
+
+.card-body { padding: 10px 14px; font-size: 11px; color: var(--green-dim); line-height: 1.6; }
+
+.card-meta {
+  padding: 6px 14px;
+  border-top: 1px solid var(--green-dark);
+  font-size: 9px;
+  color: var(--green-dark);
+  letter-spacing: 1px;
+  display: flex; justify-content: space-between;
+}
+
+/* Modal / detail view */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,8,2,0.92);
+  z-index: 300;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  width: 100%; max-width: 760px;
+  border: 1px solid var(--green-dim);
+  background: var(--black);
+  margin: auto;
+}
+
+.modal-header {
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-dim);
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.modal-title {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--green);
+}
+
+.modal-close {
+  background: none;
+  border: 1px solid var(--green-dim);
+  color: var(--green-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+.modal-close:hover { border-color: var(--green); color: var(--green); }
+
+.modal-body { padding: 18px; }
+
+/* Detail sections inside modal */
+.detail-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  border: 1px solid var(--green-dark);
+  border-bottom: none;
+}
+
+.detail-row:last-of-type { border-bottom: 1px solid var(--green-dark); }
+
+.detail-label {
+  background: var(--green-dark);
+  padding: 8px 12px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  text-transform: uppercase;
+  border-right: 1px solid var(--green-dark);
+  display: flex; align-items: center;
+}
+
+.detail-value {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--green);
+  line-height: 1.6;
+}
+
+/* Notes area */
+.notes-section {
+  margin-top: 16px;
+  border: 1px solid var(--green-dim);
+}
+
+.notes-header {
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-dim);
+  padding: 6px 12px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
+  text-transform: uppercase;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.notes-saved { font-size: 8px; color: var(--green-dark); transition: color 0.5s; }
+.notes-saved.visible { color: var(--green-dim); }
+
+.notes-textarea {
+  width: 100%;
+  background: var(--green-faint);
+  border: none;
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  padding: 12px;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  line-height: 1.7;
+}
+
+.notes-textarea::placeholder { color: var(--green-dark); }
+
+/* ─── GM CONSOLE ─────────────────────────────────────────────── */
+#gm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(2,4,0,0.97);
+  z-index: 400;
+  display: none;
+  flex-direction: column;
+}
+#gm-overlay.open { display: flex; }
+
+/* GM auth screen */
+#gm-auth {
+  flex: 1; display: flex;
+  align-items: center; justify-content: center;
+}
+
+.gm-auth-box {
+  width: 100%; max-width: 440px;
+  border: 1px solid var(--amber-dim);
+  background: #0a0800;
+}
+
+.gm-auth-header {
+  background: #1a1000;
+  border-bottom: 1px solid var(--amber-dim);
+  padding: 16px 20px; text-align: center;
+}
+
+.gm-auth-title {
+  font-family: 'VT323', monospace;
+  font-size: 28px; letter-spacing: 4px;
+  color: var(--amber);
+  text-shadow: 0 0 10px var(--amber-dim);
+  margin-bottom: 4px;
+}
+
+.gm-auth-sub { font-size: 9px; color: var(--amber-dim); letter-spacing: 3px; }
+
+.gm-auth-body { padding: 28px 24px; }
+
+.gm-label { font-size: 9px; color: var(--amber-dim); letter-spacing: 3px; display: block; margin-bottom: 6px; text-transform: uppercase; }
+
+.gm-input {
+  width: 100%; background: #1a1000;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 15px; padding: 10px 14px; outline: none;
+  letter-spacing: 2px; margin-bottom: 12px;
+}
+.gm-input:focus { border-color: var(--amber); }
+
+.gm-btn {
+  width: 100%; background: #1a1000;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; letter-spacing: 3px;
+  padding: 12px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.2s;
+}
+.gm-btn:hover { background: #2a1800; border-color: var(--amber); }
+
+.gm-auth-error {
+  color: var(--red); font-size: 10px;
+  letter-spacing: 2px; text-align: center;
+  margin-top: 10px; display: none;
+}
+
+/* GM console proper */
+#gm-console { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+#gm-console.open { display: flex; }
+
+.gm-topbar {
+  background: #1a1000;
+  border-bottom: 1px solid var(--amber-dim);
+  padding: 0 16px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  height: 44px; flex-shrink: 0;
+}
+
+.gm-topbar-title {
+  font-family: 'VT323', monospace;
+  font-size: 20px; letter-spacing: 3px; color: var(--amber);
+  text-shadow: 0 0 8px var(--amber-dim);
+}
+
+.gm-close-btn {
+  background: none; border: 1px solid var(--amber-dark);
+  color: var(--amber-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  padding: 4px 12px; cursor: pointer; transition: all 0.2s;
+}
+.gm-close-btn:hover { border-color: var(--amber-dim); color: var(--amber); }
+
+/* GM sub-nav */
+.gm-nav {
+  background: #0a0800;
+  border-bottom: 1px solid var(--amber-dark);
+  display: flex; flex-shrink: 0;
+}
+
+.gm-tab {
+  padding: 9px 18px;
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--amber-dark);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border-right: 1px solid #1a1000;
+  background: none;
+  font-family: 'Share Tech Mono', monospace;
+}
+.gm-tab:hover { color: var(--amber-dim); background: #0f0a00; }
+.gm-tab.active { color: var(--amber); border-bottom-color: var(--amber); background: #0f0a00; }
+
+/* GM content */
+.gm-content { flex: 1; overflow-y: auto; padding: 16px; }
+
+.gm-section { display: none; }
+.gm-section.active { display: block; }
+
+/* GM section header */
+.gm-sec-header {
+  border: 1px solid var(--amber-dim);
+  border-bottom: none;
+  background: #1a1000;
+  padding: 8px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.gm-sec-title {
+  font-family: 'VT323', monospace;
+  font-size: 20px; letter-spacing: 3px; color: var(--amber);
+}
+
+/* Planning threads */
+.thread-list-gm { margin-top: 12px; }
+
+.gm-thread-item {
+  border: 1px solid var(--amber-dark);
+  border-bottom: none;
+  display: flex; align-items: center;
+  gap: 10px; padding: 10px 14px;
+  cursor: pointer; transition: background 0.15s;
+}
+.gm-thread-item:hover { background: #0f0a00; }
+.gm-thread-item:last-child { border-bottom: 1px solid var(--amber-dark); }
+.gm-thread-item.active-thread { background: #1a1000; border-color: var(--amber-dim); }
+
+.gm-thread-name { font-size: 12px; color: var(--amber); flex: 1; letter-spacing: 1px; }
+.gm-thread-meta { font-size: 9px; color: var(--amber-dark); }
+.gm-thread-del { background: none; border: none; color: var(--amber-dark); cursor: pointer; font-size: 14px; padding: 0 4px; transition: color 0.2s; }
+.gm-thread-del:hover { color: var(--red-dim); }
+
+.new-thread-form {
+  border: 1px solid var(--amber-dark);
+  padding: 12px 14px; background: #0a0800;
+  display: flex; gap: 8px; margin-top: 12px;
+}
+
+.gm-text-input {
+  flex: 1; background: #1a1000;
+  border: 1px solid var(--amber-dark);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; padding: 8px 10px; outline: none;
+}
+.gm-text-input:focus { border-color: var(--amber-dim); }
+
+.gm-add-btn {
+  background: #1a1000; border: 1px solid var(--amber-dim);
+  color: var(--amber); font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; padding: 8px 16px;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  text-transform: uppercase;
+}
+.gm-add-btn:hover { background: #2a1800; border-color: var(--amber); }
+
+/* Chat area */
+.chat-area {
+  border: 1px solid var(--amber-dim); border-top: none;
+  display: flex; flex-direction: column;
+  height: 500px; background: #050400;
+}
+
+.chat-messages {
+  flex: 1; overflow-y: auto;
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+
+.chat-msg {
+  max-width: 88%;
+  font-size: 12px; line-height: 1.8;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  background: #1a1000;
+  border: 1px solid var(--amber-dark);
+  padding: 8px 12px;
+  color: var(--amber);
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+  background: #080600;
+  border: 1px solid #2a2000;
+  border-left: 2px solid var(--amber-dim);
+  padding: 8px 12px;
+  color: var(--amber-dim);
+}
+
+.chat-msg.system-msg {
+  align-self: center;
+  font-size: 9px; color: var(--amber-dark);
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.chat-msg .msg-label {
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--amber-dark); margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.chat-input-row {
+  border-top: 1px solid var(--amber-dark);
+  display: flex; gap: 0; flex-shrink: 0;
+}
+
+.chat-textarea {
+  flex: 1; background: #0a0800;
+  border: none; border-right: 1px solid var(--amber-dark);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; padding: 10px 14px;
+  resize: none; outline: none; min-height: 52px;
+  max-height: 120px;
+}
+.chat-textarea::placeholder { color: var(--amber-dark); }
+
+.chat-send-btn {
+  background: #1a1000; border: none;
+  color: var(--amber-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  padding: 0 20px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.chat-send-btn:hover { background: #2a1800; color: var(--amber); }
+.chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.thinking { color: var(--amber-dark); font-size: 11px; font-style: italic; animation: pulse-dot 1s infinite; }
+
+
+/* Char overview */
+.char-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px; margin-top: 0;
+}
+
+.char-overview-card {
+  border: 1px solid var(--amber-dark);
+  background: #0a0800;
+}
+
+.char-overview-header {
+  background: #1a1000; padding: 8px 12px;
+  border-bottom: 1px solid var(--amber-dark);
+  font-size: 12px; color: var(--amber); letter-spacing: 1px;
+}
+
+.char-stat-mini {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--amber-dark);
+}
+
+.csm-cell {
+  text-align: center; padding: 5px 2px;
+  border-right: 1px solid var(--amber-dark);
+}
+.csm-cell:last-child { border-right: none; }
+
+.csm-label { font-size: 7px; color: var(--amber-dark); letter-spacing: 1px; }
+.csm-val { font-size: 16px; color: var(--amber); font-family: 'VT323', monospace; }
+
+.char-overview-body { padding: 8px 12px; font-size: 10px; color: var(--amber-dim); line-height: 1.8; }
+
+/* ─── IMPERIAL AQUILA ──────────────────────────────────────────── */
+@keyframes aquila-spin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+@keyframes aquila-spin-wm {
+  from { transform: translate(-50%, -50%) rotateY(0deg); }
+  to   { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
+.aquila-spin {
+  animation: aquila-spin 12s linear infinite;
+  display: inline-block;
+}
+
+.aquila-glow-lg {
+  filter:
+    drop-shadow(0 0 4px #00ff41ee)
+    drop-shadow(0 0 16px #00ff41aa)
+    drop-shadow(0 0 40px #00ff4155)
+    drop-shadow(0 0 80px #00ff4122);
+}
+
+.aquila-glow-sm {
+  filter:
+    drop-shadow(0 0 2px #00ff41cc)
+    drop-shadow(0 0 7px #00ff4177);
+}
+
+/* Watermark — fixed behind content screens */
+.aquila-watermark {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+  animation: aquila-spin-wm 12s linear infinite;
+}
+
+/* Boot screen */
+#boot-screen {
+  position: fixed; inset: 0;
+  background: var(--black);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 600;
+  gap: 24px;
+}
+
+.boot-title {
+  font-family: 'VT323', monospace;
+  font-size: 13px; letter-spacing: 6px;
+  color: var(--green-dim); text-align: center;
+}
+
+.boot-bar {
+  width: 240px; height: 2px;
+  background: var(--green-dark);
+  position: relative; overflow: hidden;
+}
+.boot-bar::after {
+  content: '';
+  position: absolute; left: -60%; top: 0;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  animation: boot-scan 1.8s ease-in-out infinite;
+}
+@keyframes boot-scan { 0%{left:-60%} 100%{left:110%} }
+
+/* Remember me */
+.remember-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.remember-checkbox {
+  appearance: none;
+  width: 14px; height: 14px;
+  border: 1px solid var(--green-dim);
+  background: var(--green-dark);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.remember-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px; left: 1px;
+  color: var(--green);
+  font-size: 11px;
+}
+.remember-label {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--green-dim); cursor: pointer;
+  text-transform: uppercase;
+}
+
+
+/* ─── SUPABASE / REAL-TIME ──────────────────────────────────────── */
+.badge-released { color: var(--green-bright); border-color: var(--green); }
+.badge-unreleased { color: var(--green-dark); border-color: var(--green-dark); }
+
+.alert-banner {
+  position: fixed;
+  top: 50px; right: 16px;
+  background: #1a0e00;
+  border: 1px solid var(--amber);
+  border-left: 3px solid var(--amber);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 10px 16px;
+  z-index: 900;
+  max-width: 320px;
+  animation: alert-in 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(255,176,0,0.18);
+}
+.alert-banner .alert-title { font-size: 9px; color: var(--amber-dim); letter-spacing: 3px; margin-bottom: 4px; text-transform: uppercase; }
+.alert-banner .alert-close { float: right; margin-left: 12px; color: var(--amber-dim); }
+@keyframes alert-in { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+
+/* GM release toggle */
+.release-toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px; padding: 8px 12px;
+  border: 1px solid var(--amber-dark);
+  background: #0a0800;
+}
+.release-toggle-label { font-size: 9px; letter-spacing: 2px; color: var(--amber-dim); flex: 1; }
+.release-btn {
+  background: #1a1000; border: 1px solid var(--amber-dim);
+  color: var(--amber); font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; padding: 4px 12px;
+  cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+}
+.release-btn:hover { background: #2a1800; border-color: var(--amber); }
+.release-btn.released { color: var(--green); border-color: var(--green-dim); background: var(--green-dark); }
+
+/* GM add form */
+.gm-add-form {
+  border: 1px solid var(--amber-dark);
+  background: #0a0800;
+  padding: 14px;
+  margin-top: 12px;
+}
+.gm-add-form-title {
+  font-size: 9px; letter-spacing: 3px; color: var(--amber-dim);
+  margin-bottom: 10px; text-transform: uppercase;
+}
+.gm-field { margin-bottom: 8px; }
+.gm-field-label { font-size: 8px; letter-spacing: 2px; color: var(--amber-dark); display: block; margin-bottom: 3px; }
+.gm-field-input {
+  width: 100%; background: #1a1000; border: 1px solid var(--amber-dark);
+  color: var(--amber); font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 6px 10px; outline: none;
+}
+.gm-field-input:focus { border-color: var(--amber-dim); }
+.gm-field-textarea {
+  width: 100%; background: #1a1000; border: 1px solid var(--amber-dark);
+  color: var(--amber); font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 6px 10px; outline: none; resize: vertical; min-height: 80px;
+}
+.gm-field-textarea:focus { border-color: var(--amber-dim); }
+.gm-field-select {
+  width: 100%; background: #1a1000; border: 1px solid var(--amber-dark);
+  color: var(--amber); font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 6px 10px; outline: none;
+}
+
+/* Data item list in GM console */
+.gm-data-list { margin-top: 12px; }
+.gm-data-item {
+  border: 1px solid var(--amber-dark); border-bottom: none;
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+}
+.gm-data-item:last-child { border-bottom: 1px solid var(--amber-dark); }
+.gm-data-item-name { font-size: 11px; color: var(--amber); flex: 1; letter-spacing: 1px; }
+.gm-data-item-status { font-size: 8px; letter-spacing: 2px; padding: 2px 8px; border: 1px solid; }
+.status-live { color: var(--green); border-color: var(--green-dim); }
+.status-draft { color: var(--amber-dark); border-color: var(--amber-dark); }
+.gm-data-item-del { background:none; border:none; color:var(--amber-dark); cursor:pointer; font-size:14px; padding:0 4px; transition:color 0.2s; }
+.gm-data-item-del:hover { color: var(--red-dim); }
+
+/* Pack archive items */
+.pack-archive-item {
+  border: 1px solid var(--amber-dark);
+  border-top: none;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  background: #0a0800;
+}
+.pack-archive-item:first-child { border-top: 1px solid var(--amber-dark); }
+.pack-archive-item-name { flex: 1; font-size: 11px; color: var(--amber); letter-spacing: 1px; }
+.pack-archive-item-meta { font-size: 9px; color: var(--amber-dim); letter-spacing: 1px; }
+.pack-archive-item-status { font-size: 8px; letter-spacing: 2px; padding: 2px 6px; border: 1px solid; }
+.pack-status-active { color: var(--amber); border-color: var(--amber); }
+.pack-status-archived { color: var(--green-dim); border-color: var(--green-dark); }
+.pack-activate-btn {
+  background: #1a0e00; border: 1px solid var(--amber-dim);
+  color: var(--amber-dim); font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; padding: 3px 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.pack-activate-btn:hover { border-color: var(--amber); color: var(--amber); }
+.pack-activate-btn.is-active { border-color: var(--green-dim); color: var(--green-dim); cursor: default; }
+
+/* ─── DOSSIER CARDS ──────────────────────────────────────────────── */
+.dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  padding: 4px 0;
+}
+.dossier-card {
+  border: 1px solid var(--green-dim);
+  background: var(--black);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+}
+.dossier-card:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(0,255,65,0.15);
+}
+.dossier-card.archived-card { border-color: var(--green-dark); opacity: 0.55; }
+.dossier-card.threat-high { border-color: var(--red-dim); }
+.dossier-card.threat-high:hover { border-color: var(--red); box-shadow: 0 0 12px rgba(255,50,0,0.15); }
+.dossier-card.threat-extreme { border-color: var(--red); box-shadow: 0 0 8px rgba(255,50,0,0.2); }
+.dossier-card.threat-allied { border-color: var(--green-bright); }
+/* Corner acquisition brackets */
+.dossier-card::before, .dossier-card::after {
+  content: '';
+  position: absolute;
+  width: 10px; height: 10px;
+  z-index: 2; pointer-events: none;
+}
+.dossier-card::before {
+  top: 3px; left: 3px;
+  border-top: 1px solid var(--green); border-left: 1px solid var(--green);
+}
+.dossier-card::after {
+  bottom: 3px; right: 3px;
+  border-bottom: 1px solid var(--green); border-right: 1px solid var(--green);
+}
+.dossier-card.threat-high::before, .dossier-card.threat-high::after,
+.dossier-card.threat-extreme::before, .dossier-card.threat-extreme::after {
+  border-color: var(--red-dim);
+}
+.dossier-portrait-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 120%;
+  overflow: hidden;
+  background: #000;
+}
+.dossier-portrait {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: sepia(1) hue-rotate(80deg) saturate(3) brightness(0.85) contrast(1.2);
+  display: block;
+}
+.dossier-portrait-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+  pointer-events: none;
+  z-index: 1;
+}
+.dossier-tgt-id {
+  position: absolute;
+  top: 5px; left: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--green-dim);
+  z-index: 2;
+}
+.dossier-class-badge {
+  position: absolute;
+  top: 5px; right: 5px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 7px; letter-spacing: 2px;
+  padding: 2px 5px;
+  border: 1px solid var(--red-dim);
+  color: var(--red-dim);
+  background: rgba(0,0,0,0.7);
+  z-index: 2;
+}
+.dossier-class-badge.class-standard { border-color: var(--green-dim); color: var(--green-dim); }
+.dossier-class-badge.class-amber { border-color: var(--amber-dim); color: var(--amber-dim); }
+.dossier-class-badge.class-crimson { border-color: var(--red-dim); color: var(--red-dim); }
+.dossier-class-badge.class-vermillion { border-color: var(--red); color: var(--red); }
+.dossier-class-badge.class-thronegold { border-color: #ffd700; color: #ffd700; }
+.dossier-crosshair {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px; height: 48px;
+  border: 1px solid rgba(0,255,65,0.3);
+  border-radius: 50%;
+  z-index: 2; pointer-events: none;
+}
+.dossier-crosshair::before, .dossier-crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(0,255,65,0.3);
+}
+.dossier-crosshair::before { top: 50%; left: -8px; right: -8px; height: 1px; transform: translateY(-50%); }
+.dossier-crosshair::after { left: 50%; top: -8px; bottom: -8px; width: 1px; transform: translateX(-50%); }
+.dossier-info {
+  padding: 7px 8px 8px;
+  background: #020802;
+  border-top: 1px solid var(--green-dark);
+}
+.dossier-name {
+  font-family: 'VT323', monospace;
+  font-size: 16px; letter-spacing: 2px;
+  color: var(--green); margin-bottom: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dossier-role {
+  font-size: 8px; letter-spacing: 1px;
+  color: var(--green-dim); margin-bottom: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dossier-tags {
+  display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 5px;
+}
+.dossier-tag {
+  font-size: 7px; letter-spacing: 1px;
+  padding: 1px 4px;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+}
+.dossier-threat-bar {
+  display: flex; align-items: center; gap: 6px;
+}
+.dossier-threat-label {
+  font-size: 7px; letter-spacing: 2px; color: var(--green-dark); flex-shrink: 0;
+}
+.dossier-threat-track {
+  display: flex; gap: 2px; flex: 1;
+}
+.dossier-threat-pip {
+  flex: 1; height: 3px; background: var(--green-dark);
+}
+.dossier-threat-pip.lit { background: var(--green); }
+.dossier-threat-pip.lit-amber { background: var(--amber); }
+.dossier-threat-pip.lit-red { background: var(--red); }
+
+/* ─── DOSSIER MODAL ─────────────────────────────────────────────── */
+.dossier-modal-portrait {
+  width: 120px; height: 150px;
+  object-fit: cover; object-position: top center;
+  filter: sepia(1) hue-rotate(80deg) saturate(3) brightness(0.85) contrast(1.2);
+  border: 1px solid var(--green-dim);
+  flex-shrink: 0;
+}
+.dossier-modal-header {
+  display: flex; gap: 14px; margin-bottom: 14px;
+}
+.dossier-modal-meta { flex: 1; }
+.dossier-modal-name {
+  font-family: 'VT323', monospace;
+  font-size: 26px; letter-spacing: 3px; color: var(--green);
+  line-height: 1.1; margin-bottom: 4px;
+}
+.dossier-modal-role {
+  font-size: 10px; letter-spacing: 2px; color: var(--green-dim);
+  margin-bottom: 8px;
+}
+.dossier-modal-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+
+/* ─── TRANSMIT PUSH OVERLAY ─────────────────────────────────────── */
+#transmit-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,8,2,0.97);
+  z-index: 9000;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#transmit-overlay.active { display: flex; }
+.transmit-scan-line {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  animation: scanDown 2s linear forwards;
+}
+@keyframes scanDown {
+  from { top: 0; opacity: 1; }
+  to { top: 100%; opacity: 0.3; }
+}
+.transmit-header {
+  font-family: 'VT323', monospace;
+  font-size: 14px; letter-spacing: 6px; color: var(--green-dim);
+  margin-bottom: 6px; animation: fadeInUp 0.5s ease forwards;
+  text-align: center;
+}
+.transmit-subheader {
+  font-size: 9px; letter-spacing: 4px; color: var(--green-dark);
+  margin-bottom: 20px; animation: fadeInUp 0.7s ease forwards;
+  text-align: center;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.transmit-card-wrap {
+  position: relative;
+  animation: acquireIn 0.8s ease forwards;
+  max-width: 280px; width: 90%;
+}
+@keyframes acquireIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+.transmit-dismiss {
+  margin-top: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--green-dim); background: none;
+  border: 1px solid var(--green-dark);
+  padding: 8px 20px; cursor: pointer;
+  animation: fadeInUp 1.2s ease forwards;
+  transition: all 0.15s;
+}
+.transmit-dismiss:hover { border-color: var(--green); color: var(--green); }
+
+
+
+/* NEW badge on player cards */
+.badge-new {
+  color: var(--green-bright); border-color: var(--green);
+  animation: badge-pulse 1.5s ease-in-out infinite;
+}
+@keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Loading state */
+.loading-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--green-dark); font-size: 11px; letter-spacing: 2px;
+  border: 1px solid var(--green-dark); border-top: none;
+}
+
+/* ─── MOBILE / TABLET IMPROVEMENTS ─────────────────────────────── */
+@media (max-width: 640px) {
+  .content { padding: 12px; }
+  .card-grid { grid-template-columns: 1fr; gap: 10px; }
+  .modal { margin: 0; border-left: none; border-right: none; }
+  .modal-body { padding: 12px; }
+  .detail-row { grid-template-columns: 100px 1fr; }
+  .nav-tab { padding: 12px 16px; font-size: 11px; min-height: 44px; }
+  .login-box { margin: 12px; }
+  .charsheet { padding: 0; }
+  .chars-grid { grid-template-columns: repeat(3, 1fr); }
+  .skills-grid { grid-template-columns: 1fr; }
+  .skill-row:nth-child(2n) { border-right: none; }
+  .topbar { padding: 0 10px; height: 48px; }
+  .topbar-logo { font-size: 16px; letter-spacing: 2px; }
+  .operative-id { display: none; }
+  .alert-banner { right: 8px; left: 8px; max-width: none; font-size: 12px; }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .content { padding: 16px; }
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .chars-grid { grid-template-columns: repeat(5, 1fr); }
+  .skills-grid { grid-template-columns: 1fr 1fr; }
+  .nav-tab { padding: 10px 18px; min-height: 44px; }
+}
+
+/* ─── ARCHIVE / FILTER CONTROLS ─────────────────────────────────── */
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding: 8px 12px;
+  border: 1px solid var(--green-dark);
+  background: var(--green-faint);
+  font-size: 9px; letter-spacing: 2px; color: var(--green-dim);
+}
+.filter-btn {
+  background: var(--green-dark); border: 1px solid var(--green-dim);
+  color: var(--green-dim); font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; padding: 4px 10px;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+}
+.filter-btn:hover { border-color: var(--green); color: var(--green); }
+.filter-btn.active { border-color: var(--green); color: var(--green); background: var(--green-mid); }
+.filter-btn.amber { border-color: var(--amber-dim); color: var(--amber-dim); }
+.filter-btn.amber.active { border-color: var(--amber); color: var(--amber); background: #1a0e00; }
+.card.archived-card { opacity: 0.45; filter: saturate(0.4); }
+.archive-btn {
+  display: inline-block; margin-top: 12px;
+  background: none; border: 1px solid var(--amber-dark);
+  color: var(--amber-dim); font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; padding: 5px 12px;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+}
+.archive-btn:hover { border-color: var(--amber); color: var(--amber); }
+.archive-btn.unarchive { border-color: var(--green-dim); color: var(--green-dim); }
+.archive-btn.unarchive:hover { border-color: var(--green); color: var(--green); }
+
+
+/* ─── DELETE PACK MODAL ─────────────────────────────────────────── */
+.delete-pack-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  background: none;
+  border: 1px solid #660000;
+  color: #cc2200;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 6px;
+  display: block;
+  width: 100%;
+}
+.delete-pack-btn:hover { background: rgba(204,34,0,0.1); border-color: #cc2200; }
+
+#delete-pack-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(0,0,0,0.85);
+  align-items: center;
+  justify-content: center;
+}
+#delete-pack-modal.open { display: flex; }
+.delete-pack-box {
+  background: var(--black);
+  border: 1px solid #cc2200;
+  padding: 24px;
+  max-width: 400px;
+  width: calc(100% - 32px);
+  position: relative;
+}
+.delete-pack-box::before, .delete-pack-box::after {
+  content: ''; position: absolute;
+  width: 10px; height: 10px;
+}
+.delete-pack-box::before { top: 4px; left: 4px; border-top: 1px solid #cc2200; border-left: 1px solid #cc2200; }
+.delete-pack-box::after  { bottom: 4px; right: 4px; border-bottom: 1px solid #cc2200; border-right: 1px solid #cc2200; }
+.delete-pack-title {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: #cc2200;
+  margin-bottom: 12px;
+}
+.delete-pack-warn {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #aa4433;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.delete-pack-name-display {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  border: 1px solid var(--amber-dark);
+}
+.delete-pack-label {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #aa4433;
+  margin-bottom: 6px;
+}
+#delete-pack-confirm-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #660000;
+  color: #cc2200;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  padding: 8px;
+  letter-spacing: 3px;
+  outline: none;
+  margin-bottom: 14px;
+}
+#delete-pack-confirm-input:focus { border-color: #cc2200; }
+.delete-pack-actions {
+  display: flex;
+  gap: 10px;
+}
+.delete-pack-go-btn {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 8px;
+  background: rgba(204,34,0,0.15);
+  border: 1px solid #cc2200;
+  color: #cc2200;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.delete-pack-go-btn:disabled {
+  border-color: #440000;
+  color: #440000;
+  cursor: not-allowed;
+  background: none;
+}
+.delete-pack-go-btn:not(:disabled):hover { background: rgba(204,34,0,0.3); }
+.delete-pack-cancel-btn {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 8px;
+  background: none;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.delete-pack-cancel-btn:hover { border-color: var(--green-dim); color: var(--green); }
+.delete-pack-status {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #cc2200;
+  min-height: 14px;
+  margin-top: 8px;
+}
+
+/* ─── GM PREVIEW MODAL ──────────────────────────────────────────── */
+#gm-preview-modal {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 8000;
+  background: rgba(0,0,0,0.88);
+  align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#gm-preview-modal.open { display: flex; }
+.gm-preview-box {
+  background: var(--black);
+  border: 1px solid var(--green-dark);
+  max-width: 520px; width: calc(100% - 32px);
+  max-height: 88vh;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.gm-preview-box::before {
+  content: ''; position: absolute;
+  top: 4px; left: 4px; width: 10px; height: 10px;
+  border-top: 1px solid var(--green-dim);
+  border-left: 1px solid var(--green-dim);
+  pointer-events: none;
+}
+.gm-preview-box::after {
+  content: ''; position: absolute;
+  bottom: 4px; right: 4px; width: 10px; height: 10px;
+  border-bottom: 1px solid var(--green-dim);
+  border-right: 1px solid var(--green-dim);
+  pointer-events: none;
+}
+.gm-preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+}
+.gm-preview-label {
+  font-size: 8px; letter-spacing: 4px; color: var(--green-dim);
+}
+.gm-preview-badge {
+  font-size: 7px; letter-spacing: 2px; color: var(--amber-dim);
+  border: 1px solid var(--amber-dark);
+  padding: 2px 6px;
+}
+.gm-preview-close {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--green-dim); background: none;
+  border: 1px solid var(--green-dark);
+  padding: 4px 10px; cursor: pointer;
+  transition: all 0.12s;
+}
+.gm-preview-close:hover { border-color: var(--green-dim); color: var(--green); }
+.gm-preview-body {
+  overflow-y: auto;
+  padding: 16px;
+  flex: 1;
+}
+/* Preview note at bottom */
+.gm-preview-note {
+  font-size: 7px; letter-spacing: 2px; color: var(--green-dark);
+  text-align: center; padding: 8px;
+  border-top: 1px solid var(--green-dark);
+  flex-shrink: 0;
+}
+/* Preview button on GM data items */
+.preview-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  padding: 3px 7px;
+  background: none;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dark);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.preview-btn:hover { border-color: var(--green-dim); color: var(--green-dim); }
+
+
+/* ─── TRANSMIT OVERLAY ENHANCED ────────────────────────────────── */
+.transmit-full-dossier {
+  display: flex;
+  gap: 20px;
+  max-width: 620px; width: 90%;
+  animation: acquireIn 0.8s ease forwards;
+}
+.transmit-portrait-col {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.transmit-portrait-large {
+  width: 180px; height: 240px;
+  object-fit: cover;
+  border: 1px solid var(--green-dim);
+  filter: drop-shadow(0 0 8px rgba(0,255,65,0.3));
+  display: block;
+}
+.transmit-portrait-id {
+  font-size: 7px; letter-spacing: 2px; color: var(--green-dark);
+  margin-top: 4px; text-align: center;
+}
+.transmit-dossier-col {
+  flex: 1; display: flex; flex-direction: column; gap: 8px;
+}
+.transmit-dossier-name {
+  font-family: 'VT323', monospace;
+  font-size: 28px; letter-spacing: 3px; color: var(--green);
+  line-height: 1;
+}
+.transmit-dossier-role {
+  font-size: 9px; letter-spacing: 2px; color: var(--green-dim);
+  border-bottom: 1px solid var(--green-dark);
+  padding-bottom: 6px;
+}
+.transmit-dossier-tags {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.transmit-dossier-tag {
+  font-size: 7px; letter-spacing: 1px; color: var(--green-dark);
+  border: 1px solid var(--green-dark); padding: 1px 5px;
+}
+.transmit-dossier-fields { display: flex; flex-direction: column; gap: 5px; }
+.transmit-dossier-field {
+  display: grid; grid-template-columns: 90px 1fr;
+  font-size: 8px; letter-spacing: 1px;
+  border-bottom: 1px solid rgba(0,48,16,0.5);
+  padding-bottom: 4px;
+}
+.transmit-dossier-field-label { color: var(--green-dark); }
+.transmit-dossier-field-value { color: var(--green-dim); }
+.transmit-threat-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.transmit-threat-label { font-size: 7px; letter-spacing: 2px; color: var(--green-dark); width: 90px; }
+.transmit-threat-pips { display: flex; gap: 3px; }
+.transmit-threat-pip {
+  width: 8px; height: 8px;
+  border: 1px solid var(--green-dark);
+}
+.transmit-threat-pip.filled { background: var(--green); border-color: var(--green); }
+.transmit-class-badge-large {
+  font-size: 7px; letter-spacing: 3px;
+  padding: 3px 8px; border: 1px solid;
+  display: inline-block; margin-top: 4px;
+  align-self: flex-start;
+}
+
+/* briefing/evidence transmit card styles */
+.transmit-briefing-card, .transmit-evidence-card {
+  max-width: 480px; width: 90%;
+  background: rgba(0,8,2,0.9);
+  border: 1px solid var(--green-dim);
+  animation: acquireIn 0.8s ease forwards;
+}
+.transmit-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--green-dark);
+}
+.transmit-card-title {
+  font-family: 'VT323', monospace;
+  font-size: 22px; letter-spacing: 3px; color: var(--green);
+}
+.transmit-card-badge {
+  font-size: 7px; letter-spacing: 2px; color: var(--green-dark);
+  border: 1px solid var(--green-dark); padding: 2px 6px;
+}
+.transmit-card-body {
+  padding: 14px;
+  font-size: 10px; color: var(--green-dim); line-height: 1.8;
+  letter-spacing: 1px;
+}
+.transmit-card-meta {
+  display: flex; justify-content: space-between;
+  padding: 6px 14px;
+  font-size: 8px; color: var(--green-dark); letter-spacing: 1px;
+  border-top: 1px solid var(--green-dark);
+}
+
+</style>
+</head>
+<body>
+
+<!-- Imperial Aquila SVG Symbol -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none;">
+  <defs>
+    <g id="imperial-aquila">
+      <path d="M830.805,913.588l-8.501,5.222l4.692,50.297c-16.745,18.744-35.845,39.556-52.76,58.148l0.662-93.712l-8.589,1.971
+			l-30.476,123.318l-69.634,40.684l52.472-165.183l-8.079-1.649l-90.259,179.566l-73.196-10.757l110.747-182.602l-10.362-5.948
+			l-146.96,173.869c-22.97-12.667-44.468-24.215-67.859-37.114l185.495-174.997l-9.156-14.116l-221.883,156.436l-77.28-57.082
+			L592.1,819.828l-4.727-17.602l-319.026,120.89l-72.116-68.413l387.614-96.748l3.34-19.125l-431.134,75.852l-65.132-71.629
+			l507.897-43.576l11.365-16.342l-548.898,26.62L1,630h761.297c0,4.45-1.357,9.642-0.197,13.455
+			C579.5,735.5,667,951,906.503,804.805l48.122,49.445l-82.063,208.002l-66.343-49.21c33.114-26.709,71.114-82.042,79.685-114.409
+			c2.194-8.286,0.276-12.107-6.568-12.73c-6.692-0.609-13.336,5.846-9.787,12.987c2.001,4.016,6.189,6.93,6.189,6.93
+			c-7.732,9.551-26.502,34.554-34.545,45.44L830.805,913.588z"/>
+		
+		<path d="M1105.749,1216.276c-5.182,5.21-13.443,14.096-18.986,20.052c-11.495-25.948-22.211-52.254-33.762-78.329
+			c-1.864,1.504-4.885,5.101-6,6l30.308,80.01c-6.653,6.388-17.407,17.785-24.445,25.208c-10.01-28.807-18.991-58.806-28.864-87.218
+			l-6,5l24.805,93c-13.393,14.652-28.898,29.229-42.805,44.178L958.5,1280l27.5-93l-6-5c-9.986,28.848-20.409,58.096-30.672,87.745
+			l-21.826-24.065L958,1164l-6-6c-11.489,25.928-21.076,51.814-32.831,78.343l-19.645-21.39
+			c9.101-23.009,22.032-52.083,31.476-74.953l-50.801-58L1000,762.207L1123.904,1082L1073,1140L1105.749,1216.276z"/>
+		<polygon points="1114.248,1283.893 1092.333,1293 1099.209,1277.019 1085,1262.5 1110,1259.333 1135.827,1231.503 
+			1128.333,1218.667 1131.732,1214.805 1085.056,1142.876 1121.228,1103.756 1169.325,1195.875 1176,1192 1183.871,1204.539 
+			1208.667,1196.667 1215.5,1181.5 1226.314,1191.983 1249.404,1194.308 1232.312,1210.026 1229.646,1275.346 1210.39,1215.839 
+			1180.469,1226.391 1194.598,1250.426 1206.5,1248 1202.333,1260.667 1228.988,1307.674 1233,1354.184 1220.943,1339.715 
+			1172.132,1358.238 1201.465,1318.756 1178.792,1275.544 1164,1277.542 1172,1263.667 1159.23,1237.222 1132.419,1269.518 
+			1163.535,1298 		"/>
+		<path d="M789.492,1329.581l26,26.419c-12.165-5.26-41.766-11.248-52.847-16.362v-31.307l53.019-75.506L793.5,1229.5
+			l-30.855,54.044l10.753-89.286l52.649,15.91l57.378-105.505l36.316,39.628l-63.554,80.857L900.25,1266l-85.758,52.331L861,1268
+			l-23-24.25L789.492,1329.581z"/>
+		<path d="M1009.553,758.954c18.057-13.335,35.766-26.463,53.581-39.444c1.1-0.801,3.175-0.925,4.574-0.545
+			c7.566,2.058,15.123,4.196,22.532,6.744c1.596,0.549,3.349,2.736,3.71,4.447c2.885,13.688,5.538,27.427,8.017,41.195
+			c0.347,1.927,0.083,4.783-1.119,6.046c-19.926,20.943-40.048,41.7-60.803,63.199
+			C1029.786,813.127,1019.768,786.305,1009.553,758.954z"/>
+		<path d="M900.385,779.173c-2.128-2.18-2.773-4.141-2.128-7.253c2.771-13.371,5.29-26.798,7.643-40.25
+			c0.578-3.305,1.797-5.021,5.18-5.889c6.933-1.778,13.681-4.285,20.623-6.019c1.954-0.488,4.797,0.001,6.421,1.17
+			c16.524,11.893,32.922,23.963,49.208,36.181c1.345,1.009,2.701,3.855,2.218,5.179c0,0-19.194,51.801-28.878,77.689
+			L900.385,779.173z"/>
+		<path d="M1110.703,767.741c-2.909-14.728-5.794-28.743-8.375-42.813c-0.667-3.639-2.149-5.474-5.811-6.576
+			c-23.345-7.024-46.585-14.397-69.93-21.425c-3.221-0.97-8.337-3.227-4.779-4.628c4.358-1.716,64.432-0.915,64.432-0.915
+			c4.234,0.101,7.415-0.864,10.357-4.117c1.367-1.511,4.379-2.427,6.508-2.216c23.293,2.302,46.551,4.949,69.838,7.313
+			c3.59,0.364,5.322,1.64,6.191,5.256c2.712,11.29,2.849,11.242-5.994,18.569L1110.703,767.741z"/>
+		<path d="M820.834,710.975c-5.455-5.085-1.397-11.288,1.189-16.419c1.529-3.034,3.008-2.954,5.402-2.954
+			c49.478,0.009,98.955-0.016,148.433,0.099c1.35,0.003,3.847,0.772,4.046,2.271c0.238,1.8-2.13,2.917-3.51,3.335
+			c-23.992,7.275-47.985,14.557-72.11,21.37c-4.44,1.254-5.886,3.418-6.602,7.482l-8.53,41.919L820.834,710.975z M864.963,724.215
+			c4.548,0.082,8.507-3.645,8.737-8.224c0.238-4.737-3.769-8.812-8.626-8.773c-4.666,0.037-8.459,3.818-8.457,8.428
+			C856.621,720.226,860.426,724.133,864.963,724.215z"/>
+		<path d="M1173.579,723.488c1.612-1.266,4.518-2.362,6.238-1.782c15.177,5.113,30.221,10.623,46.035,16.276
+			c-7.459,19.759-14.78,39.152-22.526,59.671c-3.961-9.943-7.589-18.58-10.808-27.366c-1.265-3.453-3.353-5.037-6.778-5.896
+			c-15.154-3.8-30.259-7.793-46.379-11.975L1173.579,723.488z"/>
+		<path d="M860.148,753.554c-15.615,4.066-30.438,8.057-45.342,11.72c-4.054,0.997-6.257,2.942-7.68,6.914
+			c-3.092,8.626-6.755,17.048-10.524,26.396c-7.652-20.229-14.947-39.517-22.457-59.373l47.934-18.578L860.148,753.554z"/>
+		<path d="M1168.195,913.588l8.501,5.222l-4.692,50.297c16.745,18.744,35.844,39.556,52.76,58.148l-0.662-93.712l8.589,1.971
+			l30.475,123.318l69.634,40.684l-52.472-165.183l8.079-1.649l90.259,179.566l73.196-10.757l-110.747-182.602l10.362-5.948
+			l146.96,173.869c22.97-12.667,44.468-24.215,67.859-37.114l-185.495-174.997l9.156-14.116l221.884,156.436l77.28-57.082
+			L1406.9,819.828l4.727-17.602l319.026,120.89l72.116-68.413l-387.614-96.748l-3.339-19.125l431.134,75.852l65.132-71.629
+			l-507.897-43.576l-11.365-16.342l548.898,26.62L1998,630h-761.297c0,4.45,1.357,9.642,0.197,13.455
+			C1419.5,735.5,1332,951,1092.498,804.805l-48.123,49.445l82.063,208.002l66.343-49.21
+			c-33.115-26.709-71.115-82.042-79.685-114.409c-2.194-8.286-0.276-12.107,6.568-12.73c6.692-0.609,13.336,5.846,9.787,12.987
+			c-2.001,4.016-6.189,6.93-6.189,6.93c7.732,9.551,26.502,34.554,34.545,45.44L1168.195,913.588z"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- BOOT SCREEN -->
+<div id="boot-screen">
+  <div class="aquila-spin aquila-glow-lg">
+    <svg width="220" height="220" viewBox="0 0 2000 2000" fill="#00ff41" xmlns="http://www.w3.org/2000/svg">
+      <use href="#imperial-aquila"/>
+    </svg>
+  </div>
+  <div class="boot-title">INITIALISING COGITATOR UPLINK...</div>
+  <div class="boot-bar"></div>
+</div>
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  LOGIN                                                          -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="aquila-spin aquila-glow-lg">
+        <svg width="120" height="120" viewBox="0 0 2000 2000" fill="#00ff41" xmlns="http://www.w3.org/2000/svg">
+          <use href="#imperial-aquila"/>
+        </svg>
+      </div>
+      <div class="login-title">ACOLYTE DATASLATE</div>
+      <div class="login-sub">Ordo Hereticus — Cell Prima — Secure Terminal</div>
+    </div>
+    <div class="login-body">
+      <label class="login-label" for="operative-input">► Operative Designation</label>
+      <input class="login-input" id="operative-input" type="text" placeholder="ENTER YOUR OPERATIVE NAME" maxlength="30" autocomplete="off">
+      <button class="login-btn" onclick="login()">◆ ACCESS DATASLATE ◆</button>
+      <div class="remember-row">
+          <input type="checkbox" class="remember-checkbox" id="remember-me-check">
+          <label class="remember-label" for="remember-me-check">Remember my designation</label>
+        </div>
+        <div class="login-warning">
+        INQUISITORIAL PROPERTY — UNAUTHORISED ACCESS IS HERESY<br>
+        ALL SESSIONS LOGGED — THOUGHT FOR THE DAY FOLLOWS<br><br>
+        <span style="color:var(--green-dark)">An open mind is like a fortress with its gates unbarred.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  MAIN APP                                                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Aquila Watermark -->
+  <div class="aquila-watermark">
+    <svg width="700" height="700" viewBox="0 0 2000 2000" fill="#00ff41" xmlns="http://www.w3.org/2000/svg">
+      <use href="#imperial-aquila"/>
+    </svg>
+  </div>
+
+<div id="app">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="aquila-spin aquila-glow-sm" style="line-height:0;">
+        <svg width="26" height="26" viewBox="0 0 2000 2000" fill="#00ff41" xmlns="http://www.w3.org/2000/svg">
+          <use href="#imperial-aquila"/>
+        </svg>
+      </div>
+      <div class="topbar-logo">◆ ORDO HERETICUS</div>
+      <div class="topbar-sep">|</div>
+      <div class="operative-id">OPERATIVE: <span id="operative-display"></span> <span class="cursor"></span></div>
+    </div>
+    <div class="topbar-status">
+      <div class="status-dot"></div>
+      <div style="font-size:9px;color:var(--green-dim);letter-spacing:1px;">SECURE</div>
+      <button class="logout-btn" onclick="logout()">SIGN OUT</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-tab active" onclick="showSection('briefings')">► BRIEFINGS</button>
+    <button class="nav-tab" onclick="showSection('evidence')">► EVIDENCE</button>
+    <button class="nav-tab" onclick="showSection('contacts')">► CONTACTS</button>
+    <button class="nav-tab" onclick="showSection('threads')">► MISSION LOG</button>
+    <button class="nav-tab" onclick="showSection('penitent')">► PENITENT CLAUSE</button>
+    <button class="nav-tab" onclick="showSection('operative')">► OPERATIVE</button>
+    <button class="nav-tab" id="gm-nav-btn" style="color:var(--amber-dim);border-left:2px solid var(--amber-dark);margin-left:auto;" onclick="openGM()">⚿ INQUISITOR</button>
+  </div>
+
+  <!-- Mobile nav — scrollable horizontal tab bar -->
+  <div class="nav-mobile" id="nav-mobile">
+    <div class="nav-mobile-bar">
+      <button class="nav-mobile-item active" data-section="briefings" onclick="showSection('briefings')">► BRIEFINGS</button>
+      <button class="nav-mobile-item" data-section="evidence" onclick="showSection('evidence')">► EVIDENCE</button>
+      <button class="nav-mobile-item" data-section="contacts" onclick="showSection('contacts')">► CONTACTS</button>
+      <button class="nav-mobile-item" data-section="threads" onclick="showSection('threads')">► MISSION LOG</button>
+      <button class="nav-mobile-item" data-section="penitent" onclick="showSection('penitent')">► PENITENT CLAUSE</button>
+      <button class="nav-mobile-item" data-section="operative" onclick="showSection('operative')">► OPERATIVE</button>
+      <button class="nav-mobile-gm" onclick="openGM()">⚿ GM</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ─── BRIEFINGS ─────────────────────────────────────────── -->
+    <div class="section active" id="section-briefings">
+      <div class="sec-header">
+        <div class="sec-title">OPERATIONAL BRIEFINGS</div>
+        <div class="sec-count" id="briefing-count"></div>
+      </div>
+      <div class="card-grid" id="briefing-cards"></div>
+    </div>
+
+    <!-- ─── EVIDENCE ──────────────────────────────────────────── -->
+    <div class="section" id="section-evidence">
+      <div class="sec-header">
+        <div class="sec-title">EVIDENCE LOCKER</div>
+        <div class="sec-count" id="evidence-count"></div>
+      </div>
+      <div class="filter-bar">
+        <span>FILTER:</span>
+        <button class="filter-btn active" id="ev-filter-active" onclick="setEvidenceFilter('active')">ACTIVE</button>
+        <button class="filter-btn" id="ev-filter-archived" onclick="setEvidenceFilter('archived')">ARCHIVED</button>
+        <button class="filter-btn" id="ev-filter-all" onclick="setEvidenceFilter('all')">ALL</button>
+      </div>
+      <div class="card-grid" id="evidence-cards"></div>
+    </div>
+
+    <!-- ─── CONTACTS ──────────────────────────────────────────── -->
+    <div class="section" id="section-contacts">
+      <div class="sec-header">
+        <div class="sec-title">CONTACT DATABASE</div>
+        <div class="sec-count" id="contact-count"></div>
+      </div>
+      <div class="filter-bar">
+        <span>FILTER:</span>
+        <button class="filter-btn active" id="ct-filter-active" onclick="setContactFilter('active')">ACTIVE</button>
+        <button class="filter-btn" id="ct-filter-archived" onclick="setContactFilter('archived')">ARCHIVED</button>
+        <button class="filter-btn" id="ct-filter-all" onclick="setContactFilter('all')">ALL</button>
+      </div>
+      <div class="dossier-grid" id="contact-cards"></div>
+    </div>
+
+    <!-- ─── TRANSMIT PUSH OVERLAY ────────────────────────────── -->
+    <div id="transmit-overlay">
+      <div class="transmit-scan-line" id="transmit-scan"></div>
+      <div class="transmit-header">INCOMING TRANSMISSION</div>
+      <div class="transmit-subheader">ORDO HERETICUS · SECURE CHANNEL</div>
+      <div class="transmit-card-wrap" id="transmit-card-wrap"></div>
+      <button class="transmit-dismiss" onclick="dismissTransmit()">► ACKNOWLEDGED — DISMISS</button>
+    </div>
+
+    <!-- ─── MISSION LOG / THREADS ─────────────────────────────── -->
+    <div class="section" id="section-threads">
+      <div class="sec-header">
+        <div class="sec-title">MISSION LOG</div>
+      </div>
+      <div id="log-entries-container"></div>
+
+      <!-- Thread tracker -->
+      <div style="margin-top:20px;">
+        <div class="sec-header" style="margin-top:0;">
+          <div class="sec-title" style="font-size:18px;">OPEN THREADS</div>
+          <div class="sec-count" id="thread-count"></div>
+        </div>
+        <div class="threads-list" id="threads-list"></div>
+
+        <div class="add-thread">
+          <div class="add-thread-title">► Add Thread</div>
+          <div class="thread-form-row">
+            <input class="thread-input" id="thread-text-input" type="text" placeholder="Thread description...">
+            <select class="thread-select" id="thread-status-select">
+              <option value="open">OPEN</option>
+              <option value="urgent">URGENT</option>
+              <option value="closed">RESOLVED</option>
+            </select>
+            <button class="add-btn" onclick="addThread()">+ ADD</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal log notes -->
+      <div class="notes-section mt-12">
+        <div class="notes-header">
+          ► PERSONAL FIELD NOTES
+          <span class="notes-saved" id="log-notes-saved">SAVED</span>
+        </div>
+        <textarea class="notes-textarea" id="log-notes" rows="6" placeholder="Your personal field notes for this mission..." oninput="saveNote('log-notes', 'log-notes-saved')"></textarea>
+      </div>
+    </div>
+
+<!-- ─── OPERATIVE ──────────────────────────────────────────────── -->
+    <div class="section" id="section-operative" style="padding:0;border:none;">
+      <iframe src="operative_tab.html" style="width:100%;height:100vh;border:none;display:block;"></iframe>
+    </div>
+
+<!-- ─── PENITENT CLAUSE ──────────────────────────────────────── -->
+    <div class="section" id="section-penitent" style="padding:0;border:none;">
+      <iframe src="penitent_clause_tab.html" style="width:100%;height:100vh;border:none;display:block;"></iframe>
+    </div>
+
+
+  </div><!-- end content -->
+</div><!-- end app -->
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  GM CONSOLE OVERLAY                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ─── MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModalDirect()">✕ CLOSE</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="save-indicator" id="save-indicator">◆ SAVED</div>
+
+<script>
+
+// Live data served from Supabase via loadReleasedData()
+let currentOperative = null;
+
+
+// ── BOOT SCREEN ──────────────────────────────────────────────────
+(function() {
+  const boot = document.getElementById('boot-screen');
+  if (!boot) return;
+  setTimeout(() => {
+    boot.style.transition = 'opacity 0.8s';
+    boot.style.opacity = '0';
+    setTimeout(() => { boot.style.display = 'none'; }, 800);
+  }, 2200);
+})();
+
+// ─── LOGIN ──────────────────────────────────────────────────────
+function login() {
+  const input = document.getElementById('operative-input');
+  const name = input.value.trim().toUpperCase();
+  if (!name) { input.style.borderColor = 'var(--red)'; return; }
+  // Remember me
+  const rememberCheck = document.getElementById('remember-me-check');
+  if (rememberCheck && rememberCheck.checked) {
+    localStorage.setItem('remembered_operative', name);
+  } else {
+    localStorage.removeItem('remembered_operative');
+  }
+  currentOperative = name;
+  document.getElementById('operative-display').textContent = name;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+
+// Pre-fill remembered operative on load
+(function() {
+  const saved = localStorage.getItem('remembered_operative');
+  if (saved) {
+    const input = document.getElementById('operative-input');
+    const check = document.getElementById('remember-me-check');
+    if (input) input.value = saved;
+    if (check) check.checked = true;
+  }
+})();
+
+function logout() {
+  currentOperative = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('operative-input').value = '';
+}
+
+document.getElementById('operative-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+// ─── STORAGE ────────────────────────────────────────────────────
+function storeKey(key) { return `acolyte_${currentOperative}_${key}`; }
+
+function load(key, fallback = '') {
+  try { return localStorage.getItem(storeKey(key)) ?? fallback; } catch { return fallback; }
+}
+
+function save(key, val) {
+  try { localStorage.setItem(storeKey(key), val); } catch {}
+}
+
+function loadJson(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(storeKey(key))) ?? fallback; } catch { return fallback; }
+}
+
+function saveJson(key, val) {
+  try { localStorage.setItem(storeKey(key), JSON.stringify(val)); } catch {}
+}
+
+// Save indicator
+let saveTimer;
+function flashSave() {
+  const el = document.getElementById('save-indicator');
+  el.classList.add('visible');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => el.classList.remove('visible'), 1800);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE DATA LAYER
+// ══════════════════════════════════════════════════════════════════
+
+const SUPABASE_URL = 'https://oqyfbvmjbizmjxiqgtzu.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_0J_YUzVuwYKnyYpdWp0Pzw_pzd-nnDG';
+
+// ── Core Supabase fetch via Netlify proxy ─────────────────────────
+async function sbFetch(table, method = 'GET', data = null, filters = null, returning = true) {
+  const body = { table, method, filters, returning };
+  if (data) body.data = data;
+  const res = await fetch('/.netlify/functions/supabase', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Supabase error');
+  return result;
+}
+
+// ── Direct Supabase REST (for real-time polling) ──────────────────
+async function sbDirect(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&order=created_at.asc`, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${SUPABASE_ANON}`,
+    }
+  });
+  if (!res.ok) throw new Error('Supabase direct fetch failed');
+  return res.json();
+}
+
+// ── PLAYER: Load released data ────────────────────────────────────
+async function loadReleasedData() {
+  try {
+    const [briefings, evidence, contacts, logEntries] = await Promise.all([
+      sbDirect('briefings', 'released=eq.true'),
+      sbDirect('evidence', 'released=eq.true'),
+      sbDirect('contacts', 'released=eq.true'),
+      sbDirect('log_entries', 'released=eq.true'),
+    ]);
+    GM_DATA.briefings = briefings || [];
+    GM_DATA.evidence = evidence || [];
+    GM_DATA.contacts = contacts || [];
+    GM_DATA.logEntries = logEntries || [];
+    renderBriefings();
+    renderEvidence();
+    renderContacts();
+    renderLogEntries();
+    renderThreads();
+  } catch(e) {
+    console.warn('Could not load live data, using local cache:', e.message);
+  }
+}
+
+// ── PLAYER: Poll for new alerts ───────────────────────────────────
+let lastAlertId = parseInt(localStorage.getItem('last_alert_id') || '0');
+
+async function pollAlerts() {
+  try {
+    const alerts = await sbDirect('alerts', `id=gt.${lastAlertId}`);
+    if (alerts && alerts.length > 0) {
+      alerts.forEach(alert => {
+        showAlertBanner(alert);
+        if (alert.id > lastAlertId) lastAlertId = alert.id;
+      });
+      localStorage.setItem('last_alert_id', lastAlertId);
+      // Refresh the relevant section
+      loadReleasedData();
+    }
+  } catch(e) {
+    // Silent fail — polling
+  }
+}
+
+// ── PLAYER: Show alert banner ─────────────────────────────────────
+function showAlertBanner(alert) {
+  const banner = document.createElement('div');
+  banner.className = 'alert-banner';
+  const typeLabel = {
+    briefing: 'NEW BRIEFING',
+    evidence: 'NEW EVIDENCE',
+    contact: 'NEW CONTACT',
+    log: 'NEW LOG ENTRY',
+  }[alert.type] || 'NEW TRANSMISSION';
+  banner.innerHTML = `
+    <div class="alert-title">◆ ${typeLabel} — INCOMING TRANSMISSION</div>
+    ${alert.item_title}
+    <span class="alert-close" onclick="this.parentElement.remove()">✕</span>`;
+  banner.onclick = (e) => {
+    if (e.target.classList.contains('alert-close')) return;
+    banner.remove();
+    // Navigate to relevant section
+    const sectionMap = { briefing:'briefings', evidence:'evidence', contact:'contacts', log:'threads' };
+    const sec = sectionMap[alert.type];
+    if (sec) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('section-' + sec)?.classList.add('active');
+    }
+  };
+  document.body.appendChild(banner);
+  setTimeout(() => { if (banner.parentElement) banner.remove(); }, 8000);
+}
+
+// Start polling every 15 seconds when app is open
+let alertPollInterval = null;
+function startAlertPolling() {
+  if (alertPollInterval) clearInterval(alertPollInterval);
+  alertPollInterval = setInterval(pollAlerts, 15000);
+}
+
+// ── GM: Load all data (including unreleased) ──────────────────────
+async function gmLoadAllData() {
+  try {
+    const [briefings, evidence, contacts, logEntries] = await Promise.all([
+      sbDirect('briefings', ''),
+      sbDirect('evidence', ''),
+      sbDirect('contacts', ''),
+      sbDirect('log_entries', ''),
+    ]);
+    renderGMDataList('briefing', briefings || []);
+    renderGMDataList('evidence', evidence || []);
+    renderGMDataList('contact', contacts || []);
+    renderGMDataList('log', logEntries || []);
+  } catch(e) {
+    console.error('GM load error:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MISSION PACK SYSTEM
+// ══════════════════════════════════════════════════════════════════
+
+// ── Load mission packs from Supabase ─────────────────────────────
+async function loadMissionPacks() {
+  try {
+    const packs = await sbDirect('mission_packs', 'order=created_at.desc');
+    renderPackArchive(packs || []);
+    const active = (packs || []).find(p => p.status === 'active');
+    if (active) {
+      document.getElementById('active-pack-name').textContent = active.name;
+      document.getElementById('active-pack-meta').innerHTML =
+        `ITEMS: ${active.item_count || '—'}<br>LOADED: ${active.created_at ? active.created_at.slice(0,10) : '—'}`;
+    } else {
+      document.getElementById('active-pack-name').textContent = '— NO PACK LOADED —';
+      document.getElementById('active-pack-meta').textContent = '';
+    }
+  } catch(e) {
+    console.warn('Could not load mission packs:', e.message);
+    setPackStatus('⚠ Could not connect to mission pack database. Ensure mission_packs table exists in Supabase.', true);
+  }
+}
+
+// ── Render pack archive list ──────────────────────────────────────
+function renderPackArchive(packs) {
+  const container = document.getElementById('gm-pack-archive');
+  if (!container) return;
+  if (!packs.length) {
+    container.innerHTML = '<div style="border:1px solid var(--amber-dark);padding:10px;font-size:10px;color:var(--amber-dark);text-align:center;letter-spacing:1px;">No archived missions</div>';
+    return;
+  }
+  container.innerHTML = '';
+  packs.forEach(pack => {
+    const isActive = pack.status === 'active';
+    const div = document.createElement('div');
+    div.className = 'pack-archive-item';
+    div.innerHTML = `
+      <div class="pack-archive-item-name">${pack.name}</div>
+      <div class="pack-archive-item-meta">${pack.item_count || 0} items · ${pack.created_at ? pack.created_at.slice(0,10) : '—'}</div>
+      <div class="pack-archive-item-status ${isActive ? 'pack-status-active' : 'pack-status-archived'}">${isActive ? 'ACTIVE' : 'ARCHIVED'}</div>
+      <button class="pack-activate-btn ${isActive ? 'is-active' : ''}" onclick="setActivePack('${pack.id}')" ${isActive ? 'disabled' : ''}>${isActive ? '◆ ACTIVE' : '▶ ACTIVATE'}</button>
+      <button class="delete-pack-btn" onclick="openDeletePackModal('${pack.id}', ${JSON.stringify(pack.name)})">✕ DELETE PACK</button>`;
+    container.appendChild(div);
+  });
+}
+
+// ── Set a pack as active (deactivates others) ─────────────────────
+async function setActivePack(packId) {
+  setPackStatus('Switching active mission...');
+  try {
+    // Deactivate all packs individually (Supabase rejects filterless PATCH)
+    const activePacks = await sbFetch('mission_packs', 'GET', null, { status: 'active' });
+    if (Array.isArray(activePacks)) {
+      for (const p of activePacks) {
+        await sbFetch('mission_packs', 'PATCH', { status: 'archived' }, { id: p.id });
+      }
+    }
+    // Set selected as active
+    await sbFetch('mission_packs', 'PATCH', { status: 'active' }, { id: packId });
+    await loadMissionPacks();
+    setPackStatus('✓ Mission pack activated.');
+  } catch(e) {
+    setPackStatus('⚠ Error switching pack: ' + e.message, true);
+  }
+}
+
+// ── Delete mission pack ───────────────────────────────────────────
+let _deletePackId   = null;
+let _deletePackName = null;
+
+function openDeletePackModal(packId, packName) {
+  _deletePackId   = packId;
+  _deletePackName = packName;
+  document.getElementById('delete-pack-name-display').textContent = packName;
+  document.getElementById('delete-pack-confirm-input').value = '';
+  document.getElementById('delete-pack-go-btn').disabled = true;
+  document.getElementById('delete-pack-status').textContent = '';
+  document.getElementById('delete-pack-modal').classList.add('open');
+  document.getElementById('delete-pack-confirm-input').focus();
+}
+
+function closeDeletePackModal() {
+  document.getElementById('delete-pack-modal').classList.remove('open');
+  _deletePackId   = null;
+  _deletePackName = null;
+}
+
+function onDeleteInput() {
+  const val = document.getElementById('delete-pack-confirm-input').value.trim();
+  document.getElementById('delete-pack-go-btn').disabled = (val !== 'DELETE');
+}
+
+async function executeDeletePack() {
+  if (!_deletePackId) return;
+  const status = document.getElementById('delete-pack-status');
+  const btn    = document.getElementById('delete-pack-go-btn');
+  btn.disabled = true;
+  status.textContent = 'Deleting associated data...';
+
+  try {
+    const tables = ['briefings', 'evidence', 'contacts', 'log_entries'];
+    for (const table of tables) {
+      await sbFetch(table, 'DELETE', null, { mission_pack_id: _deletePackId });
+    }
+    status.textContent = 'Deleting mission pack record...';
+    await sbFetch('mission_packs', 'DELETE', null, { id: _deletePackId });
+    status.textContent = '✓ Pack purged.';
+    setTimeout(() => {
+      closeDeletePackModal();
+      loadMissionPacks();
+    }, 900);
+  } catch(e) {
+    status.textContent = '⚠ Error: ' + e.message;
+    btn.disabled = false;
+  }
+}
+
+// ── Upload and import a mission pack JSON ─────────────────────────
+async function uploadMissionPack() {
+  const fileInput = document.getElementById('pack-file-input');
+  const file = fileInput.files[0];
+  if (!file) { setPackStatus('⚠ No file selected.', true); return; }
+
+  setPackStatus('Reading pack file...');
+  const text = await file.text();
+  let pack;
+  try {
+    pack = JSON.parse(text);
+  } catch(e) {
+    setPackStatus('⚠ Invalid JSON — could not parse pack file.', true);
+    return;
+  }
+
+  // Validate required fields
+  if (!pack.mission_name) { setPackStatus('⚠ Pack missing required field: mission_name', true); return; }
+
+  const packId = 'pack-' + Date.now();
+  const totalItems = (pack.briefings||[]).length + (pack.evidence||[]).length + (pack.contacts||[]).length + (pack.log_entries||[]).length;
+
+  setPackStatus(`Importing ${totalItems} items...`);
+
+  try {
+    // Deactivate existing active packs individually (Supabase rejects filterless PATCH)
+    const existingPacks = await sbFetch('mission_packs', 'GET', null, { status: 'active' });
+    if (Array.isArray(existingPacks)) {
+      for (const p of existingPacks) {
+        await sbFetch('mission_packs', 'PATCH', { status: 'archived' }, { id: p.id });
+      }
+    }
+
+    // Create pack record
+    await sbFetch('mission_packs', 'POST', {
+      id: packId,
+      name: pack.mission_name,
+      status: 'active',
+      item_count: totalItems,
+      description: pack.description || ''
+    });
+
+    // Import briefings
+    for (const item of (pack.briefings || [])) {
+      await sbFetch('briefings', 'POST', {
+        id: 'bf-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        title: item.title,
+        classification: item.classification || 'STANDARD',
+        date: item.date || '',
+        summary: item.summary || '',
+        content: item.content || '',
+        released: false,
+        mission_pack_id: packId,
+      });
+    }
+
+    // Import evidence
+    for (const item of (pack.evidence || [])) {
+      await sbFetch('evidence', 'POST', {
+        id: 'ev-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        title: item.title,
+        type: item.type || 'DOCUMENT',
+        location: item.location || '',
+        summary: item.summary || '',
+        content: item.content || '',
+        released: false,
+        mission_pack_id: packId,
+      });
+    }
+
+    // Import contacts
+    for (const item of (pack.contacts || [])) {
+      // Resolve portrait: base64 data_uri > stock silhouette key > default
+      let portrait_file = item.portrait_file || 'UNKNOWN_ROBED_M';
+      let portrait_data = null;
+      if (item.portrait_data && item.portrait_data.startsWith('data:')) {
+        portrait_data = item.portrait_data;
+      }
+      await sbFetch('contacts', 'POST', {
+        id: 'ct-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        name: item.name,
+        role: item.role || '',
+        location: item.location || '',
+        classification: item.classification || 'STANDARD',
+        threat: item.threat || 'UNKNOWN',
+        tags: item.tags || [],
+        physical: item.physical || '',
+        portrait_file: portrait_file,
+        portrait_data: portrait_data,
+        known: item.known || '',
+        briefing_push: item.briefing_push || false,
+        released: false,
+        mission_pack_id: packId,
+      });
+    }
+
+    // Import log entries
+    for (const item of (pack.log_entries || [])) {
+      await sbFetch('log_entries', 'POST', {
+        id: 'lg-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        title: item.title,
+        date: item.date || '',
+        content: item.content || '',
+        released: false,
+        mission_pack_id: packId,
+      });
+    }
+
+    setPackStatus(`✓ Pack "${pack.mission_name}" loaded. ${totalItems} items imported as DRAFT. Use MISSION DATA tab to release to players.`);
+    fileInput.value = '';
+    await loadMissionPacks();
+    await gmLoadAllData();
+  } catch(e) {
+    setPackStatus('⚠ Import error: ' + e.message, true);
+  }
+}
+
+function setPackStatus(msg, isError = false) {
+  const el = document.getElementById('pack-upload-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--red)' : 'var(--amber-dim)';
+}
+
+// ── GM: Render data management lists ─────────────────────────────
+function renderGMDataList(type, items) {
+  const listMap = {
+    briefing: 'gm-briefings-list',
+    evidence: 'gm-evidence-list',
+    contact: 'gm-contacts-list',
+    log: 'gm-log-list',
+  };
+  const container = document.getElementById(listMap[type]);
+  if (!container) return;
+  container.innerHTML = '';
+  if (items.length === 0) {
+    container.innerHTML = '<div style="border:1px solid var(--amber-dark);padding:10px;font-size:10px;color:var(--amber-dark);text-align:center;letter-spacing:1px;">No entries yet</div>';
+    return;
+  }
+  items.forEach(item => {
+    const name = item.title || item.name || 'Unnamed';
+    const div = document.createElement('div');
+    div.className = 'gm-data-item';
+    const transmitBtn = `<button class="gm-add-btn" onclick="gmTransmitItem('${type}', '${item.id}')" style="font-size:8px;padding:4px 8px;letter-spacing:1px;border-color:var(--amber-dim);color:var(--amber-dim);" title="Push to all player screens">▶ TRANSMIT</button>`;
+    div.innerHTML = `
+      <div class="gm-data-item-name">${name}</div>
+      <div class="gm-data-item-status ${item.released ? 'status-live' : 'status-draft'}">${item.released ? 'LIVE' : 'DRAFT'}</div>
+      <button class="preview-btn" onclick="gmPreviewItem('${type}', '${item.id}')" title="Preview as players see it">◉ PREVIEW</button>
+      ${transmitBtn}
+      <button class="release-btn ${item.released ? 'released' : ''}" onclick="toggleRelease('${type}', '${item.id}', ${item.released})">${item.released ? 'RETRACT' : 'RELEASE'}</button>
+      <button class="gm-data-item-del" onclick="deleteItem('${type}', '${item.id}')">✕</button>`;
+    container.appendChild(div);
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// FEATURE 14 — GM PREVIEW MODAL
+// ═══════════════════════════════════════════════════════════════════
+function gmPreviewItem(type, id) {
+  const tableMap = { briefing: GM_DATA.briefings, evidence: GM_DATA.evidence, contact: GM_DATA.contacts, log: GM_DATA.logEntries };
+  const item = (tableMap[type] || []).find(i => i.id === id);
+  if (!item) { alert('Item not found in current data.'); return; }
+
+  const badge = document.getElementById('gm-preview-type-badge');
+  const body  = document.getElementById('gm-preview-body');
+  badge.textContent = type.toUpperCase();
+
+  let innerHtml = '';
+  if (type === 'briefing') {
+    innerHtml = `
+      <div class="card" style="cursor:default;margin-bottom:12px;">
+        <div class="card-header">
+          <div class="card-title">${item.title}</div>
+          <div class="card-badge badge-unk">${item.classification || '—'}</div>
+        </div>
+        <div class="card-body">${item.summary || ''}</div>
+        <div class="card-meta"><span>${item.date || '—'}</span><span>— tap to open</span></div>
+      </div>
+      <div style="font-size:8px;letter-spacing:2px;color:var(--green-dark);margin-bottom:6px;">► FULL CONTENT</div>
+      <div class="briefing-text" style="border:1px solid var(--green-dark);padding:12px;font-size:11px;color:var(--green-dim);line-height:1.8;">${(item.content||'').replace(/\n/g,'<br>')}</div>`;
+  } else if (type === 'evidence') {
+    innerHtml = `
+      <div class="card" style="cursor:default;margin-bottom:12px;">
+        <div class="card-header">
+          <div class="card-title">${item.title}</div>
+          <div class="card-badge badge-unk">${item.type || '—'}</div>
+        </div>
+        <div class="card-body">${item.summary || ''}</div>
+        <div class="card-meta"><span>FOUND: ${item.location || '—'}</span><span>— tap to open</span></div>
+      </div>
+      <div style="font-size:8px;letter-spacing:2px;color:var(--green-dark);margin-bottom:6px;">► FULL RECORD</div>
+      <div class="briefing-text" style="border:1px solid var(--green-dark);padding:12px;font-size:11px;color:var(--green-dim);line-height:1.8;">${(item.content||'').replace(/\n/g,'<br>')}</div>`;
+  } else if (type === 'contact') {
+    const portrait = getPortrait(item);
+    const tags = (item.tags || []).filter(t => t && !t.startsWith('['));
+    innerHtml = `
+      <div class="dossier-card${threatCardClass(item.threat)}" style="cursor:default;margin-bottom:0;">
+        ${buildDossierCard(item)}
+      </div>`;
+  } else if (type === 'log') {
+    innerHtml = `
+      <div class="log-entry" style="cursor:default;">
+        <div class="log-entry-header"><span>${item.title}</span><span style="color:var(--green-dim);font-size:9px;">${item.date||'—'}</span></div>
+        <div class="log-entry-body">${(item.content||'').replace(/\n/g,'<br>')}</div>
+      </div>`;
+  }
+
+  body.innerHTML = innerHtml;
+  document.getElementById('gm-preview-modal').classList.add('open');
+}
+
+function closeGMPreview() {
+  document.getElementById('gm-preview-modal').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FEATURE 16 — UNIFIED GM TRANSMIT (briefings, evidence, contacts)
+// ═══════════════════════════════════════════════════════════════════
+async function gmTransmitItem(type, id) {
+  const tableMap = { briefing: GM_DATA.briefings, evidence: GM_DATA.evidence, contact: GM_DATA.contacts };
+  const item = (tableMap[type] || []).find(i => i.id === id);
+  if (!item) { alert('Item not found.'); return; }
+
+  const name = item.title || item.name || 'Unknown';
+  if (!item.released) {
+    if (!confirm(`"${name}" is not yet released.\n\nTransmitting will push it to all active player screens immediately, but it won't appear in their permanent lists until you release it.\n\nTransmit anyway?`)) return;
+  }
+
+  try {
+    await sbFetch('briefing_push', 'POST', { contact_id: id, item_type: type }, null, false);
+    // Show on GM screen for confirmation
+    alert(`◈ TRANSMITTED\n\n"${name}" pushed to all active player Dataslates.`);
+  } catch(e) {
+    alert(`Transmit failed. Ensure the briefing_push table exists in Supabase and has an item_type column (text).\n\nIf you only have contact_id, add:\nALTER TABLE briefing_push ADD COLUMN item_type text DEFAULT 'contact';\n\nError: ${e.message}`);
+    console.error('Transmit error:', e);
+  }
+}
+
+// Legacy wrapper (keep for any existing calls)
+async function gmTransmitContact(contactId) {
+  return gmTransmitItem('contact', contactId);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FEATURE 15 — ENHANCED TRANSMIT OVERLAY (fullscreen, full dossier)
+// ═══════════════════════════════════════════════════════════════════
+function buildTransmitThreatPips(threat) {
+  const levels = ['MINIMAL','LOW','MODERATE','HIGH','EXTREME','UNKNOWN'];
+  const idx = levels.indexOf((threat||'UNKNOWN').toUpperCase());
+  const filled = idx < 0 ? 0 : idx;
+  let pips = '';
+  for (let i = 0; i < 5; i++) {
+    pips += `<div class="transmit-threat-pip${i < filled ? ' filled' : ''}"></div>`;
+  }
+  return pips;
+}
+
+function buildTransmitClassBadge(cls) {
+  const clsMap = {
+    'ASSET':    'style="color:var(--green);border-color:var(--green-dim);"',
+    'NEUTRAL':  'style="color:var(--green-dim);border-color:var(--green-dark);"',
+    'SUSPECT':  'style="color:var(--amber);border-color:var(--amber-dim);"',
+    'HOSTILE':  'style="color:#cc2200;border-color:#cc2200;"',
+    'STANDARD': 'style="color:var(--green-dim);border-color:var(--green-dark);"',
+  };
+  const style = clsMap[(cls||'STANDARD').toUpperCase()] || clsMap['STANDARD'];
+  return `<div class="transmit-class-badge-large" ${style}>${cls||'STANDARD'}</div>`;
+}
+
+// ── GM: Toggle release state ──────────────────────────────────────
+async function toggleRelease(type, id, currentState) {
+  const tableMap = { briefing:'briefings', evidence:'evidence', contact:'contacts', log:'log_entries' };
+  const table = tableMap[type];
+  try {
+    await sbFetch(table, 'PATCH', { released: !currentState }, { id });
+    // If releasing, create an alert
+    if (!currentState) {
+      const items = await sbDirect(table, `id=eq.${id}`);
+      const item = items[0];
+      const title = item?.title || item?.name || 'New item';
+      await sbFetch('alerts', 'POST', { type, item_id: id, item_title: title });
+    }
+    gmLoadAllData();
+  } catch(e) {
+    console.error('Toggle release error:', e);
+  }
+}
+
+// ── GM: Transmit contact dossier to all players (legacy — redirects to unified)
+async function gmTransmitContact(contactId) {
+  return gmTransmitItem('contact', contactId);
+}
+
+// ── GM: Delete item ───────────────────────────────────────────────
+async function deleteItem(type, id) {
+  const tableMap = { briefing:'briefings', evidence:'evidence', contact:'contacts', log:'log_entries' };
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  try {
+    await sbFetch(tableMap[type], 'DELETE', null, { id });
+    gmLoadAllData();
+  } catch(e) {
+    console.error('Delete error:', e);
+  }
+}
+
+// ── GM: Save new item ─────────────────────────────────────────────
+async function saveItem(type) {
+  const id = type + '-' + Date.now();
+  let data, table;
+  if (type === 'briefing') {
+    table = 'briefings';
+    data = {
+      id,
+      title: document.getElementById('bf-title').value.trim(),
+      classification: document.getElementById('bf-class').value,
+      date: document.getElementById('bf-date').value.trim(),
+      summary: document.getElementById('bf-summary').value.trim(),
+      content: document.getElementById('bf-content').value.trim(),
+      released: false,
+    };
+    if (!data.title) return;
+  } else if (type === 'evidence') {
+    table = 'evidence';
+    data = {
+      id,
+      title: document.getElementById('ev-title').value.trim(),
+      type: document.getElementById('ev-type').value,
+      location: document.getElementById('ev-location').value.trim(),
+      summary: document.getElementById('ev-summary').value.trim(),
+      content: document.getElementById('ev-content').value.trim(),
+      released: false,
+    };
+    if (!data.title) return;
+  } else if (type === 'contact') {
+    table = 'contacts';
+    const ctIdField = document.getElementById('ct-id');
+    const ctClass = document.getElementById('ct-classification');
+    const ctPhysical = document.getElementById('ct-physical');
+    const ctTags = document.getElementById('ct-tags');
+    const ctPortraitSel = document.getElementById('ct-portrait-select');
+    const ctPortraitImg = document.getElementById('ct-portrait-img');
+    // Resolve portrait data
+    let portrait_file = ctPortraitSel ? ctPortraitSel.value : 'UNKNOWN_ROBED_M';
+    let portrait_data = null;
+    if (portrait_file === 'UPLOAD' && ctPortraitImg && ctPortraitImg.src && ctPortraitImg.src.startsWith('data:')) {
+      portrait_data = ctPortraitImg.src;
+      portrait_file = null;
+    }
+    // Parse tags
+    const tagsRaw = ctTags ? ctTags.value.trim() : '';
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim().toUpperCase()).filter(Boolean) : [];
+    data = {
+      id: (ctIdField && ctIdField.value.trim()) ? ctIdField.value.trim() : id,
+      name: document.getElementById('ct-name').value.trim(),
+      role: document.getElementById('ct-role').value.trim(),
+      location: document.getElementById('ct-location').value.trim(),
+      classification: ctClass ? ctClass.value : 'STANDARD',
+      threat: document.getElementById('ct-threat').value,
+      known: document.getElementById('ct-known').value.trim(),
+      physical: ctPhysical ? ctPhysical.value.trim() : '',
+      tags: tags,
+      portrait_file: portrait_file,
+      portrait_data: portrait_data,
+      released: false,
+    };
+    if (!data.name) return;
+  } else if (type === 'log') {
+    table = 'log_entries';
+    data = {
+      id,
+      title: document.getElementById('lg-title').value.trim(),
+      date: document.getElementById('lg-date').value.trim(),
+      content: document.getElementById('lg-content').value.trim(),
+      released: false,
+    };
+    if (!data.title) return;
+  }
+  try {
+    await sbFetch(table, 'POST', data);
+    hideAddForm(type);
+    gmLoadAllData();
+  } catch(e) {
+    console.error('Save error:', e);
+    alert('Save failed: ' + e.message);
+  }
+}
+
+// ── Add/hide form helpers ─────────────────────────────────────────
+function showAddForm(type) {
+  document.getElementById('add-form-' + type).style.display = 'block';
+}
+function hideAddForm(type) {
+  document.getElementById('add-form-' + type).style.display = 'none';
+}
+
+// ── Hook into GM console open ─────────────────────────────────────
+const _origShowGMSection = showGMSection;
+// Will be patched after showGMSection is defined
+
+
+
+// ── Seed demo data to Supabase if tables are empty ───────────────
+async function seedDemoDataIfEmpty() {
+  try {
+    const existing = await sbDirect('briefings', '');
+    if (existing && existing.length > 0) return; // Already seeded
+
+    const demoItems = [
+      {
+        table: 'briefings',
+        data: {
+          id: 'brief-demo-01',
+          title: 'OPERATION GREY SHROUD — DEMONSTRATION FILE',
+          classification: 'VERMILLION',
+          date: 'M41.997.223',
+          summary: 'Demonstration briefing. This file illustrates how operational briefings are displayed. Active mission briefings will appear here once issued.',
+          content: `NOTICE: DEMONSTRATION FILE ONLY\n\nThis briefing is not an active operational order. It exists to demonstrate the Dataslate briefing display.\n\nACTIVE BRIEFINGS will contain your mission parameters, cover identities, primary and secondary objectives, known hazards, and standing directives.\n\nBriefings are issued by your handler and are read-only. You may annotate them using the Personal Notes section.`,
+          released: true,
+        }
+      },
+      {
+        table: 'briefings',
+        data: {
+          id: 'brief-demo-02',
+          title: 'TRANSIT ADVISORY — VOID PASSAGE PROTOCOLS',
+          classification: 'AMBER',
+          date: 'M41.997.190',
+          summary: 'Standard void transit advisory. Covers emergency procedures, vox silence protocols, and prohibited areas during transit.',
+          content: `VOID TRANSIT ADVISORY — ALL CELL PRIMA PERSONNEL\n\nIssued by: Shipmaster Talve\n\nEMERGENCY PROCEDURES\nReport to your designated muster station. Cell Prima muster point is Deck Two, Frame 14, port side.\n\nVOX SILENCE\nDuring translation to and from the warp, all non-essential vox traffic is suspended. Do not attempt to raise external contacts during translation.\n\nPROHIBITED AREAS DURING TRANSIT\n— The Bridge (Deck One)\n— Drive Compartments (Deck Six aft)\n— All sections marked with a red stencil border`,
+          released: true,
+        }
+      },
+      {
+        table: 'evidence',
+        data: {
+          id: 'ev-demo-01',
+          title: 'EVIDENCE LOCKER — DEMONSTRATION ENTRY',
+          type: 'DOCUMENT',
+          location: 'Filed by Handler',
+          summary: 'Sample evidence entry demonstrating how recovered items are catalogued.',
+          content: `EVIDENCE ENTRY — DEMONSTRATION FILE\n\nTYPE: Document\n\nDuring active operations, your handler will file evidence here as it is recovered or transmitted to you.\n\nEVIDENCE TYPES:\n— DOCUMENT: Written records, data-slates, manifests\n— AUDIO RECORD: Vox intercepts, pict-captures\n— PHYSICAL ITEM: Objects of investigative significance\n— COGITATOR LOG: Machine-spirit records\n— TESTIMONY: Witness accounts, interrogation summaries`,
+          released: true,
+        }
+      },
+      {
+        table: 'contacts',
+        data: {
+          id: 'con-demo-01',
+          name: 'SAMPLE CONTACT — ALLIED ASSET',
+          role: 'Example Entry — Friendly Disposition',
+          location: 'Contact Database',
+          threat: 'ALLY',
+          known: 'This is a demonstration contact entry. Active contacts will be filed here as you encounter significant individuals during operations. Each record includes their known role, location, assessed disposition, and cleared intelligence.',
+          released: true,
+        }
+      },
+      {
+        table: 'contacts',
+        data: {
+          id: 'con-demo-02',
+          name: 'SAMPLE CONTACT — UNKNOWN DISPOSITION',
+          role: 'Example Entry — Person of Interest',
+          location: 'Contact Database',
+          threat: 'UNKNOWN',
+          known: 'Unknown disposition means your handler has flagged this individual as operationally significant but their loyalties or intentions have not been confirmed. Treat with appropriate caution.',
+          released: true,
+        }
+      },
+      {
+        table: 'contacts',
+        data: {
+          id: 'con-demo-03',
+          name: 'SAMPLE CONTACT — HOSTILE',
+          role: 'Example Entry — Known Threat',
+          location: 'Contact Database',
+          threat: 'HIGH',
+          known: 'High threat individuals will be marked accordingly. In active operations this section contains detailed intelligence on individuals representing a direct threat to the operation or the Imperium.',
+          released: true,
+        }
+      },
+      {
+        table: 'log_entries',
+        data: {
+          id: 'log-demo-01',
+          title: 'MISSION LOG — DEMONSTRATION ENTRY',
+          date: 'Example',
+          content: `This section displays mission log entries issued by your handler.\n\nLog entries record operational milestones, debrief summaries, status updates, and formal records of events during an investigation.\n\nEntries are read-only and issued by your handler. Your personal field notes — which are private and editable — are below.`,
+          released: true,
+        }
+      },
+    ];
+
+    for (const item of demoItems) {
+      await sbFetch(item.table, 'POST', item.data);
+    }
+    console.log('Demo data seeded to Supabase');
+    gmLoadAllData();
+  } catch(e) {
+    console.warn('Seed error:', e.message);
+  }
+}
+
+
+// ─── INIT ────────────────────────────────────────────────────────
+function initApp() {
+  loadLogNotes();
+  renderThreads();
+  // Load live data from Supabase
+  loadReleasedData();
+  // Start polling for GM alerts every 15s
+  startAlertPolling();
+  // Start listening for GM dossier transmissions
+  initTransmitListener();
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────
+// Section label map for mobile nav display
+const SECTION_LABELS = {
+  briefings: '► BRIEFINGS', evidence: '► EVIDENCE', contacts: '► CONTACTS',
+  threads: '► MISSION LOG', penitent: '► PENITENT CLAUSE',
+  charsheet: '► OPERATIVE FILE', tools: '► TOOLS'
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  // Highlight desktop tab
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + id + "'")) {
+      t.classList.add('active');
+    }
+  });
+  // Highlight + scroll mobile tab
+  const mobileNav = document.getElementById('nav-mobile');
+  document.querySelectorAll('.nav-mobile-item').forEach(t => {
+    const isActive = t.dataset.section === id;
+    t.classList.toggle('active', isActive);
+    if (isActive && mobileNav) {
+      // Scroll active tab into view within the nav bar
+      const navLeft = mobileNav.scrollLeft;
+      const navWidth = mobileNav.offsetWidth;
+      const tabLeft = t.offsetLeft;
+      const tabRight = tabLeft + t.offsetWidth;
+      if (tabLeft < navLeft) {
+        mobileNav.scrollLeft = tabLeft - 8;
+      } else if (tabRight > navLeft + navWidth) {
+        mobileNav.scrollLeft = tabRight - navWidth + 8;
+      }
+    }
+  });
+}
+
+function toggleMobileNav() { /* no-op — dropdown removed */ }
+function closeMobileNav()  { /* no-op — dropdown removed */ }
+
+// ─── SWIPE NAVIGATION ────────────────────────────────────────────
+(function() {
+  const SECTIONS = ['briefings','evidence','contacts','threads','penitent','operative'];
+  let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+
+  function currentSectionIndex() {
+    for (let i = 0; i < SECTIONS.length; i++) {
+      const el = document.getElementById('section-' + SECTIONS[i]);
+      if (el && el.classList.contains('active')) return i;
+    }
+    return 0;
+  }
+
+  document.addEventListener('touchstart', e => {
+    // Only track single-finger touches on the content area
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchStartX    = t.clientX;
+    touchStartY    = t.clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (e.changedTouches.length !== 1) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+
+    // Must be a fast, mostly-horizontal swipe
+    if (dt > 400) return;
+    if (Math.abs(dx) < 60) return;
+    if (Math.abs(dy) > Math.abs(dx) * 0.7) return;
+
+    // Don't swipe if touching the nav bar or GM console
+    const target = e.target;
+    if (target.closest('.nav-mobile') || target.closest('#gm-console') || target.closest('.modal-overlay')) return;
+    // Don't swipe over horizontally-scrollable elements
+    if (target.closest('.nav-mobile') || target.closest('[data-no-swipe]')) return;
+
+    const idx = currentSectionIndex();
+    if (dx < 0 && idx < SECTIONS.length - 1) {
+      showSection(SECTIONS[idx + 1]);
+    } else if (dx > 0 && idx > 0) {
+      showSection(SECTIONS[idx - 1]);
+    }
+  }, { passive: true });
+})();
+
+
+// ─── BRIEFINGS ───────────────────────────────────────────────────
+function renderBriefings() {
+  const container = document.getElementById('briefing-cards');
+  const count = document.getElementById('briefing-count');
+  count.textContent = GM_DATA.briefings.length + ' RECORDS';
+  container.innerHTML = '';
+  GM_DATA.briefings.forEach(b => {
+    const note = load('note_' + b.id, '');
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.onclick = () => openBriefing(b);
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${b.title}</div>
+        <div class="card-badge badge-unk">${b.classification}</div>
+      </div>
+      <div class="card-body">${b.summary}</div>
+      <div class="card-meta">
+        <span>${b.date}</span>
+        <span>${note ? '◆ NOTES' : '— tap to open'}</span>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function openBriefing(b) {
+  document.getElementById('modal-title').textContent = b.title;
+  const note = load('note_' + b.id, '');
+  document.getElementById('modal-body').innerHTML = `
+    <div class="briefing-text">${b.content.replace(/\n/g,'<br>')}</div>
+    <div class="notes-section" style="margin-top:16px;">
+      <div class="notes-header">► YOUR NOTES <span class="notes-saved" id="modal-saved">SAVED</span></div>
+      <textarea class="notes-textarea" id="modal-note" rows="5" placeholder="Add your notes here...">${note}</textarea>
+    </div>`;
+  document.getElementById('modal-note').oninput = () => {
+    save('note_' + b.id, document.getElementById('modal-note').value);
+    const s = document.getElementById('modal-saved');
+    s.classList.add('visible');
+    setTimeout(() => s.classList.remove('visible'), 1500);
+    renderBriefings();
+  };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ─── EVIDENCE ────────────────────────────────────────────────────
+let evidenceFilter = 'active';
+function setEvidenceFilter(f) {
+  evidenceFilter = f;
+  ['active','archived','all'].forEach(x => {
+    const btn = document.getElementById('ev-filter-' + x);
+    if (btn) btn.classList.toggle('active', x === f);
+  });
+  renderEvidence();
+}
+
+function renderEvidence() {
+  const container = document.getElementById('evidence-cards');
+  const count = document.getElementById('evidence-count');
+  container.innerHTML = '';
+  const items = GM_DATA.evidence.filter(e => {
+    const arch = load('archived_' + e.id, '') === 'true';
+    if (evidenceFilter === 'active') return !arch;
+    if (evidenceFilter === 'archived') return arch;
+    return true;
+  });
+  count.textContent = items.length + ' ITEMS';
+  items.forEach(e => {
+    const note = load('note_' + e.id, '');
+    const arch = load('archived_' + e.id, '') === 'true';
+    const div = document.createElement('div');
+    div.className = 'card' + (arch ? ' archived-card' : '');
+    div.onclick = () => openEvidence(e);
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${e.title}</div>
+        <div class="card-badge ${arch ? 'badge-unk' : 'badge-unk'}">${arch ? 'ARCHIVED' : e.type}</div>
+      </div>
+      <div class="card-body">${e.summary}</div>
+      <div class="card-meta">
+        <span>FOUND: ${e.location}</span>
+        <span>${note ? '◆ NOTES' : '— tap to open'}</span>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function openEvidence(e) {
+  document.getElementById('modal-title').textContent = e.title;
+  const note = load('note_' + e.id, '');
+  const arch = load('archived_' + e.id, '') === 'true';
+  const rows = [
+    ['Type', e.type],
+    ['Location Found', e.location],
+    ['Summary', e.summary],
+  ];
+  let html = rows.map(([l,v]) => `<div class="detail-row"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`).join('');
+  html += `<div style="margin-top:12px;"><div class="notes-header" style="background:var(--green-dark);border:1px solid var(--green-dim);padding:6px 12px;font-size:9px;letter-spacing:3px;color:var(--green-dim);display:flex;justify-content:space-between;">► FULL RECORD <span class="notes-saved visible" id="modal-saved2"></span></div><div class="briefing-text" style="border:1px solid var(--green-dark);border-top:none;">${e.content.replace(/\n/g,'<br>')}</div></div>`;
+  html += `<div class="notes-section" style="margin-top:12px;"><div class="notes-header">► YOUR NOTES <span class="notes-saved" id="modal-saved">SAVED</span></div><textarea class="notes-textarea" id="modal-note" rows="4" placeholder="Your analysis and observations...">${note}</textarea></div>`;
+  html += `<div style="margin-top:10px;display:flex;gap:8px;"><button class="archive-btn ${arch ? 'unarchive' : ''}" id="evidence-archive-btn" onclick="toggleArchiveEvidence('${e.id}')">${arch ? '↑ RESTORE TO ACTIVE' : '↓ MARK AS OBSOLETE'}</button></div>`;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-note').oninput = () => {
+    save('note_' + e.id, document.getElementById('modal-note').value);
+    const s = document.getElementById('modal-saved');
+    s.classList.add('visible');
+    setTimeout(() => s.classList.remove('visible'), 1500);
+    renderEvidence();
+  };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function toggleArchiveEvidence(id) {
+  const arch = load('archived_' + id, '') === 'true';
+  save('archived_' + id, arch ? 'false' : 'true');
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderEvidence();
+}
+
+// ─── CONTACTS ────────────────────────────────────────────────────
+const THREAT_BADGE = { LOW:'badge-low', MEDIUM:'badge-med', HIGH:'badge-high', UNKNOWN:'badge-unk', ALLY:'badge-ally' };
+
+let contactFilter = 'active';
+function setContactFilter(f) {
+  contactFilter = f;
+  ['active','archived','all'].forEach(x => {
+    const btn = document.getElementById('ct-filter-' + x);
+    if (btn) btn.classList.toggle('active', x === f);
+  });
+  renderContacts();
+}
+
+// ── THREAT RATING HELPERS ─────────────────────────────────────────
+function threatPips(threat) {
+  const levels = { 'UNKNOWN':0, 'ALLIED':-1, 'LOW':1, 'MEDIUM':2, 'HIGH':3, 'EXTREME':4 };
+  const n = levels[threat] !== undefined ? levels[threat] : 0;
+  if (n < 0) {
+    // Allied — green pips
+    return Array.from({length:4}, (_,i) =>
+      `<div class="dossier-threat-pip lit" style="background:var(--green-bright)"></div>`
+    ).join('');
+  }
+  return Array.from({length:4}, (_,i) => {
+    if (i >= n) return `<div class="dossier-threat-pip"></div>`;
+    const cls = n >= 3 ? 'lit-red' : n >= 2 ? 'lit-amber' : 'lit';
+    return `<div class="dossier-threat-pip ${cls}"></div>`;
+  }).join('');
+}
+
+function classificationClass(c) {
+  const map = { 'STANDARD':'class-standard','AMBER':'class-amber','CRIMSON':'class-crimson','VERMILLION':'class-vermillion','THRONEGOLD':'class-thronegold' };
+  return map[c] || 'class-standard';
+}
+
+function threatCardClass(threat) {
+  if (threat === 'HIGH') return ' threat-high';
+  if (threat === 'EXTREME') return ' threat-extreme';
+  if (threat === 'ALLIED') return ' threat-allied';
+  return '';
+}
+
+function buildDossierCard(c, compact) {
+  const arch = load('archived_' + c.id, '') === 'true';
+  const portrait = getPortrait(c);
+  const tags = (c.tags || []).filter(t => t && !t.startsWith('['));
+  const tagHTML = tags.map(t => `<div class="dossier-tag">${t}</div>`).join('');
+  const classCode = c.classification || 'STANDARD';
+  return `
+    <div class="dossier-portrait-wrap">
+      <img class="dossier-portrait" src="${portrait}" alt="">
+      <div class="dossier-portrait-overlay"></div>
+      <div class="dossier-tgt-id">${c.id || 'TGT-UNK'}</div>
+      <div class="dossier-class-badge ${classificationClass(classCode)}">${classCode}</div>
+      <div class="dossier-crosshair"></div>
+    </div>
+    <div class="dossier-info">
+      <div class="dossier-name">${c.name}</div>
+      <div class="dossier-role">${c.role}</div>
+      ${tagHTML ? `<div class="dossier-tags">${tagHTML}</div>` : ''}
+      <div class="dossier-threat-bar">
+        <div class="dossier-threat-label">THREAT</div>
+        <div class="dossier-threat-track">${threatPips(c.threat || 'UNKNOWN')}</div>
+        <div style="font-size:8px;letter-spacing:1px;color:var(--green-dim);flex-shrink:0;">${c.threat || 'UNKNOWN'}</div>
+      </div>
+    </div>`;
+}
+
+function renderContacts() {
+  const container = document.getElementById('contact-cards');
+  const count = document.getElementById('contact-count');
+  container.innerHTML = '';
+  const items = GM_DATA.contacts.filter(c => {
+    const arch = load('archived_' + c.id, '') === 'true';
+    if (contactFilter === 'active') return !arch;
+    if (contactFilter === 'archived') return arch;
+    return true;
+  });
+  count.textContent = items.length + ' CONTACT' + (items.length !== 1 ? 'S' : '');
+  if (items.length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;font-size:10px;color:var(--green-dark);letter-spacing:2px;">NO CONTACTS ON FILE</div>';
+    return;
+  }
+  items.forEach(c => {
+    const arch = load('archived_' + c.id, '') === 'true';
+    const div = document.createElement('div');
+    div.className = 'dossier-card' + threatCardClass(c.threat) + (arch ? ' archived-card' : '');
+    div.onclick = () => openContact(c);
+    div.innerHTML = buildDossierCard(c);
+    container.appendChild(div);
+  });
+  // Check for pending transmit pushes
+  checkPendingTransmit();
+}
+
+function openContact(c) {
+  const note = load('note_' + c.id, '');
+  const arch = load('archived_' + c.id, '') === 'true';
+  const portrait = getPortrait(c);
+  const tags = (c.tags || []).filter(t => t && !t.startsWith('['));
+  const classCode = c.classification || 'STANDARD';
+
+  document.getElementById('modal-title').textContent = c.id || c.name;
+
+  let html = `
+    <div class="dossier-modal-header">
+      <img class="dossier-modal-portrait" src="${portrait}" alt="">
+      <div class="dossier-modal-meta">
+        <div class="dossier-modal-name">${c.name}</div>
+        <div class="dossier-modal-role">${c.role}</div>
+        ${tags.length ? `<div class="dossier-modal-tags">${tags.map(t => `<div class="dossier-tag">${t}</div>`).join('')}</div>` : ''}
+        <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+          <div class="dossier-class-badge ${classificationClass(classCode)}" style="position:static;">${classCode}</div>
+          <div style="font-size:9px;letter-spacing:1px;color:var(--green-dim)">THREAT: ${c.threat || 'UNKNOWN'}</div>
+        </div>
+      </div>
+    </div>`;
+
+  html += `<div class="detail-row"><div class="detail-label">Location</div><div class="detail-value">${c.location || '—'}</div></div>`;
+
+  if (c.physical) {
+    html += `<div class="detail-row"><div class="detail-label">Physical</div><div class="detail-value">${c.physical}</div></div>`;
+  }
+
+  html += `<div class="detail-row"><div class="detail-label">Intel</div><div class="detail-value" style="line-height:1.7;">${c.known}</div></div>`;
+
+  html += `<div class="notes-section" style="margin-top:14px;">
+    <div class="notes-header">► YOUR NOTES <span class="notes-saved" id="modal-saved">SAVED</span></div>
+    <textarea class="notes-textarea" id="modal-note" rows="4" placeholder="Your observations, suspicions, interactions...">${note}</textarea>
+  </div>`;
+
+  html += `<div style="margin-top:10px;display:flex;gap:8px;">
+    <button class="archive-btn ${arch ? 'unarchive' : ''}" onclick="toggleArchiveContact('${c.id}')">
+      ${arch ? '↑ RESTORE TO ACTIVE' : '↓ MARK AS OBSOLETE'}
+    </button>
+  </div>`;
+
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-note').oninput = () => {
+    save('note_' + c.id, document.getElementById('modal-note').value);
+    const s = document.getElementById('modal-saved');
+    s.classList.add('visible');
+    setTimeout(() => s.classList.remove('visible'), 1500);
+    renderContacts();
+  };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function toggleArchiveContact(id) {
+  const arch = load('archived_' + id, '') === 'true';
+  save('archived_' + id, arch ? 'false' : 'true');
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderContacts();
+}
+
+// ── PORTRAIT HELPERS ─────────────────────────────────────────────
+function gmPortraitSelectChange() {
+  const sel = document.getElementById('ct-portrait-select');
+  const wrap = document.getElementById('ct-portrait-upload-wrap');
+  if (sel && wrap) {
+    wrap.style.display = sel.value === 'UPLOAD' ? 'block' : 'none';
+    if (sel.value !== 'UPLOAD') {
+      document.getElementById('ct-portrait-preview').style.display = 'none';
+    }
+  }
+}
+
+function gmPortraitPreview() {
+  const fileInput = document.getElementById('ct-portrait-file');
+  const preview = document.getElementById('ct-portrait-preview');
+  const img = document.getElementById('ct-portrait-img');
+  if (!fileInput.files || !fileInput.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    img.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(fileInput.files[0]);
+}
+
+// ── TRANSMIT PUSH ─────────────────────────────────────────────────
+let transmitChannel = null;
+let supabaseClient = null;
+let transmitPollInterval = null;
+let transmitLastSeen = localStorage.getItem('transmit_last_seen') || new Date(0).toISOString();
+
+function initTransmitListener() {
+  // Poll briefing_push every 5s for new transmissions
+  if (transmitPollInterval) clearInterval(transmitPollInterval);
+  transmitPollInterval = setInterval(pollTransmit, 5000);
+  // Also check immediately
+  pollTransmit();
+}
+
+async function pollTransmit() {
+  try {
+    const rows = await sbDirect('briefing_push', `transmitted_at=gt.${encodeURIComponent(transmitLastSeen)}&order=transmitted_at.asc`);
+    if (!Array.isArray(rows) || !rows.length) return;
+    // Update last seen to latest row
+    transmitLastSeen = rows[rows.length - 1].transmitted_at;
+    localStorage.setItem('transmit_last_seen', transmitLastSeen);
+    // Queue each new transmission
+    for (const row of rows) {
+      handleTransmitPush(row);
+    }
+  } catch(e) { /* silent — polling failures are non-critical */ }
+}
+
+function handleTransmitPush(push) {
+  if (!push || !push.contact_id) return;
+  const itemType = push.item_type || 'contact';
+  const itemId   = push.contact_id;
+  // Mark as pending in localStorage
+  const pending = JSON.parse(localStorage.getItem('transmit_pending') || '[]');
+  const key = itemType + ':' + itemId;
+  if (!pending.includes(key)) {
+    pending.push(key);
+    localStorage.setItem('transmit_pending', JSON.stringify(pending));
+  }
+  // Show immediately
+  showTransmitForKey(key);
+}
+
+function showTransmitForKey(key) {
+  const [type, id] = key.split(':');
+  if (type === 'contact') {
+    const item = GM_DATA.contacts.find(c => c.id === id);
+    if (item) showTransmitOverlay(item, 'contact');
+  } else if (type === 'briefing') {
+    const item = GM_DATA.briefings.find(b => b.id === id);
+    if (item) showTransmitOverlay(item, 'briefing');
+  } else if (type === 'evidence') {
+    const item = GM_DATA.evidence.find(e => e.id === id);
+    if (item) showTransmitOverlay(item, 'evidence');
+  }
+}
+
+function checkPendingTransmit() {
+  const pending = JSON.parse(localStorage.getItem('transmit_pending') || '[]');
+  if (!pending.length) return;
+  const key = pending[0];
+  // Support both old format (bare id) and new format (type:id)
+  if (key.includes(':')) {
+    showTransmitForKey(key);
+  } else {
+    // Legacy: bare contact id
+    const contact = GM_DATA.contacts.find(c => c.id === key);
+    if (contact) showTransmitOverlay(contact, 'contact');
+  }
+}
+
+function showTransmitOverlay(item, type) {
+  type = type || 'contact';
+  const wrap = document.getElementById('transmit-card-wrap');
+  const scan = document.getElementById('transmit-scan');
+  wrap.innerHTML = '';
+
+  // Update header labels
+  const header = document.querySelector('.transmit-header');
+  const subheader = document.querySelector('.transmit-subheader');
+  if (type === 'contact') {
+    if (header)    header.textContent = 'INCOMING TRANSMISSION';
+    if (subheader) subheader.textContent = 'ORDO HERETICUS · SECURE CHANNEL';
+  } else if (type === 'briefing') {
+    if (header)    header.textContent = 'CLASSIFIED BRIEFING';
+    if (subheader) subheader.textContent = 'ORDO HERETICUS · EYES ONLY';
+  } else if (type === 'evidence') {
+    if (header)    header.textContent = 'EVIDENCE TRANSFER';
+    if (subheader) subheader.textContent = 'ORDO HERETICUS · ASSET LOG';
+  }
+
+  if (type === 'contact') {
+    // Feature 15: Full dossier with large portrait
+    const portrait = getPortrait(item);
+    const tags = (item.tags || []).filter(t => t && !t.startsWith('['));
+    const tagHtml = tags.map(t => `<div class="transmit-dossier-tag">${t}</div>`).join('');
+    const fields = [
+      ['ROLE',         item.role          || '—'],
+      ['AFFILIATION',  item.affiliation    || '—'],
+      ['LAST SEEN',    item.lastSeen       || '—'],
+      ['NOTES',        item.notes         || '—'],
+    ].filter(([,v]) => v && v !== '—');
+
+    const fieldHtml = fields.map(([l,v]) => `
+      <div class="transmit-dossier-field">
+        <div class="transmit-dossier-field-label">${l}</div>
+        <div class="transmit-dossier-field-value">${v}</div>
+      </div>`).join('');
+
+    const div = document.createElement('div');
+    div.className = 'transmit-full-dossier';
+    div.innerHTML = `
+      <div class="transmit-portrait-col">
+        <img class="transmit-portrait-large" src="${portrait}" alt="">
+        <div class="transmit-portrait-id">${item.id || 'TGT-UNK'}</div>
+        ${buildTransmitClassBadge(item.classification)}
+      </div>
+      <div class="transmit-dossier-col">
+        <div class="transmit-dossier-name">${item.name}</div>
+        <div class="transmit-dossier-role">${item.role || '—'}</div>
+        ${tagHtml ? `<div class="transmit-dossier-tags">${tagHtml}</div>` : ''}
+        <div class="transmit-dossier-fields">${fieldHtml}</div>
+        <div class="transmit-threat-row">
+          <div class="transmit-threat-label">THREAT LEVEL</div>
+          <div class="transmit-threat-pips">${buildTransmitThreatPips(item.threat)}</div>
+          <span style="font-size:8px;letter-spacing:1px;color:var(--green-dim);margin-left:6px;">${item.threat||'UNKNOWN'}</span>
+        </div>
+      </div>`;
+    wrap.appendChild(div);
+
+  } else if (type === 'briefing') {
+    const div = document.createElement('div');
+    div.className = 'transmit-briefing-card';
+    div.innerHTML = `
+      <div class="transmit-card-header">
+        <div class="transmit-card-title">${item.title}</div>
+        <div class="transmit-card-badge">${item.classification || 'CLASSIFIED'}</div>
+      </div>
+      <div class="transmit-card-body">${item.summary || ''}</div>
+      <div class="transmit-card-meta">
+        <span>${item.date || '—'}</span>
+        <span>ORDO HERETICUS</span>
+      </div>`;
+    wrap.appendChild(div);
+
+  } else if (type === 'evidence') {
+    const div = document.createElement('div');
+    div.className = 'transmit-evidence-card';
+    div.innerHTML = `
+      <div class="transmit-card-header">
+        <div class="transmit-card-title">${item.title}</div>
+        <div class="transmit-card-badge">${item.type || 'EVIDENCE'}</div>
+      </div>
+      <div class="transmit-card-body">${item.summary || ''}</div>
+      <div class="transmit-card-meta">
+        <span>FOUND: ${item.location || '—'}</span>
+        <span>ASSET LOG</span>
+      </div>`;
+    wrap.appendChild(div);
+  }
+
+  // Reset scan animation
+  scan.style.animation = 'none';
+  scan.offsetHeight;
+  scan.style.animation = '';
+  document.getElementById('transmit-overlay').classList.add('active');
+}
+
+function dismissTransmit() {
+  document.getElementById('transmit-overlay').classList.remove('active');
+  // Clear the first pending item
+  const pending = JSON.parse(localStorage.getItem('transmit_pending') || '[]');
+  if (pending.length) {
+    pending.shift();
+    localStorage.setItem('transmit_pending', JSON.stringify(pending));
+    // If more queued, show next after brief delay
+    if (pending.length) setTimeout(() => showTransmitForKey(pending[0]), 600);
+  }
+  renderContacts();
+  renderBriefings();
+  renderEvidence();
+}
+
+// ─── LOG ENTRIES ─────────────────────────────────────────────────
+function renderLogEntries() {
+  const container = document.getElementById('log-entries-container');
+  container.innerHTML = '';
+  GM_DATA.logEntries.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML = `<div class="log-entry-header"><span>${entry.title}</span><span style="color:var(--green-dim);font-size:9px;">${entry.date}</span></div><div class="log-entry-body">${entry.content.replace(/\n/g,'<br>')}</div>`;
+    container.appendChild(div);
+  });
+}
+
+// ─── THREADS ─────────────────────────────────────────────────────
+function renderThreads() {
+  const threads = loadJson('threads', []);
+  const list = document.getElementById('threads-list');
+  const count = document.getElementById('thread-count');
+  const open = threads.filter(t => t.status !== 'closed').length;
+  count.textContent = open + ' OPEN';
+
+  if (threads.length === 0) {
+    list.innerHTML = '<div class="empty-state">NO THREADS LOGGED — ADD BELOW</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  threads.forEach((t, i) => {
+    const statusClass = { open: 'thread-open', closed: 'thread-closed', urgent: 'thread-urgent' }[t.status] || 'thread-open';
+    const statusLabel = { open: 'OPEN', closed: 'RESOLVED', urgent: 'URGENT' }[t.status] || 'OPEN';
+    const item = document.createElement('div');
+    item.className = 'thread-item';
+    item.innerHTML = `
+      <button class="thread-status-btn" onclick="cycleThread(${i})">${statusLabel}</button>
+      <div class="thread-text ${statusClass}">${t.text}</div>
+      <button class="thread-del" onclick="deleteThread(${i})" title="Remove">✕</button>`;
+    list.appendChild(item);
+  });
+}
+
+function addThread() {
+  const text = document.getElementById('thread-text-input').value.trim();
+  const status = document.getElementById('thread-status-select').value;
+  if (!text) return;
+  const threads = loadJson('threads', []);
+  threads.push({ text, status });
+  saveJson('threads', threads);
+  document.getElementById('thread-text-input').value = '';
+  renderThreads();
+  flashSave();
+}
+
+function cycleThread(i) {
+  const threads = loadJson('threads', []);
+  const cycle = { open: 'urgent', urgent: 'closed', closed: 'open' };
+  threads[i].status = cycle[threads[i].status] || 'open';
+  saveJson('threads', threads);
+  renderThreads();
+}
+
+function deleteThread(i) {
+  const threads = loadJson('threads', []);
+  threads.splice(i, 1);
+  saveJson('threads', threads);
+  renderThreads();
+}
+
+function loadLogNotes() {
+  document.getElementById('log-notes').value = load('log-notes-text', '');
+}
+
+function saveNote(textareaId, savedId) {
+  const val = document.getElementById(textareaId).value;
+  save(textareaId + '-text', val);
+  const s = document.getElementById(savedId);
+  if (s) { s.classList.add('visible'); setTimeout(() => s.classList.remove('visible'), 1500); }
+  flashSave();
+}
+
+// ─── CHARACTER SHEET — functions defined above in new system ────
+
+// ═══════════════════════════════════════════════════════════════
+// GM CONSOLE
+// ═══════════════════════════════════════════════════════════════
+const GM_USER = "SABOT";
+const GM_PASS = "purge";
+
+let gmAuthenticated = false;
+let activeThreadId = null;
+
+function openGM() {
+  document.getElementById('gm-overlay').classList.add('open');
+  seedDemoDataIfEmpty();
+  if (!gmAuthenticated) {
+    document.getElementById('gm-auth').style.display = 'flex';
+    document.getElementById('gm-console').classList.remove('open');
+  } else {
+    showGMConsole();
+  }
+}
+
+function closeGM() {
+  document.getElementById('gm-overlay').classList.remove('open');
+}
+
+function gmLogin() {
+  const user = document.getElementById('gm-user-input').value.trim().toUpperCase();
+  const pass = document.getElementById('gm-pass-input').value.trim().toLowerCase();
+  if (user === GM_USER && pass === GM_PASS) {
+    gmAuthenticated = true;
+    document.getElementById('gm-user-display').textContent = user;
+    showGMConsole();
+  } else {
+    const err = document.getElementById('gm-auth-error');
+    err.style.display = 'block';
+    document.getElementById('gm-pass-input').value = '';
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const passInput = document.getElementById('gm-pass-input');
+  if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') gmLogin(); });
+});
+
+function showGMConsole() {
+  document.getElementById('gm-auth').style.display = 'none';
+  document.getElementById('gm-console').classList.add('open');
+  renderCharOverview();
+  gmLoadAllData();
+  loadMissionPacks();
+}
+
+// ── GM SECTIONS ──────────────────────────────────────────────────
+function showGMSection(id) {
+  document.querySelectorAll('.gm-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('gm-section-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'charoverview') renderCharOverview();
+  if (id === 'datamanage') gmLoadAllData();
+  if (id === 'packs') loadMissionPacks();
+}
+
+// ── OPERATIVE OVERVIEW ───────────────────────────────────────────
+function renderCharOverview() {
+  const grid = document.getElementById('char-overview-grid');
+  // Collect all known operative names from localStorage
+  const operatives = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('acolyte_') && key.endsWith('_charsheet')) {
+      const name = key.replace('acolyte_', '').replace('_charsheet', '');
+      try {
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        operatives.push({ name, data });
+      } catch {}
+    }
+  }
+
+  if (operatives.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;font-size:10px;color:var(--amber-dark);letter-spacing:2px;">No operative sheets found on this device. Players must log in and fill their sheets on this device for them to appear here.</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  operatives.forEach(op => {
+    const d = op.data;
+    const card = document.createElement('div');
+    card.className = 'char-overview-card';
+    card.innerHTML = `
+      <div class="char-overview-header">
+        ${d['id-name'] || op.name}
+        <span style="font-size:9px;color:var(--amber-dark);margin-left:8px;">${d['id-role'] || '—'}</span>
+      </div>
+      <div class="char-stat-mini">
+        <div class="csm-cell"><div class="csm-label">WOUNDS</div><div class="csm-val">${d['stat-wounds'] || '—'}</div></div>
+        <div class="csm-cell"><div class="csm-label">FATE</div><div class="csm-val">${d['stat-fate'] || '—'}</div></div>
+        <div class="csm-cell"><div class="csm-label">CORRUPT</div><div class="csm-val">${d['stat-corruption'] || '0'}</div></div>
+      </div>
+      <div class="char-stat-mini" style="border-bottom:none;">
+        <div class="csm-cell"><div class="csm-label">WS</div><div class="csm-val">${d['char-ws'] || '—'}</div></div>
+        <div class="csm-cell"><div class="csm-label">BS</div><div class="csm-val">${d['char-bs'] || '—'}</div></div>
+        <div class="csm-cell"><div class="csm-label">AG</div><div class="csm-val">${d['char-ag'] || '—'}</div></div>
+      </div>
+      <div class="char-overview-body">
+        <span style="color:var(--amber-dim);">Origin:</span> ${d['id-origin'] || '—'} &nbsp;|&nbsp;
+        <span style="color:var(--amber-dim);">Faction:</span> ${d['id-faction'] || '—'}<br>
+        <span style="color:var(--amber-dim);">Melee:</span> ${d['sk-melee-tot'] || '—'} &nbsp;
+        <span style="color:var(--amber-dim);">Ranged:</span> ${d['sk-ranged-tot'] || '—'} &nbsp;
+        <span style="color:var(--amber-dim);">WIL:</span> ${d['char-wil'] || '—'}<br>
+        <span style="color:var(--amber-dim);">Status:</span> ${d['stat-wounds'] || '—'} wounds &nbsp;|&nbsp; Superiority: ${d['stat-superiority'] || '0'}
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+// ─── PORTRAIT & DOSSIER HELPERS ──────────────────────────────────
+const STOCK_PORTRAITS = {
+  UNKNOWN_ROBED_M:  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 4"%3E%3Crect width="3" height="4" fill="%23003010"/%3E%3Ccircle cx="1.5" cy="1.2" r="0.7" fill="%2300aa2b"/%3E%3Crect x="0.5" y="2.1" width="2" height="1.8" rx="0.3" fill="%2300aa2b"/%3E%3C/svg%3E',
+  UNKNOWN_ROBED_F:  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 4"%3E%3Crect width="3" height="4" fill="%23003010"/%3E%3Ccircle cx="1.5" cy="1.2" r="0.7" fill="%2300aa2b"/%3E%3Crect x="0.4" y="2.1" width="2.2" height="1.8" rx="0.4" fill="%2300aa2b"/%3E%3C/svg%3E',
+  UNKNOWN_ARMOURED: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 4"%3E%3Crect width="3" height="4" fill="%23003010"/%3E%3Ccircle cx="1.5" cy="1.1" r="0.65" fill="%2300aa2b"/%3E%3Crect x="0.3" y="2" width="2.4" height="2" rx="0.2" fill="%2300aa2b"/%3E%3C/svg%3E',
+  UNKNOWN_CIVILIAN: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 4"%3E%3Crect width="3" height="4" fill="%23003010"/%3E%3Ccircle cx="1.5" cy="1.2" r="0.65" fill="%2300aa2b"/%3E%3Crect x="0.6" y="2.1" width="1.8" height="1.8" rx="0.3" fill="%2300aa2b"/%3E%3C/svg%3E',
+};
+
+function getPortrait(item) {
+  if (item && item.portrait_data && item.portrait_data.startsWith('data:')) return item.portrait_data;
+  return STOCK_PORTRAITS[(item && item.portrait_file) || 'UNKNOWN_ROBED_M'] || STOCK_PORTRAITS['UNKNOWN_ROBED_M'];
+}
+
+function buildDossierCard(c) {
+  const portrait  = getPortrait(c);
+  const tags      = (c.tags || []).filter(t => t && !t.startsWith('['));
+  const tagHTML   = tags.map(t => `<div class="dossier-tag">${t}</div>`).join('');
+  const classCode = c.classification || 'STANDARD';
+  return `
+    <div class="dossier-portrait-wrap">
+      <img class="dossier-portrait" src="${portrait}" alt="">
+      <div class="dossier-portrait-overlay"></div>
+      <div class="dossier-tgt-id">${c.id || 'TGT-UNK'}</div>
+      <div class="dossier-class-badge ${classificationClass(classCode)}">${classCode}</div>
+      <div class="dossier-crosshair"></div>
+    </div>
+    <div class="dossier-info">
+      <div class="dossier-name">${c.name}</div>
+      <div class="dossier-role">${c.role || ''}</div>
+      ${tagHTML ? `<div class="dossier-tags">${tagHTML}</div>` : ''}
+      <div class="dossier-threat-bar">
+        <div class="dossier-threat-label">THREAT</div>
+        <div class="dossier-threat-track">${threatPips(c.threat || 'UNKNOWN')}</div>
+        <div style="font-size:8px;letter-spacing:1px;color:var(--green-dim);flex-shrink:0;">${c.threat || 'UNKNOWN'}</div>
+      </div>
+    </div>`;
+}
+
+function gmPortraitSelectChange() {
+  const sel  = document.getElementById('ct-portrait-select');
+  const wrap = document.getElementById('ct-portrait-upload-wrap');
+  if (sel && wrap) {
+    wrap.style.display = sel.value === 'UPLOAD' ? 'block' : 'none';
+    if (sel.value !== 'UPLOAD') document.getElementById('ct-portrait-preview').style.display = 'none';
+  }
+}
+
+function gmPortraitPreview() {
+  const fileInput = document.getElementById('ct-portrait-file');
+  const preview   = document.getElementById('ct-portrait-preview');
+  const img       = document.getElementById('ct-portrait-img');
+  if (!fileInput.files || !fileInput.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => { img.src = e.target.result; preview.style.display = 'block'; };
+  reader.readAsDataURL(fileInput.files[0]);
+}
+
+</script>
+
+  
+  <!-- ── GM PREVIEW MODAL ──────────────────────────────────────── -->
+  <div id="gm-preview-modal">
+    <div class="gm-preview-box">
+      <div class="gm-preview-header">
+        <div class="gm-preview-label">◉ PLAYER VIEW PREVIEW</div>
+        <div class="gm-preview-badge" id="gm-preview-type-badge">—</div>
+        <button class="gm-preview-close" onclick="closeGMPreview()">✕ CLOSE</button>
+      </div>
+      <div class="gm-preview-body" id="gm-preview-body"></div>
+      <div class="gm-preview-note">THIS IS HOW PLAYERS WILL SEE THIS ITEM WHEN RELEASED</div>
+    </div>
+  </div>
+
+  <!-- ── DELETE PACK MODAL ──────────────────────────────────────── -->
+  <div id="delete-pack-modal">
+    <div class="delete-pack-box">
+      <div class="delete-pack-title">◈ PURGE MISSION DATA</div>
+      <div class="delete-pack-warn">
+        This will permanently delete the mission pack and ALL associated data including briefings, evidence, contacts, and log entries.<br><br>
+        This action cannot be undone.
+      </div>
+      <div class="delete-pack-name-display" id="delete-pack-name-display">—</div>
+      <div class="delete-pack-label">TYPE <span style="color:#cc2200;letter-spacing:3px;">DELETE</span> TO CONFIRM</div>
+      <input type="text" id="delete-pack-confirm-input" placeholder="DELETE" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onDeleteInput()">
+      <div class="delete-pack-actions">
+        <button class="delete-pack-cancel-btn" onclick="closeDeletePackModal()">◄ CANCEL</button>
+        <button class="delete-pack-go-btn" id="delete-pack-go-btn" disabled onclick="executeDeletePack()">◈ PURGE</button>
+      </div>
+      <div class="delete-pack-status" id="delete-pack-status"></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INFO</title>
+<script src="cs_shared.js"></script>
+<style>
+
+/* ── INFLUENCE ── */
+.inf-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--green-dark);
+}
+.inf-row:last-child { border-bottom: none; }
+.inf-faction {
+  flex: 1;
+  font-size: 11px;
+  color: var(--green-dim);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inf-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.inf-value {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  min-width: 28px;
+  text-align: center;
+}
+.inf-attitude {
+  font-size: 10px;
+  min-width: 80px;
+  text-align: right;
+  letter-spacing: 1px;
+}
+
+/* ── GOALS ── */
+.goal-block {
+  border: 1px solid var(--green-mid);
+  background: var(--black);
+  padding: 8px;
+  margin-bottom: 6px;
+}
+.goal-label {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--green-bright);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.goal-hint {
+  font-size: 10px;
+  color: var(--amber-dim);
+  margin-top: 3px;
+}
+
+/* ── CONNECTIONS ── */
+.conn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+</style>
+</head>
+<body>
+<div class="sheet-container">
+  <div class="sheet-grid">
+
+    <!-- INFLUENCE -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// INFLUENCE</div>
+      <div class="panel-body" style="padding:0;">
+        <div id="influence-list"></div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="panel">
+      <div class="panel-header">// GOALS</div>
+      <div class="panel-body">
+        <div class="goal-block">
+          <div class="goal-label">SHORT-TERM GOAL</div>
+          <textarea id="f-goal-short" rows="3"
+            oninput="saveField('goal_short',this.value)"></textarea>
+          <div class="goal-hint">Reward: 50 XP on completion</div>
+        </div>
+        <div class="goal-block">
+          <div class="goal-label">LONG-TERM GOAL</div>
+          <textarea id="f-goal-long" rows="3"
+            oninput="saveField('goal_long',this.value)"></textarea>
+          <div class="goal-hint">Reward: 500 XP on completion, or retire (&#189; XP to next character)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKGROUND & CONNECTIONS -->
+    <div class="panel">
+      <div class="panel-header">// BACKGROUND &amp; CONNECTIONS</div>
+      <div class="panel-body">
+        <div class="field mb-6">
+          <label>BACKGROUND</label>
+          <textarea id="f-background" rows="5"
+            oninput="saveField('background',this.value)"></textarea>
+        </div>
+        <div class="font-vt text-bright"
+          style="font-size:14px;margin-bottom:5px;letter-spacing:1px;">CONNECTIONS</div>
+        <div id="conn-list"></div>
+        <button class="add-row-btn" onclick="addConn()">+ ADD CONNECTION</button>
+      </div>
+    </div>
+
+    <!-- PERSONAL NOTES -->
+    <div class="panel sheet-full">
+      <div class="panel-header">// PERSONAL NOTES</div>
+      <div class="panel-body">
+        <textarea id="f-notes" rows="6"
+          oninput="saveField('notes',this.value)"></textarea>
+      </div>
+    </div>
+
+  </div><!-- /sheet-grid -->
+</div><!-- /sheet-container -->
+
+<script>
+
+// ── Influence ──────────────────────────────────────────────
+
+function renderInfluence(d) {
+  const list = document.getElementById('influence-list');
+  list.innerHTML = '';
+  FACTIONS.forEach(fac => {
+    const val      = (d.influence?.[fac]) || 0;
+    const attitude = INFLUENCE_ATTITUDES[String(val)] || 'NEUTRAL';
+    const col      = val > 0 ? 'var(--green)' : val < 0 ? 'var(--red)' : 'var(--green-dim)';
+    const key      = fac.replace(/\s/g, '');
+    const row      = document.createElement('div');
+    row.className  = 'inf-row';
+    row.innerHTML  =
+      '<span class="inf-faction" title="' + fac + '">' + fac.toUpperCase() + '</span>' +
+      '<div class="inf-controls">' +
+        '<button class="inf-btn" onclick="adjInf(\'' + fac + '\',-1)">&#9666;</button>' +
+        '<span class="inf-value" id="inf-val-' + key + '" style="color:' + col + '">' + val + '</span>' +
+        '<button class="inf-btn" onclick="adjInf(\'' + fac + '\',1)">&#9656;</button>' +
+      '</div>' +
+      '<span class="inf-attitude" id="inf-att-' + key + '" style="color:' + col + '">' + attitude + '</span>';
+    list.appendChild(row);
+  });
+}
+
+function adjInf(fac, delta) {
+  const d = currentData();
+  if (!d.influence) d.influence = {};
+  const cur    = d.influence[fac] || 0;
+  const newVal = Math.max(-5, Math.min(5, cur + delta));
+  d.influence[fac] = newVal;
+  saveCurrentData(d);
+  const key  = fac.replace(/\s/g, '');
+  const col  = newVal > 0 ? 'var(--green)' : newVal < 0 ? 'var(--red)' : 'var(--green-dim)';
+  const valEl = document.getElementById('inf-val-' + key);
+  const attEl = document.getElementById('inf-att-' + key);
+  if (valEl) { valEl.textContent = newVal; valEl.style.color = col; }
+  if (attEl) { attEl.textContent = INFLUENCE_ATTITUDES[String(newVal)] || 'NEUTRAL'; attEl.style.color = col; }
+}
+
+// ── Connections ────────────────────────────────────────────
+
+function renderConnections(d) {
+  const list = document.getElementById('conn-list');
+  list.innerHTML = '';
+  (d.connections || []).forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'conn-row';
+    ['name', 'faction', 'nature'].forEach(f => {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = c[f] || '';
+      inp.placeholder = f.charAt(0).toUpperCase() + f.slice(1);
+      inp.oninput = () => updateConn(i, f, inp.value);
+      div.appendChild(inp);
+    });
+    const rm = document.createElement('button');
+    rm.className = 'remove-btn'; rm.innerHTML = '&#x2715;';
+    rm.onclick = () => removeConn(i);
+    div.appendChild(rm);
+    list.appendChild(div);
+  });
+}
+
+function addConn() {
+  const d = currentData();
+  if (!d.connections) d.connections = [];
+  d.connections.push({ name:'', faction:'', nature:'' });
+  saveCurrentData(d); renderConnections(d);
+}
+
+function removeConn(i) {
+  const d = currentData();
+  d.connections.splice(i, 1);
+  saveCurrentData(d); renderConnections(d);
+}
+
+function updateConn(i, field, val) {
+  const d = currentData();
+  d.connections[i][field] = val;
+  saveCurrentData(d);
+}
+
+// ── Init ───────────────────────────────────────────────────
+
+function init() {
+  const d = currentData();
+  renderInfluence(d);
+  renderConnections(d);
+  setVal('f-goal-short',  d.goal_short  || '');
+  setVal('f-goal-long',   d.goal_long   || '');
+  setVal('f-background',  d.background  || '');
+  setVal('f-notes',       d.notes       || '');
+}
+
+window.refreshIfPresent = init;
+init();
+
+</script>
+</body>
+</html>
