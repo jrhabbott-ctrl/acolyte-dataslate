@@ -8,12 +8,27 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 
+/* ── LAYOUT: full-height shell ── */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* shell itself doesn't scroll — frame does */
+}
+
+.shell-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 /* ── SUB-TAB BAR ── */
 .sub-tabs {
   display: flex;
   border-bottom: 1px solid var(--green-mid);
   background: var(--black);
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 .sub-tab {
   font-family: 'VT323', monospace;
@@ -31,12 +46,14 @@
 .sub-tab:hover  { color: var(--green); background: var(--green-dark); }
 .sub-tab.active { color: var(--green-bright); background: var(--green-dark); border-bottom: 2px solid var(--green); }
 
-/* ── IFRAME ── */
+/* ── IFRAME: fills remaining vertical space and scrolls ── */
 #subtab-frame {
+  flex: 1;
   width: 100%;
   border: none;
   display: block;
-  min-height: 400px;
+  overflow: auto;
+  min-height: 0; /* required for flex child to shrink properly */
 }
 
 /* ── SYNC BAR ── */
@@ -48,6 +65,7 @@
   background: var(--green-faint);
   border-bottom: 1px solid var(--green-mid);
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 .sync-bar input {
   flex: 1;
@@ -83,6 +101,7 @@
   padding: 10px;
   background: var(--green-faint);
   border-bottom: 1px solid var(--green-mid);
+  flex-shrink: 0;
 }
 @media (max-width: 768px) { .header-grid { grid-template-columns: 1fr; } }
 
@@ -178,181 +197,184 @@
 </style>
 </head>
 <body>
+<div class="shell-wrapper">
 
-<!-- ── SYNC BAR ── -->
-<div class="sync-bar">
-  <span class="text-dim font-vt" style="font-size:14px;">SYNC:</span>
-  <input type="text" id="sb-url" placeholder="Supabase URL" oninput="saveSyncConfig()">
-  <input type="text" id="sb-key" placeholder="Anon Key"     oninput="saveSyncConfig()">
-  <button class="sync-btn" onclick="syncToGM()">&#11014; SYNC TO GM</button>
-  <span class="sync-status" id="sync-status">&#8212;</span>
-</div>
+  <!-- ── SYNC BAR ── -->
+  <div class="sync-bar">
+    <span class="text-dim font-vt" style="font-size:14px;">SYNC:</span>
+    <input type="text" id="sb-url" placeholder="Supabase URL" oninput="saveSyncConfig()">
+    <input type="text" id="sb-key" placeholder="Anon Key"     oninput="saveSyncConfig()">
+    <button class="sync-btn" onclick="syncToGM()">&#11014; SYNC TO GM</button>
+    <span class="sync-status" id="sync-status">&#8212;</span>
+  </div>
 
-<!-- ── STATIC HEADER ── -->
-<div class="header-grid">
+  <!-- ── STATIC HEADER ── -->
+  <div class="header-grid">
 
-  <!-- IDENTITY -->
-  <div class="panel">
-    <div class="panel-header">// IDENTITY</div>
-    <div class="panel-body">
-      <div class="field-row cols-2">
-        <div class="field"><label>DESIGNATION</label>
-          <input type="text" id="f-name"
-            oninput="saveField('name',this.value)"></div>
-        <div class="field"><label>ORIGIN</label>
-          <input type="text" id="f-origin"
-            oninput="saveField('origin',this.value)"></div>
-      </div>
-      <div class="field-row cols-2">
-        <div class="field"><label>FACTION</label>
-          <input type="text" id="f-faction"
-            oninput="saveField('faction',this.value)"></div>
-        <div class="field"><label>ROLE</label>
-          <input type="text" id="f-role"
-            oninput="saveField('role',this.value)"></div>
-      </div>
-      <div class="field-row cols-4">
-        <div class="field"><label>AGE</label>
-          <input type="text" id="f-age"
-            oninput="saveField('age',this.value)"></div>
-        <div class="field"><label>GENDER</label>
-          <input type="text" id="f-gender"
-            oninput="saveField('gender',this.value)"></div>
-        <div class="field"><label>BUILD</label>
-          <input type="text" id="f-build"
-            oninput="saveField('build',this.value)"></div>
-        <div class="field"><label>HAND</label>
-          <select id="f-hand" onchange="saveField('hand',this.value)">
-            <option value="R">RIGHT</option>
-            <option value="L">LEFT</option>
-          </select>
+    <!-- IDENTITY -->
+    <div class="panel">
+      <div class="panel-header">// IDENTITY</div>
+      <div class="panel-body">
+        <div class="field-row cols-2">
+          <div class="field"><label>DESIGNATION</label>
+            <input type="text" id="f-name"
+              oninput="saveField('name',this.value)"></div>
+          <div class="field"><label>ORIGIN</label>
+            <input type="text" id="f-origin"
+              oninput="saveField('origin',this.value)"></div>
         </div>
-      </div>
-      <div class="field-row cols-2">
-        <div class="field"><label>TOTAL XP</label>
-          <input type="number" id="f-xp" min="0"
-            oninput="saveField('xp',parseInt(this.value)||0);refreshXP()"></div>
-        <div class="field"><label>AVAILABLE XP</label>
-          <div class="vital-auto" id="xp-avail-display"
-            style="font-size:18px;padding:3px 0;">&#8212;</div>
+        <div class="field-row cols-2">
+          <div class="field"><label>FACTION</label>
+            <input type="text" id="f-faction"
+              oninput="saveField('faction',this.value)"></div>
+          <div class="field"><label>ROLE</label>
+            <input type="text" id="f-role"
+              oninput="saveField('role',this.value)"></div>
+        </div>
+        <div class="field-row cols-4">
+          <div class="field"><label>AGE</label>
+            <input type="text" id="f-age"
+              oninput="saveField('age',this.value)"></div>
+          <div class="field"><label>GENDER</label>
+            <input type="text" id="f-gender"
+              oninput="saveField('gender',this.value)"></div>
+          <div class="field"><label>BUILD</label>
+            <input type="text" id="f-build"
+              oninput="saveField('build',this.value)"></div>
+          <div class="field"><label>HAND</label>
+            <select id="f-hand" onchange="saveField('hand',this.value)">
+              <option value="R">RIGHT</option>
+              <option value="L">LEFT</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field"><label>TOTAL XP</label>
+            <input type="number" id="f-xp" min="0"
+              oninput="saveField('xp',parseInt(this.value)||0);refreshXP()"></div>
+          <div class="field"><label>AVAILABLE XP</label>
+            <div class="vital-auto" id="xp-avail-display"
+              style="font-size:18px;padding:3px 0;">&#8212;</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- VITAL STATISTICS -->
-  <div class="panel">
-    <div class="panel-header">// VITAL STATISTICS</div>
-    <div class="panel-body">
-      <div class="vitals-grid">
+    <!-- VITAL STATISTICS -->
+    <div class="panel">
+      <div class="panel-header">// VITAL STATISTICS</div>
+      <div class="panel-body">
+        <div class="vitals-grid">
 
-        <div class="vital-block">
-          <div class="vital-name">WOUNDS</div>
-          <div class="vital-inputs">
-            <input type="number" id="v-wounds-cur" min="0"
-              oninput="saveVital('wounds_cur',this.value)">
-            <span class="vital-sep">/</span>
-            <span class="vital-auto" id="v-wounds-max">&#8212;</span>
+          <div class="vital-block">
+            <div class="vital-name">WOUNDS</div>
+            <div class="vital-inputs">
+              <input type="number" id="v-wounds-cur" min="0"
+                oninput="saveVital('wounds_cur',this.value)">
+              <span class="vital-sep">/</span>
+              <span class="vital-auto" id="v-wounds-max">&#8212;</span>
+            </div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">CRITICAL WOUNDS</div>
+            <div class="vital-inputs">
+              <input type="number" id="v-crit-cur" min="0"
+                oninput="saveVital('crit_cur',this.value);checkCritWarn()">
+              <span class="vital-sep">/</span>
+              <span class="vital-auto" id="v-crit-max">&#8212;</span>
+            </div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">FATE</div>
+            <div class="vital-inputs">
+              <input type="number" id="v-fate-cur" min="0"
+                oninput="saveVital('fate_cur',this.value)">
+              <span class="vital-sep">/</span>
+              <input type="number" id="v-fate-max" min="0"
+                oninput="saveVital('fate_max',this.value)">
+            </div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">CORRUPTION</div>
+            <div class="vital-inputs vital-wide">
+              <input type="number" id="v-corruption" min="0" max="100"
+                oninput="saveVital('corruption',this.value)">
+            </div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">INITIATIVE</div>
+            <div class="vital-auto" id="v-initiative">&#8212;</div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">SPEED</div>
+            <select id="v-speed" onchange="saveVital('speed',this.value)"
+              style="font-size:11px;padding:2px;width:100%;background:var(--black);border:1px solid var(--green-mid);color:var(--green);font-family:'Share Tech Mono',monospace;outline:none;">
+              <option value="Slow">SLOW</option>
+              <option value="Normal" selected>NORMAL</option>
+              <option value="Fast">FAST</option>
+            </select>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">ENCUMBRANCE</div>
+            <div class="vital-inputs">
+              <input type="number" id="v-enc-cur" min="0"
+                oninput="saveVital('enc_cur',this.value)">
+              <span class="vital-sep">/</span>
+              <span class="vital-auto" id="v-enc-max">&#8212;</span>
+            </div>
+          </div>
+
+          <div class="vital-block">
+            <div class="vital-name">SOLARS</div>
+            <div class="vital-inputs vital-wide">
+              <input type="number" id="v-solars" min="0"
+                oninput="saveVital('solars',this.value)">
+            </div>
+          </div>
+
+        </div><!-- /vitals-grid -->
+
+        <!-- Superiority -->
+        <div style="margin-top:6px;padding:5px;border:1px solid var(--green-mid);background:var(--black);">
+          <span class="text-dim" style="font-size:10px;letter-spacing:1px;">GROUP SUPERIORITY</span>
+          <span style="font-size:9px;color:var(--green-dim);"> &#8212; shared resource</span>
+          <div class="flex-row mt-6">
+            <button class="inf-btn" onclick="adjSup(-1)">&#9666;</button>
+            <span class="font-vt fs-big" id="v-sup">0</span>
+            <button class="inf-btn" onclick="adjSup(1)">&#9656;</button>
+            <span style="font-size:9px;color:var(--green-dim);margin-left:6px;">+1 SL on any Test (declare before roll)</span>
           </div>
         </div>
 
-        <div class="vital-block">
-          <div class="vital-name">CRITICAL WOUNDS</div>
-          <div class="vital-inputs">
-            <input type="number" id="v-crit-cur" min="0"
-              oninput="saveVital('crit_cur',this.value);checkCritWarn()">
-            <span class="vital-sep">/</span>
-            <span class="vital-auto" id="v-crit-max">&#8212;</span>
-          </div>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">FATE</div>
-          <div class="vital-inputs">
-            <input type="number" id="v-fate-cur" min="0"
-              oninput="saveVital('fate_cur',this.value)">
-            <span class="vital-sep">/</span>
-            <input type="number" id="v-fate-max" min="0"
-              oninput="saveVital('fate_max',this.value)">
-          </div>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">CORRUPTION</div>
-          <div class="vital-inputs vital-wide">
-            <input type="number" id="v-corruption" min="0" max="100"
-              oninput="saveVital('corruption',this.value)">
-          </div>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">INITIATIVE</div>
-          <div class="vital-auto" id="v-initiative">&#8212;</div>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">SPEED</div>
-          <select id="v-speed" onchange="saveVital('speed',this.value)"
-            style="font-size:11px;padding:2px;width:100%;background:var(--black);border:1px solid var(--green-mid);color:var(--green);font-family:'Share Tech Mono',monospace;outline:none;">
-            <option value="Slow">SLOW</option>
-            <option value="Normal" selected>NORMAL</option>
-            <option value="Fast">FAST</option>
-          </select>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">ENCUMBRANCE</div>
-          <div class="vital-inputs">
-            <input type="number" id="v-enc-cur" min="0"
-              oninput="saveVital('enc_cur',this.value)">
-            <span class="vital-sep">/</span>
-            <span class="vital-auto" id="v-enc-max">&#8212;</span>
-          </div>
-        </div>
-
-        <div class="vital-block">
-          <div class="vital-name">SOLARS</div>
-          <div class="vital-inputs vital-wide">
-            <input type="number" id="v-solars" min="0"
-              oninput="saveVital('solars',this.value)">
-          </div>
-        </div>
-
-      </div><!-- /vitals-grid -->
-
-      <!-- Superiority -->
-      <div style="margin-top:6px;padding:5px;border:1px solid var(--green-mid);background:var(--black);">
-        <span class="text-dim" style="font-size:10px;letter-spacing:1px;">GROUP SUPERIORITY</span>
-        <span style="font-size:9px;color:var(--green-dim);"> &#8212; shared resource</span>
-        <div class="flex-row mt-6">
-          <button class="inf-btn" onclick="adjSup(-1)">&#9666;</button>
-          <span class="font-vt fs-big" id="v-sup">0</span>
-          <button class="inf-btn" onclick="adjSup(1)">&#9656;</button>
-          <span style="font-size:9px;color:var(--green-dim);margin-left:6px;">+1 SL on any Test (declare before roll)</span>
-        </div>
       </div>
-
     </div>
+
+  </div><!-- /header-grid -->
+
+  <!-- ── SUB-TAB BAR ── -->
+  <div class="sub-tabs">
+    <button class="sub-tab active"
+      onclick="switchTab('cs_characteristics.html',this)">CHARACTERISTICS</button>
+    <button class="sub-tab"
+      onclick="switchTab('cs_inventory.html',this)">INVENTORY</button>
+    <button class="sub-tab"
+      onclick="switchTab('cs_psychic.html',this)">PSYCHIC</button>
+    <button class="sub-tab"
+      onclick="switchTab('cs_info.html',this)">INFO</button>
+    <button class="sub-tab"
+      onclick="switchTab('cs_tools.html',this)">TOOLS</button>
   </div>
 
-</div><!-- /header-grid -->
+  <!-- ── SUB-TAB IFRAME ── -->
+  <iframe id="subtab-frame" src="cs_characteristics.html"></iframe>
 
-<!-- ── SUB-TAB BAR ── -->
-<div class="sub-tabs">
-  <button class="sub-tab active"
-    onclick="switchTab('cs_characteristics.html',this)">CHARACTERISTICS</button>
-  <button class="sub-tab"
-    onclick="switchTab('cs_inventory.html',this)">INVENTORY</button>
-  <button class="sub-tab"
-    onclick="switchTab('cs_psychic.html',this)">PSYCHIC</button>
-  <button class="sub-tab"
-    onclick="switchTab('cs_info.html',this)">INFO</button>
-  <button class="sub-tab"
-    onclick="switchTab('cs_tools.html',this)">TOOLS</button>
-</div>
-
-<!-- ── SUB-TAB IFRAME ── -->
-<iframe id="subtab-frame" src="cs_characteristics.html" scrolling="no"></iframe>
+</div><!-- /shell-wrapper -->
 
 <!-- ── RENAME MODAL ── -->
 <div class="modal-overlay" id="modal-rename">
@@ -395,23 +417,6 @@ function switchTab(src, btn) {
   document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   frame.src = src;
-}
-
-// Auto-resize iframe to its content height
-frame.addEventListener('load', resizeFrame);
-function resizeFrame() {
-  try {
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    frame.style.height = doc.documentElement.scrollHeight + 'px';
-    // Re-check after images/fonts settle
-    setTimeout(() => {
-      try {
-        frame.style.height = doc.documentElement.scrollHeight + 'px';
-      } catch(e) {}
-    }, 300);
-  } catch(e) {
-    frame.style.height = '800px';
-  }
 }
 
 // ── Storage event: refresh header when sub-tab saves data ──
