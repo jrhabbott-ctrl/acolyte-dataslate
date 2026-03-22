@@ -797,7 +797,17 @@ body::before {
 .char-overview-body { padding: 8px 12px; font-size: 10px; color: var(--amber-dim); line-height: 1.8; }
 
 /* ─── IMPERIAL AQUILA ──────────────────────────────────────────── */
+@keyframes aquila-spin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+@keyframes aquila-spin-wm {
+  from { transform: translate(-50%, -50%) rotateY(0deg); }
+  to   { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
 .aquila-spin {
+  animation: aquila-spin 12s linear infinite;
   display: inline-block;
 }
 
@@ -823,6 +833,7 @@ body::before {
   opacity: 0.07;
   pointer-events: none;
   z-index: 0;
+  animation: aquila-spin-wm 12s linear infinite;
 }
 
 /* Boot screen */
@@ -1896,7 +1907,6 @@ let currentOperative = null;
   setTimeout(() => {
     boot.style.transition = 'opacity 0.8s';
     boot.style.opacity = '0';
-    boot.style.pointerEvents = 'none';
     setTimeout(() => { boot.style.display = 'none'; }, 800);
   }, 2200);
 })();
@@ -3604,5 +3614,232 @@ function gmPortraitPreview() {
       <div class="delete-pack-status" id="delete-pack-status"></div>
     </div>
   </div>
+
+<div id="gm-overlay">
+
+  <!-- Auth screen -->
+  <div id="gm-auth">
+    <div class="gm-auth-box">
+      <div class="gm-auth-header">
+        <div class="gm-auth-title">INQUISITOR CONSOLE</div>
+        <div class="gm-auth-sub">Thronegold Clearance — Authorised Personnel Only</div>
+      </div>
+      <div class="gm-auth-body">
+        <label class="gm-label">Operative Designation</label>
+        <input class="gm-input" id="gm-user-input" type="text" placeholder="DESIGNATION" autocomplete="off">
+        <label class="gm-label">Access Code</label>
+        <input class="gm-input" id="gm-pass-input" type="password" placeholder="••••••••" autocomplete="off">
+        <button class="gm-btn" onclick="gmLogin()">◆ AUTHENTICATE ◆</button>
+        <div class="gm-auth-error" id="gm-auth-error">⚠ ACCESS DENIED — CREDENTIALS INVALID</div>
+        <div style="margin-top:16px;text-align:center;">
+          <button style="background:none;border:none;color:var(--amber-dark);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;" onclick="closeGM()">← RETURN TO DATASLATE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GM Console -->
+  <div id="gm-console">
+
+    <div class="gm-topbar">
+      <div class="gm-topbar-title">◆ INQUISITOR CONSOLE — THRONEGOLD</div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="font-size:9px;color:var(--amber-dim);letter-spacing:1px;" id="gm-user-display"></div>
+        <button class="gm-close-btn" onclick="closeGM()">✕ CLOSE CONSOLE</button>
+      </div>
+    </div>
+
+    <div class="gm-nav">
+      <button class="gm-tab active" onclick="showGMSection('datamanage')">◈ MISSION DATA</button>
+      <button class="gm-tab" onclick="showGMSection('packs')">◈ MISSION PACKS</button>
+      <button class="gm-tab" onclick="showGMSection('charoverview')">◈ OPERATIVE OVERVIEW</button>
+    </div>
+
+    <div class="gm-content">
+
+      <!-- ── MISSION DATA MANAGEMENT ──────────────────────────────── -->
+      <div class="gm-section active" id="gm-section-datamanage">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+          <!-- BRIEFINGS -->
+          <div>
+            <div class="gm-sec-header"><div class="gm-sec-title" style="font-size:17px;">BRIEFINGS</div><button class="gm-add-btn" onclick="showAddForm('briefing')" style="font-size:9px;padding:5px 10px;">+ NEW</button></div>
+            <div id="gm-briefings-list" class="gm-data-list"></div>
+            <div id="add-form-briefing" style="display:none;">
+              <div class="gm-add-form">
+                <div class="gm-add-form-title">► NEW BRIEFING</div>
+                <div class="gm-field"><label class="gm-field-label">TITLE</label><input class="gm-field-input" id="bf-title" placeholder="Operation name..."></div>
+                <div class="gm-field"><label class="gm-field-label">CLASSIFICATION</label>
+                  <select class="gm-field-select" id="bf-class">
+                    <option>VERMILLION</option><option>CRIMSON</option><option>AMBER</option><option>STANDARD</option>
+                  </select>
+                </div>
+                <div class="gm-field"><label class="gm-field-label">DATE (Imperial)</label><input class="gm-field-input" id="bf-date" placeholder="M41.xxx.xxx"></div>
+                <div class="gm-field"><label class="gm-field-label">SUMMARY</label><input class="gm-field-input" id="bf-summary" placeholder="One line summary..."></div>
+                <div class="gm-field"><label class="gm-field-label">FULL CONTENT</label><textarea class="gm-field-textarea" id="bf-content" placeholder="Full briefing text..."></textarea></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="gm-add-btn" onclick="saveItem('briefing')" style="flex:1;">◆ SAVE</button>
+                  <button class="gm-add-btn" onclick="hideAddForm('briefing')" style="flex:1;color:var(--red-dim);border-color:var(--red-dim);">✕ CANCEL</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EVIDENCE -->
+          <div>
+            <div class="gm-sec-header"><div class="gm-sec-title" style="font-size:17px;">EVIDENCE</div><button class="gm-add-btn" onclick="showAddForm('evidence')" style="font-size:9px;padding:5px 10px;">+ NEW</button></div>
+            <div id="gm-evidence-list" class="gm-data-list"></div>
+            <div id="add-form-evidence" style="display:none;">
+              <div class="gm-add-form">
+                <div class="gm-add-form-title">► NEW EVIDENCE</div>
+                <div class="gm-field"><label class="gm-field-label">TITLE</label><input class="gm-field-input" id="ev-title" placeholder="Item designation..."></div>
+                <div class="gm-field"><label class="gm-field-label">TYPE</label>
+                  <select class="gm-field-select" id="ev-type">
+                    <option>DOCUMENT</option><option>AUDIO RECORD</option><option>PICT RECORD</option><option>PHYSICAL ITEM</option><option>COGITATOR LOG</option><option>TESTIMONY</option>
+                  </select>
+                </div>
+                <div class="gm-field"><label class="gm-field-label">LOCATION FOUND</label><input class="gm-field-input" id="ev-location" placeholder="Where recovered..."></div>
+                <div class="gm-field"><label class="gm-field-label">SUMMARY</label><input class="gm-field-input" id="ev-summary" placeholder="Brief description..."></div>
+                <div class="gm-field"><label class="gm-field-label">FULL CONTENT</label><textarea class="gm-field-textarea" id="ev-content" placeholder="Full evidence details..."></textarea></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="gm-add-btn" onclick="saveItem('evidence')" style="flex:1;">◆ SAVE</button>
+                  <button class="gm-add-btn" onclick="hideAddForm('evidence')" style="flex:1;color:var(--red-dim);border-color:var(--red-dim);">✕ CANCEL</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTACTS -->
+          <div>
+            <div class="gm-sec-header" style="margin-top:16px;"><div class="gm-sec-title" style="font-size:17px;">CONTACTS</div><button class="gm-add-btn" onclick="showAddForm('contact')" style="font-size:9px;padding:5px 10px;">+ NEW</button></div>
+            <div id="gm-contacts-list" class="gm-data-list"></div>
+            <div id="add-form-contact" style="display:none;">
+              <div class="gm-add-form">
+                <div class="gm-add-form-title">► NEW CONTACT — TARGET DOSSIER</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="gm-field"><label class="gm-field-label">TARGET ID</label><input class="gm-field-input" id="ct-id" placeholder="TGT-XXX-000"></div>
+                  <div class="gm-field"><label class="gm-field-label">CLASSIFICATION</label>
+                    <select class="gm-field-select" id="ct-classification">
+                      <option value="STANDARD">STANDARD</option>
+                      <option value="AMBER">AMBER</option>
+                      <option value="CRIMSON">CRIMSON</option>
+                      <option value="VERMILLION">VERMILLION</option>
+                      <option value="THRONEGOLD">THRONEGOLD</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="gm-field"><label class="gm-field-label">NAME</label><input class="gm-field-input" id="ct-name" placeholder="Full name and title — or UNKNOWN SUBJECT"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="gm-field"><label class="gm-field-label">ROLE / AFFILIATION</label><input class="gm-field-input" id="ct-role" placeholder="Position or function..."></div>
+                  <div class="gm-field"><label class="gm-field-label">LAST KNOWN LOCATION</label><input class="gm-field-input" id="ct-location" placeholder="Location..."></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="gm-field"><label class="gm-field-label">THREAT ASSESSMENT</label>
+                    <select class="gm-field-select" id="ct-threat">
+                      <option value="UNKNOWN">UNKNOWN</option>
+                      <option value="ALLIED">ALLIED</option>
+                      <option value="LOW">LOW</option>
+                      <option value="MEDIUM">MEDIUM</option>
+                      <option value="HIGH">HIGH</option>
+                      <option value="EXTREME">EXTREME</option>
+                    </select>
+                  </div>
+                  <div class="gm-field"><label class="gm-field-label">PORTRAIT</label>
+                    <select class="gm-field-select" id="ct-portrait-select" onchange="gmPortraitSelectChange()">
+                      <option value="UNKNOWN_ROBED_M">Stock — Robed (M)</option>
+                      <option value="UNKNOWN_ROBED_F">Stock — Robed (F)</option>
+                      <option value="UPLOAD">↑ Upload processed PNG...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="gm-field" id="ct-portrait-upload-wrap" style="display:none;">
+                  <label class="gm-field-label">PORTRAIT FILE (phosphor-processed PNG)</label>
+                  <input type="file" id="ct-portrait-file" accept=".png,.jpg,.jpeg" style="background:none;border:1px solid var(--amber-dark);color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px;width:100%;cursor:pointer;" onchange="gmPortraitPreview()">
+                  <div id="ct-portrait-preview" style="margin-top:6px;display:none;">
+                    <img id="ct-portrait-img" style="width:70px;height:88px;object-fit:cover;border:1px solid var(--green-dim);" alt="">
+                    <div style="font-size:8px;color:var(--green-dim);letter-spacing:1px;margin-top:3px;">◆ PORTRAIT LOADED</div>
+                  </div>
+                </div>
+                <div class="gm-field"><label class="gm-field-label">PHYSICAL DESCRIPTION</label><input class="gm-field-input" id="ct-physical" placeholder="Age, build, distinguishing features..."></div>
+                <div class="gm-field"><label class="gm-field-label">TAGS (comma-separated)</label><input class="gm-field-input" id="ct-tags" placeholder="HOSTILE, PSYKER, ARMED, INFORMANT, CULT OPERATIVE..."></div>
+                <div class="gm-field"><label class="gm-field-label">KNOWN INTELLIGENCE</label><textarea class="gm-field-textarea" id="ct-known" rows="4" placeholder="What the operatives are cleared to know. Write from the acolyte's perspective."></textarea></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="gm-add-btn" onclick="saveItem('contact')" style="flex:1;">◆ SAVE DOSSIER</button>
+                  <button class="gm-add-btn" onclick="hideAddForm('contact')" style="flex:1;color:var(--red-dim);border-color:var(--red-dim);">✕ CANCEL</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LOG ENTRIES -->
+          <div>
+            <div class="gm-sec-header" style="margin-top:16px;"><div class="gm-sec-title" style="font-size:17px;">MISSION LOG</div><button class="gm-add-btn" onclick="showAddForm('log')" style="font-size:9px;padding:5px 10px;">+ NEW</button></div>
+            <div id="gm-log-list" class="gm-data-list"></div>
+            <div id="add-form-log" style="display:none;">
+              <div class="gm-add-form">
+                <div class="gm-add-form-title">► NEW LOG ENTRY</div>
+                <div class="gm-field"><label class="gm-field-label">TITLE</label><input class="gm-field-input" id="lg-title" placeholder="Entry title..."></div>
+                <div class="gm-field"><label class="gm-field-label">DATE</label><input class="gm-field-input" id="lg-date" placeholder="M41.xxx / Session X..."></div>
+                <div class="gm-field"><label class="gm-field-label">CONTENT</label><textarea class="gm-field-textarea" id="lg-content" placeholder="Log entry text..."></textarea></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="gm-add-btn" onclick="saveItem('log')" style="flex:1;">◆ SAVE</button>
+                  <button class="gm-add-btn" onclick="hideAddForm('log')" style="flex:1;color:var(--red-dim);border-color:var(--red-dim);">✕ CANCEL</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── MISSION PACKS ─────────────────────────────────────── -->
+      <div class="gm-section" id="gm-section-packs">
+
+        <!-- Active mission banner -->
+        <div style="border:1px solid var(--amber);background:#0d0900;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:9px;letter-spacing:3px;color:var(--amber-dim);margin-bottom:4px;">ACTIVE MISSION PACK</div>
+            <div id="active-pack-name" style="font-family:'VT323',monospace;font-size:22px;color:var(--amber);letter-spacing:2px;">— NO PACK LOADED —</div>
+          </div>
+          <div id="active-pack-meta" style="font-size:9px;color:var(--amber-dim);letter-spacing:1px;text-align:right;"></div>
+        </div>
+
+        <!-- Upload new pack -->
+        <div class="gm-add-form" style="margin-bottom:16px;">
+          <div class="gm-add-form-title">► UPLOAD MISSION PACK</div>
+          <div style="font-size:9px;color:var(--amber-dim);letter-spacing:1px;margin-bottom:10px;line-height:1.8;">
+            Select a .json mission pack file. All briefings, evidence and contacts will be imported as DRAFT and tagged to this mission. The pack will become the active mission.
+          </div>
+          <div class="gm-field">
+            <label class="gm-field-label">PACK FILE (.json)</label>
+            <input type="file" id="pack-file-input" accept=".json" style="background:none;border:1px solid var(--amber-dark);color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px;width:100%;cursor:pointer;">
+          </div>
+          <button class="gm-add-btn" onclick="uploadMissionPack()" style="margin-top:8px;width:100%;">◆ LOAD PACK TO SUPABASE</button>
+          <div id="pack-upload-status" style="margin-top:8px;font-size:9px;letter-spacing:1px;color:var(--amber-dim);min-height:16px;"></div>
+        </div>
+
+        <!-- Pack archive -->
+        <div>
+          <div class="gm-sec-header"><div class="gm-sec-title" style="font-size:17px;">MISSION ARCHIVE</div></div>
+          <div id="gm-pack-archive" class="gm-data-list" style="margin-top:0;">
+            <div style="border:1px solid var(--amber-dark);padding:10px;font-size:10px;color:var(--amber-dark);text-align:center;letter-spacing:1px;">No archived missions</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── OPERATIVE OVERVIEW ─────────────────────────────────── -->
+      <div class="gm-section" id="gm-section-charoverview">
+        <div class="gm-sec-header"><div class="gm-sec-title" style="font-size:17px;">OPERATIVE OVERVIEW</div><div style="font-size:9px;color:var(--amber-dark);">READ FROM PLAYER SHEETS</div></div>
+        <div style="font-size:9px;color:var(--amber-dark);letter-spacing:1px;padding:8px 14px;border:1px solid var(--amber-dark);border-top:none;border-bottom:none;background:#0a0800;">
+          Showing character data entered by players on their own devices. This view reads from the current device only — have players enter their data on their own device.
+        </div>
+        <div class="char-overview-grid" id="char-overview-grid" style="border:1px solid var(--amber-dark);border-top:none;padding:12px;background:#050400;"></div>
+      </div>
+
+    </div><!-- end gm-content -->
+  </div><!-- end gm-console -->
+</div><!-- end gm-overlay -->
+
 </body>
 </html>
