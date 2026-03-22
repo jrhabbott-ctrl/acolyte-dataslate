@@ -3462,7 +3462,12 @@ function showGMSection(id) {
   document.querySelectorAll('.gm-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('gm-section-' + id).classList.add('active');
-  event.target.classList.add('active');
+  // Highlight the matching tab without relying on implicit event.target
+  document.querySelectorAll('.gm-tab').forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + id + "'")) {
+      t.classList.add('active');
+    }
+  });
   if (id === 'charoverview') renderCharOverview();
   if (id === 'datamanage') gmLoadAllData();
   if (id === 'packs') loadMissionPacks();
