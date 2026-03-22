@@ -2155,7 +2155,7 @@ function renderPackArchive(packs) {
       <div class="pack-archive-item-meta">${pack.item_count || 0} items · ${pack.created_at ? pack.created_at.slice(0,10) : '—'}</div>
       <div class="pack-archive-item-status ${isActive ? 'pack-status-active' : 'pack-status-archived'}">${isActive ? 'ACTIVE' : 'ARCHIVED'}</div>
       <button class="pack-activate-btn ${isActive ? 'is-active' : ''}" onclick="setActivePack('${pack.id}')" ${isActive ? 'disabled' : ''}>${isActive ? '◆ ACTIVE' : '▶ ACTIVATE'}</button>
-      <button class="delete-pack-btn" onclick="openDeletePackModal('${pack.id}', ${JSON.stringify(pack.name)})">✕ DELETE PACK</button>`;
+      <button class="delete-pack-btn" data-pack-id="${pack.id}" data-pack-name="${pack.name}">✕ DELETE PACK</button>`;
     container.appendChild(div);
   });
 }
@@ -3447,6 +3447,16 @@ function gmLogin() {
 document.addEventListener('DOMContentLoaded', () => {
   const passInput = document.getElementById('gm-pass-input');
   if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') gmLogin(); });
+
+  // Delegated click handler for delete-pack-btn (avoids onclick attribute quoting issues)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.delete-pack-btn');
+    if (btn) {
+      const packId   = btn.dataset.packId;
+      const packName = btn.dataset.packName;
+      if (packId) openDeletePackModal(packId, packName);
+    }
+  });
 });
 
 function showGMConsole() {
