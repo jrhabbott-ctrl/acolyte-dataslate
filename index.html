@@ -1901,6 +1901,9 @@ body.section-penitent-active .aquila-watermark { display: none; }
 // Live data served from Supabase via loadReleasedData()
 let currentOperative = null;
 
+// ── Shared data store (player + GM both read from this) ───────────
+const GM_DATA = { briefings: [], evidence: [], contacts: [], logEntries: [] };
+
 
 // ── BOOT SCREEN ──────────────────────────────────────────────────
 (function() {
@@ -2105,6 +2108,11 @@ async function gmLoadAllData() {
       sbDirect('contacts', ''),
       sbDirect('log_entries', ''),
     ]);
+    // Populate GM_DATA so preview and transmit can find items
+    GM_DATA.briefings  = briefings  || [];
+    GM_DATA.evidence   = evidence   || [];
+    GM_DATA.contacts   = contacts   || [];
+    GM_DATA.logEntries = logEntries || [];
     renderGMDataList('briefing', briefings || []);
     renderGMDataList('evidence', evidence || []);
     renderGMDataList('contact', contacts || []);
