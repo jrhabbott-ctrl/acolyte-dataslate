@@ -2211,15 +2211,21 @@ async function executeDeletePack() {
   const status = document.getElementById('delete-pack-status');
   const btn    = document.getElementById('delete-pack-go-btn');
   btn.disabled = true;
-  status.textContent = 'Deleting associated data...';
 
   try {
     const tables = ['briefings', 'evidence', 'contacts', 'log_entries'];
     for (const table of tables) {
-      await sbFetch(table, 'DELETE', null, { mission_pack_id: _deletePackId });
+      status.textContent = 'Fetching ' + table + '...';
+      const records = await sbDirect(table, 'mission_pack_id=eq.' + encodeURIComponent(_deletePackId));
+      if (Array.isArray(records) && records.length > 0) {
+        status.textContent = 'Deleting ' + records.length + ' ' + table + '...';
+        for (const rec of records) {
+          await sbFetch(table, 'DELETE', null, { id: rec.id }, false);
+        }
+      }
     }
     status.textContent = 'Deleting mission pack record...';
-    await sbFetch('mission_packs', 'DELETE', null, { id: _deletePackId });
+    await sbFetch('mission_packs', 'DELETE', null, { id: _deletePackId }, false);
     status.textContent = '✓ Pack purged.';
     setTimeout(() => {
       closeDeletePackModal();
