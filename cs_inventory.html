@@ -57,11 +57,17 @@
   letter-spacing: 1px;
   white-space: nowrap;
 }
+/* ADD column header — left-most, narrow */
+.armoury-table th.th-add {
+  width: 52px;
+  text-align: center;
+  padding: 3px 4px;
+}
 .armoury-table td {
   padding: 3px 5px;
   border-bottom: 1px solid var(--green-dark);
   color: var(--green);
-  vertical-align: top;
+  vertical-align: middle;
 }
 .armoury-table tr:hover td { background: var(--green-faint); }
 .armoury-table .td-name {
@@ -80,18 +86,29 @@
 .avail-scarce  { color: var(--amber); }
 .avail-rare    { color: var(--amber-dim); }
 .avail-exotic  { color: var(--red-dim); }
+
+/* ADD button — compact, left column */
 .add-item-btn {
   font-family: 'VT323', monospace;
-  font-size: 13px;
-  padding: 1px 7px;
-  background: none;
+  font-size: 14px;
+  padding: 2px 7px;
+  background: var(--green-dark);
   border: 1px solid var(--green-mid);
   color: var(--green-dim);
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.1s, border-color 0.1s;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
+  display: block;
+  width: 100%;
+  text-align: center;
+  letter-spacing: 1px;
 }
-.add-item-btn:hover { color: var(--green-bright); border-color: var(--green); }
+.add-item-btn:hover {
+  color: var(--green-bright);
+  border-color: var(--green);
+  background: var(--green-mid);
+}
+
 .category-divider td {
   font-family: 'VT323', monospace;
   font-size: 12px;
@@ -210,6 +227,130 @@
 }
 .flash-msg.visible { display: block; }
 
+/* ── ADD ITEM MODAL ── */
+.add-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.add-modal-overlay.open { display: flex; }
+
+.add-modal {
+  background: var(--black);
+  border: 1px solid var(--green);
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(0,255,65,0.12);
+}
+
+.add-modal-header {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+  padding: 8px 14px;
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--green-mid);
+  color: var(--green-bright);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-modal-close {
+  background: none; border: none;
+  color: var(--green-dark); cursor: pointer;
+  font-size: 16px; font-family: 'VT323', monospace;
+  transition: color 0.1s;
+}
+.add-modal-close:hover { color: var(--red); }
+
+.add-modal-body { padding: 14px; }
+
+/* Item preview card inside modal */
+.item-preview {
+  border: 1px solid var(--green-mid);
+  background: var(--green-faint);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.item-preview-name {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--green-bright);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.item-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 16px;
+  font-size: 10px;
+  color: var(--green-dim);
+}
+.item-preview-grid span { color: var(--green); }
+.item-preview-traits {
+  font-size: 10px;
+  color: var(--green-dim);
+  margin-top: 6px;
+  border-top: 1px solid var(--green-dark);
+  padding-top: 5px;
+  line-height: 1.5;
+}
+
+/* Destination selector */
+.dest-label {
+  font-size: 10px;
+  color: var(--green-dim);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.dest-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.dest-btn {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  padding: 4px 12px;
+  background: none;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.1s;
+}
+.dest-btn.selected {
+  border-color: var(--green);
+  color: var(--green-bright);
+  background: var(--green-dark);
+}
+.dest-btn:hover:not(.selected) { border-color: var(--green-mid); color: var(--green); }
+
+/* Confirm add button */
+.confirm-add-btn {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  width: 100%;
+  padding: 8px;
+  background: var(--green-dark);
+  border: 1px solid var(--green);
+  color: var(--green-bright);
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.1s;
+}
+.confirm-add-btn:hover { background: var(--green-mid); }
+.confirm-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
 </style>
 </head>
 <body>
@@ -307,22 +448,30 @@
 
 </div><!-- /sheet-container -->
 
+<!-- ── ADD ITEM MODAL ── -->
+<div class="add-modal-overlay" id="add-modal-overlay">
+  <div class="add-modal">
+    <div class="add-modal-header">
+      <span id="add-modal-title">ADD TO LOADOUT</span>
+      <button class="add-modal-close" onclick="closeAddModal()">&#x2715;</button>
+    </div>
+    <div class="add-modal-body" id="add-modal-body"></div>
+  </div>
+</div>
+
 <script>
 
 // ============================================================
-// ARMOURY DATA  (from IM_Wargear.md project files)
+// ARMOURY DATA
 // ============================================================
 
 const ARMOURY = {
   MELEE: [
-    // Chain
     { name:'Chainaxe',         spec:'One-handed', dam:'3+StrB', enc:1, cost:600,   avail:'Rare',   traits:'Loud, Rend (3)' },
     { name:'Chainsword',       spec:'One-handed', dam:'3+StrB', enc:1, cost:500,   avail:'Scarce', traits:'Loud, Rend (2)' },
     { name:'Eviscerator',      spec:'Two-handed', dam:'5+StrB', enc:3, cost:800,   avail:'Rare',   traits:'Heavy (4), Loud, Rend (4), Two-handed' },
-    // Force
     { name:'Force Staff',      spec:'Two-handed', dam:'1+StrB', enc:2, cost:7000,  avail:'Exotic', traits:'Defensive, Two-handed' },
     { name:'Force Sword',      spec:'One-handed', dam:'2+StrB', enc:1, cost:8000,  avail:'Exotic', traits:'\u2014' },
-    // Mundane
     { name:'Axe',              spec:'One-handed', dam:'2+StrB', enc:1, cost:80,    avail:'Common', traits:'\u2014' },
     { name:'Brass Knuckles',   spec:'Brawling',   dam:'0+StrB', enc:0, cost:30,    avail:'Common', traits:'Subtle' },
     { name:'Flail',            spec:'Two-handed', dam:'4+StrB', enc:2, cost:200,   avail:'Common', traits:'Heavy (4), Two-handed' },
@@ -332,10 +481,8 @@ const ARMOURY = {
     { name:'Staff',            spec:'Two-handed', dam:'1+StrB', enc:2, cost:25,    avail:'Common', traits:'Defensive, Two-handed' },
     { name:'Sword',            spec:'One-handed', dam:'2+StrB', enc:1, cost:150,   avail:'Common', traits:'\u2014' },
     { name:'Whip',             spec:'One-handed', dam:'0+StrB', enc:1, cost:60,    avail:'Scarce', traits:'Loud, Reach' },
-    // Shock
     { name:'Electro-Flail',    spec:'One-handed', dam:'0+StrB', enc:1, cost:500,   avail:'Scarce', traits:'Loud, Reach, Inflict (Stunned)' },
     { name:'Shock Maul',       spec:'One-handed', dam:'2+StrB', enc:1, cost:250,   avail:'Scarce', traits:'Loud, Inflict (Stunned)' },
-    // Power
     { name:'Power Axe',        spec:'Two-handed', dam:'6+StrB', enc:2, cost:3400,  avail:'Rare',   traits:'Heavy (4), Penetrating (6), Two-handed' },
     { name:'Power Fist',       spec:'Brawling',   dam:'6+StrB', enc:2, cost:4000,  avail:'Rare',   traits:'Heavy (4), Penetrating (6)' },
     { name:'Power Knife',      spec:'One-handed', dam:'2+StrB', enc:1, cost:2000,  avail:'Rare',   traits:'Penetrating (2), Subtle, Thrown (Short)' },
@@ -343,143 +490,128 @@ const ARMOURY = {
     { name:'Power Sword',      spec:'One-handed', dam:'4+StrB', enc:1, cost:3000,  avail:'Rare',   traits:'Penetrating (4)' }
   ],
   RANGED: [
-    // Bolt
-    { name:'Bolt Pistol',      spec:'Pistol',    dam:'8',  range:'Medium', mag:2,  enc:1, cost:4000,  avail:'Scarce', traits:'Burst, Close, Loud, Penetrating (4), Spread' },
-    { name:'Boltgun',          spec:'Long Gun',  dam:'8',  range:'Long',   mag:4,  enc:2, cost:5000,  avail:'Scarce', traits:'Loud, Penetrating (4), Rapid Fire (2), Spread, Two-handed' },
-    { name:'Heavy Bolter',     spec:'Ordnance',  dam:'10', range:'Long',   mag:6,  enc:3, cost:9000,  avail:'Rare',   traits:'Heavy (4), Penetrating (5), Loud, Rapid Fire (3), Spread, Two-handed' },
-    // Flame
-    { name:'Hand Flamer',      spec:'Pistol',    dam:'7',  range:'Short',  mag:2,  enc:1, cost:500,   avail:'Rare',   traits:'Close, Flamer, Inflict (Ablaze), Loud' },
-    { name:'Flamer',           spec:'Long Gun',  dam:'8',  range:'Medium', mag:4,  enc:2, cost:1000,  avail:'Scarce', traits:'Flamer, Inflict (Ablaze), Loud, Two-handed' },
-    // Las
-    { name:'Laspistol',        spec:'Pistol',    dam:'5',  range:'Medium', mag:2,  enc:0, cost:400,   avail:'Common', traits:'Burst, Close, Loud, Reliable' },
-    { name:'Lasgun',           spec:'Long Gun',  dam:'6',  range:'Long',   mag:4,  enc:2, cost:600,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
-    { name:'Las Carbine',      spec:'Long Gun',  dam:'5',  range:'Medium', mag:3,  enc:1, cost:800,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
-    { name:'Long Las',         spec:'Long Gun',  dam:'6',  range:'Extreme',mag:2,  enc:2, cost:1000,  avail:'Scarce', traits:'Burst, Penetrating (1), Reliable, Two-handed' },
-    { name:'Hot-Shot Laspistol',spec:'Pistol',   dam:'8',  range:'Medium', mag:2,  enc:2, cost:900,   avail:'Rare',   traits:'Burst, Loud, Penetrating (2)' },
-    { name:'Hot-Shot Lasgun',  spec:'Long Gun',  dam:'8',  range:'Long',   mag:3,  enc:3, cost:1000,  avail:'Rare',   traits:'Burst, Loud, Penetrating (2), Two-handed' },
-    { name:'Lascannon',        spec:'Ordnance',  dam:'18', range:'Extreme',mag:5,  enc:4, cost:8000,  avail:'Rare',   traits:'Heavy (4), Loud, Penetrating (10), Two-handed' },
-    // Melta
-    { name:'Inferno Pistol',   spec:'Pistol',    dam:'16', range:'Short',  mag:3,  enc:0, cost:8000,  avail:'Exotic', traits:'Close, Rend (5)' },
-    { name:'Meltagun',         spec:'Long Gun',  dam:'16', range:'Medium', mag:5,  enc:1, cost:9000,  avail:'Rare',   traits:'Rend (5), Two-handed' },
-    // Plasma
-    { name:'Plasma Pistol',    spec:'Pistol',    dam:'10', range:'Medium', mag:6,  enc:1, cost:7000,  avail:'Rare',   traits:'Close, Loud, Penetrating (6), Supercharge (4), Unstable' },
-    { name:'Plasma Gun',       spec:'Long Gun',  dam:'10', range:'Long',   mag:12, enc:1, cost:8000,  avail:'Rare',   traits:'Loud, Penetrating (6), Supercharge (4), Two-handed, Unstable' },
-    // Solid Projectile
-    { name:'Autopistol',       spec:'Pistol',    dam:'5',  range:'Medium', mag:3,  enc:0, cost:400,   avail:'Common', traits:'Close, Loud, Rapid Fire (3)' },
-    { name:'Autogun',          spec:'Long Gun',  dam:'6',  range:'Long',   mag:5,  enc:1, cost:600,   avail:'Common', traits:'Loud, Rapid Fire (3), Two-handed' },
-    { name:'Hand Cannon',      spec:'Pistol',    dam:'8',  range:'Medium', mag:4,  enc:2, cost:570,   avail:'Scarce', traits:'Close, Heavy (4), Loud, Penetrating (2)' },
-    { name:'Shotgun (Combat)', spec:'Long Gun',  dam:'6',  range:'Medium', mag:12, enc:1, cost:600,   avail:'Scarce', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
-    { name:'Shotgun (Pump)',   spec:'Long Gun',  dam:'6',  range:'Medium', mag:8,  enc:1, cost:400,   avail:'Common', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
-    { name:'Sniper Rifle',     spec:'Long Gun',  dam:'8',  range:'Extreme',mag:6,  enc:2, cost:1000,  avail:'Scarce', traits:'Loud, Two-handed' },
-    { name:'Stub Pistol',      spec:'Pistol',    dam:'6',  range:'Medium', mag:2,  enc:0, cost:250,   avail:'Common', traits:'Burst, Close, Loud' },
-    { name:'Stub Revolver',    spec:'Pistol',    dam:'6',  range:'Medium', mag:6,  enc:0, cost:200,   avail:'Common', traits:'Close, Loud, Reliable' },
-    { name:'Heavy Stubber',    spec:'Ordnance',  dam:'8',  range:'Extreme',mag:8,  enc:3, cost:2000,  avail:'Scarce', traits:'Heavy (4), Loud, Penetrating (3), Rapid Fire (4), Two-handed' },
-    // Specialised
-    { name:'Needle Pistol',    spec:'Pistol',    dam:'1',  range:'Medium', mag:4,  enc:1, cost:1500,  avail:'Exotic', traits:'Close, Inflict (Poisoned), Penetrating (6), Subtle' },
-    { name:'Needle Rifle',     spec:'Long Gun',  dam:'1',  range:'Long',   mag:6,  enc:2, cost:1700,  avail:'Exotic', traits:'Inflict (Poisoned), Penetrating (6), Subtle, Two-handed' },
-    { name:'Web Pistol',       spec:'Pistol',    dam:'\u2014', range:'Short', mag:3, enc:1, cost:1300, avail:'Rare',  traits:'Close, Inflict (Restrained)' },
-    { name:'Webber',           spec:'Long Gun',  dam:'\u2014', range:'Medium',mag:6, enc:1, cost:1500, avail:'Rare',  traits:'Inflict (Restrained), Two-handed' },
-    // Launcher
-    { name:'Grenade Launcher', spec:'Ordnance',  dam:'\u2014',range:'Long',  mag:6, enc:2, cost:1000, avail:'Rare',  traits:'Loud, Two-handed' },
-    { name:'Missile Launcher', spec:'Ordnance',  dam:'\u2014',range:'Extreme',mag:1,enc:3, cost:2000, avail:'Rare',  traits:'Heavy (4), Loud, Two-handed' }
+    { name:'Bolt Pistol',       spec:'Pistol',    dam:'8',  range:'Medium', mag:2,  enc:1, cost:4000,  avail:'Scarce', traits:'Burst, Close, Loud, Penetrating (4), Spread' },
+    { name:'Boltgun',           spec:'Long Gun',  dam:'8',  range:'Long',   mag:4,  enc:2, cost:5000,  avail:'Scarce', traits:'Loud, Penetrating (4), Rapid Fire (2), Spread, Two-handed' },
+    { name:'Heavy Bolter',      spec:'Ordnance',  dam:'10', range:'Long',   mag:6,  enc:3, cost:9000,  avail:'Rare',   traits:'Heavy (4), Penetrating (5), Loud, Rapid Fire (3), Spread, Two-handed' },
+    { name:'Hand Flamer',       spec:'Pistol',    dam:'7',  range:'Short',  mag:2,  enc:1, cost:500,   avail:'Rare',   traits:'Close, Flamer, Inflict (Ablaze), Loud' },
+    { name:'Flamer',            spec:'Long Gun',  dam:'8',  range:'Medium', mag:4,  enc:2, cost:1000,  avail:'Scarce', traits:'Flamer, Inflict (Ablaze), Loud, Two-handed' },
+    { name:'Laspistol',         spec:'Pistol',    dam:'5',  range:'Medium', mag:2,  enc:0, cost:400,   avail:'Common', traits:'Burst, Close, Loud, Reliable' },
+    { name:'Lasgun',            spec:'Long Gun',  dam:'6',  range:'Long',   mag:4,  enc:2, cost:600,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
+    { name:'Las Carbine',       spec:'Long Gun',  dam:'5',  range:'Medium', mag:3,  enc:1, cost:800,   avail:'Common', traits:'Burst, Loud, Reliable, Two-handed' },
+    { name:'Long Las',          spec:'Long Gun',  dam:'6',  range:'Extreme',mag:2,  enc:2, cost:1000,  avail:'Scarce', traits:'Burst, Penetrating (1), Reliable, Two-handed' },
+    { name:'Hot-Shot Laspistol',spec:'Pistol',    dam:'8',  range:'Medium', mag:2,  enc:2, cost:900,   avail:'Rare',   traits:'Burst, Loud, Penetrating (2)' },
+    { name:'Hot-Shot Lasgun',   spec:'Long Gun',  dam:'8',  range:'Long',   mag:3,  enc:3, cost:1000,  avail:'Rare',   traits:'Burst, Loud, Penetrating (2), Two-handed' },
+    { name:'Lascannon',         spec:'Ordnance',  dam:'18', range:'Extreme',mag:5,  enc:4, cost:8000,  avail:'Rare',   traits:'Heavy (4), Loud, Penetrating (10), Two-handed' },
+    { name:'Inferno Pistol',    spec:'Pistol',    dam:'16', range:'Short',  mag:3,  enc:0, cost:8000,  avail:'Exotic', traits:'Close, Rend (5)' },
+    { name:'Meltagun',          spec:'Long Gun',  dam:'16', range:'Medium', mag:5,  enc:1, cost:9000,  avail:'Rare',   traits:'Rend (5), Two-handed' },
+    { name:'Plasma Pistol',     spec:'Pistol',    dam:'10', range:'Medium', mag:6,  enc:1, cost:7000,  avail:'Rare',   traits:'Close, Loud, Penetrating (6), Supercharge (4), Unstable' },
+    { name:'Plasma Gun',        spec:'Long Gun',  dam:'10', range:'Long',   mag:12, enc:1, cost:8000,  avail:'Rare',   traits:'Loud, Penetrating (6), Supercharge (4), Two-handed, Unstable' },
+    { name:'Autopistol',        spec:'Pistol',    dam:'5',  range:'Medium', mag:3,  enc:0, cost:400,   avail:'Common', traits:'Close, Loud, Rapid Fire (3)' },
+    { name:'Autogun',           spec:'Long Gun',  dam:'6',  range:'Long',   mag:5,  enc:1, cost:600,   avail:'Common', traits:'Loud, Rapid Fire (3), Two-handed' },
+    { name:'Hand Cannon',       spec:'Pistol',    dam:'8',  range:'Medium', mag:4,  enc:2, cost:570,   avail:'Scarce', traits:'Close, Heavy (4), Loud, Penetrating (2)' },
+    { name:'Shotgun (Combat)',  spec:'Long Gun',  dam:'6',  range:'Medium', mag:12, enc:1, cost:600,   avail:'Scarce', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
+    { name:'Shotgun (Pump)',    spec:'Long Gun',  dam:'6',  range:'Medium', mag:8,  enc:1, cost:400,   avail:'Common', traits:'Inflict (Prone), Loud, Spread, Two-handed' },
+    { name:'Sniper Rifle',      spec:'Long Gun',  dam:'8',  range:'Extreme',mag:6,  enc:2, cost:1000,  avail:'Scarce', traits:'Loud, Two-handed' },
+    { name:'Stub Pistol',       spec:'Pistol',    dam:'6',  range:'Medium', mag:2,  enc:0, cost:250,   avail:'Common', traits:'Burst, Close, Loud' },
+    { name:'Stub Revolver',     spec:'Pistol',    dam:'6',  range:'Medium', mag:6,  enc:0, cost:200,   avail:'Common', traits:'Close, Loud, Reliable' },
+    { name:'Heavy Stubber',     spec:'Ordnance',  dam:'8',  range:'Extreme',mag:8,  enc:3, cost:2000,  avail:'Scarce', traits:'Heavy (4), Loud, Penetrating (3), Rapid Fire (4), Two-handed' },
+    { name:'Needle Pistol',     spec:'Pistol',    dam:'1',  range:'Medium', mag:4,  enc:1, cost:1500,  avail:'Exotic', traits:'Close, Inflict (Poisoned), Penetrating (6), Subtle' },
+    { name:'Needle Rifle',      spec:'Long Gun',  dam:'1',  range:'Long',   mag:6,  enc:2, cost:1700,  avail:'Exotic', traits:'Inflict (Poisoned), Penetrating (6), Subtle, Two-handed' },
+    { name:'Web Pistol',        spec:'Pistol',    dam:'\u2014', range:'Short', mag:3, enc:1, cost:1300, avail:'Rare', traits:'Close, Inflict (Restrained)' },
+    { name:'Webber',            spec:'Long Gun',  dam:'\u2014', range:'Medium',mag:6, enc:1, cost:1500, avail:'Rare', traits:'Inflict (Restrained), Two-handed' },
+    { name:'Grenade Launcher',  spec:'Ordnance',  dam:'\u2014',range:'Long',  mag:6, enc:2, cost:1000, avail:'Rare', traits:'Loud, Two-handed' },
+    { name:'Missile Launcher',  spec:'Ordnance',  dam:'\u2014',range:'Extreme',mag:1,enc:3, cost:2000, avail:'Rare', traits:'Heavy (4), Loud, Two-handed' }
   ],
   GRENADES: [
-    { name:'Frag Grenade',         spec:'Thrown/Ordnance', dam:'6',  enc:0, cost:50,   avail:'Common', traits:'Blast, Loud, Thrown (Medium), Unstable' },
-    { name:'Krak Grenade',         spec:'Thrown/Ordnance', dam:'12', enc:0, cost:60,   avail:'Rare',   traits:'Loud, Penetrating (4), Spread, Thrown (Medium), Unstable' },
-    { name:'Smoke Grenade',        spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:30, avail:'Common', traits:'Blast, Thrown (Medium), Unstable. Zone = Heavily Obscured x3 rounds' },
-    { name:'Fire Bomb',            spec:'Thrown',          dam:'\u2014',enc:1,cost:10, avail:'Common', traits:'Blast, Loud, Inflict (Ablaze), Thrown (Medium), Unstable' },
-    { name:'Choke Grenade',        spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:40, avail:'Scarce', traits:'Inflict (Stunned) x3 rounds, Thrown (Medium), Unstable' },
-    { name:'Photon Flash Grenade', spec:'Thrown/Ordnance', dam:'\u2014',enc:0,cost:200,avail:'Rare',   traits:'Loud, Inflict (Blinded) all in Zone, Thrown (Medium), Unstable' },
-    { name:'Web Grenade',          spec:'Thrown',          dam:'\u2014',enc:0,cost:150,avail:'Rare',   traits:'Loud, Blast, Inflict (Restrained) all in Zone, Thrown (Medium), Unstable' },
-    { name:'Blasting Charge',      spec:'Thrown',          dam:'10', enc:0, cost:40,   avail:'Common', traits:'Loud, Spread, Thrown (Medium), Unstable' },
-    { name:'Frag Missile',         spec:'Ordnance',        dam:'8',  enc:1, cost:200,  avail:'Scarce', traits:'Blast, Loud, Unstable' },
-    { name:'Krak Missile',         spec:'Ordnance',        dam:'16', enc:1, cost:400,  avail:'Scarce', traits:'Loud, Penetrating (6), Spread, Unstable' },
-    { name:'Demolition Charge',    spec:'Engineering',     dam:'16', enc:2, cost:50,   avail:'Common', traits:'Loud, Spread, Unstable. Comes with Remote Detonator' },
-    { name:'Melta Bomb',           spec:'Engineering',     dam:'16', enc:2, cost:1000, avail:'Exotic', traits:'Rend (12), Spread, Unstable. Target only' }
+    { name:'Frag Grenade',          spec:'Thrown/Ordnance', dam:'6',      enc:0, cost:50,   avail:'Common', traits:'Blast, Loud, Thrown (Medium), Unstable' },
+    { name:'Krak Grenade',          spec:'Thrown/Ordnance', dam:'12',     enc:0, cost:60,   avail:'Rare',   traits:'Loud, Penetrating (4), Spread, Thrown (Medium), Unstable' },
+    { name:'Smoke Grenade',         spec:'Thrown/Ordnance', dam:'\u2014', enc:0, cost:30,   avail:'Common', traits:'Blast, Thrown (Medium), Unstable. Zone = Heavily Obscured x3 rounds' },
+    { name:'Fire Bomb',             spec:'Thrown',          dam:'\u2014', enc:1, cost:10,   avail:'Common', traits:'Blast, Loud, Inflict (Ablaze), Thrown (Medium), Unstable' },
+    { name:'Choke Grenade',         spec:'Thrown/Ordnance', dam:'\u2014', enc:0, cost:40,   avail:'Scarce', traits:'Inflict (Stunned) x3 rounds, Thrown (Medium), Unstable' },
+    { name:'Photon Flash Grenade',  spec:'Thrown/Ordnance', dam:'\u2014', enc:0, cost:200,  avail:'Rare',   traits:'Loud, Inflict (Blinded) all in Zone, Thrown (Medium), Unstable' },
+    { name:'Web Grenade',           spec:'Thrown',          dam:'\u2014', enc:0, cost:150,  avail:'Rare',   traits:'Loud, Blast, Inflict (Restrained) all in Zone, Thrown (Medium), Unstable' },
+    { name:'Blasting Charge',       spec:'Thrown',          dam:'10',     enc:0, cost:40,   avail:'Common', traits:'Loud, Spread, Thrown (Medium), Unstable' },
+    { name:'Frag Missile',          spec:'Ordnance',        dam:'8',      enc:1, cost:200,  avail:'Scarce', traits:'Blast, Loud, Unstable' },
+    { name:'Krak Missile',          spec:'Ordnance',        dam:'16',     enc:1, cost:400,  avail:'Scarce', traits:'Loud, Penetrating (6), Spread, Unstable' },
+    { name:'Demolition Charge',     spec:'Engineering',     dam:'16',     enc:2, cost:50,   avail:'Common', traits:'Loud, Spread, Unstable. Comes with Remote Detonator' },
+    { name:'Melta Bomb',            spec:'Engineering',     dam:'16',     enc:2, cost:1000, avail:'Exotic', traits:'Rend (12), Spread, Unstable. Target only' }
   ],
   ARMOUR: [
-    // Basic
-    { name:'Robes/Light Leathers',    locations:'Arms, Body, Legs', armour:1, enc:1, cost:10,      avail:'Common', traits:'Subtle' },
-    { name:'Heavy Leathers',          locations:'Arms, Body, Legs', armour:2, enc:1, cost:60,      avail:'Common', traits:'\u2014' },
-    { name:'Armoured Bodyglove',      locations:'Arms, Body, Legs', armour:2, enc:1, cost:1200,    avail:'Rare',   traits:'Subtle' },
-    { name:'Armoured Greatcoat',      locations:'Arms, Body, Legs', armour:2, enc:2, cost:500,     avail:'Rare',   traits:'Subtle' },
-    { name:'Scrap-plate',             locations:'Body',             armour:3, enc:2, cost:300,     avail:'Rare',   traits:'Heavy (3)' },
-    { name:'Void Suit',               locations:'All',              armour:3, enc:2, cost:2000,    avail:'Scarce', traits:'Vacuum+pathogen protection 10hr' },
-    // Flak
-    { name:'Flak Boots',              locations:'Legs',             armour:2, enc:2, cost:100,     avail:'Common', traits:'\u2014' },
-    { name:'Flak Helmet',             locations:'Head',             armour:2, enc:2, cost:150,     avail:'Common', traits:'\u2014' },
-    { name:'Flak Gauntlets',          locations:'Arms',             armour:2, enc:1, cost:100,     avail:'Common', traits:'\u2014' },
-    { name:'Flak Vest',               locations:'Body',             armour:3, enc:2, cost:500,     avail:'Common', traits:'\u2014' },
-    { name:'Flak Jacket',             locations:'Arms, Body',       armour:3, enc:2, cost:800,     avail:'Scarce', traits:'\u2014' },
-    { name:'AM Flak Armour',          locations:'All',              armour:4, enc:4, cost:1000,    avail:'Rare',   traits:'Loud' },
-    // Mesh
-    { name:'Mesh Boots',              locations:'Legs',             armour:3, enc:1, cost:600,     avail:'Rare',   traits:'\u2014' },
-    { name:'Mesh Cowl',               locations:'Head',             armour:3, enc:1, cost:800,     avail:'Rare',   traits:'\u2014' },
-    { name:'Mesh Gauntlets',          locations:'Arms',             armour:3, enc:0, cost:600,     avail:'Rare',   traits:'\u2014' },
-    { name:'Mesh Vest',               locations:'Body',             armour:4, enc:1, cost:500,     avail:'Rare',   traits:'\u2014' },
-    { name:'Xenos Mesh',              locations:'Arms, Body, Legs', armour:4, enc:2, cost:5000,    avail:'Exotic', traits:'\u2014' },
-    // Carapace
-    { name:'Carapace Helm',           locations:'Head',             armour:5, enc:2, cost:400,     avail:'Rare',   traits:'\u2014' },
-    { name:'Carapace Gauntlets',      locations:'Arms',             armour:5, enc:2, cost:300,     avail:'Rare',   traits:'\u2014' },
-    { name:'Carapace Greaves',        locations:'Legs',             armour:5, enc:2, cost:300,     avail:'Rare',   traits:'\u2014' },
-    { name:'Carapace Chestplate',     locations:'Body',             armour:6, enc:3, cost:800,     avail:'Rare',   traits:'Heavy (4), Loud' },
-    { name:'Enforcer Carapace',       locations:'All',              armour:5, enc:4, cost:1800,    avail:'Rare',   traits:'Heavy (4), Loud' },
-    { name:'Tempestus Carapace',      locations:'All',              armour:6, enc:5, cost:4000,    avail:'Exotic', traits:'Heavy (4), Loud' },
-    // Force Fields
-    { name:'Refractor Field',         locations:'All',              armour:'1d10', enc:0, cost:1000,  avail:'Exotic', traits:'Protection field; overload 10' },
-    { name:'Conversion Field',        locations:'All',              armour:'2d10', enc:0, cost:6000,  avail:'Exotic', traits:'Protection field; overload 20; blinds on 10+ absorbed' }
+    { name:'Robes/Light Leathers',   locations:'Arms, Body, Legs', armour:1, enc:1, cost:10,    avail:'Common', traits:'Subtle' },
+    { name:'Heavy Leathers',         locations:'Arms, Body, Legs', armour:2, enc:1, cost:60,    avail:'Common', traits:'\u2014' },
+    { name:'Armoured Bodyglove',     locations:'Arms, Body, Legs', armour:2, enc:1, cost:1200,  avail:'Rare',   traits:'Subtle' },
+    { name:'Armoured Greatcoat',     locations:'Arms, Body, Legs', armour:2, enc:2, cost:500,   avail:'Rare',   traits:'Subtle' },
+    { name:'Scrap-plate',            locations:'Body',             armour:3, enc:2, cost:300,   avail:'Rare',   traits:'Heavy (3)' },
+    { name:'Void Suit',              locations:'All',              armour:3, enc:2, cost:2000,  avail:'Scarce', traits:'Vacuum+pathogen protection 10hr' },
+    { name:'Flak Boots',             locations:'Legs',             armour:2, enc:2, cost:100,   avail:'Common', traits:'\u2014' },
+    { name:'Flak Helmet',            locations:'Head',             armour:2, enc:2, cost:150,   avail:'Common', traits:'\u2014' },
+    { name:'Flak Gauntlets',         locations:'Arms',             armour:2, enc:1, cost:100,   avail:'Common', traits:'\u2014' },
+    { name:'Flak Vest',              locations:'Body',             armour:3, enc:2, cost:500,   avail:'Common', traits:'\u2014' },
+    { name:'Flak Jacket',            locations:'Arms, Body',       armour:3, enc:2, cost:800,   avail:'Scarce', traits:'\u2014' },
+    { name:'AM Flak Armour',         locations:'All',              armour:4, enc:4, cost:1000,  avail:'Rare',   traits:'Loud' },
+    { name:'Mesh Boots',             locations:'Legs',             armour:3, enc:1, cost:600,   avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Cowl',              locations:'Head',             armour:3, enc:1, cost:800,   avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Gauntlets',         locations:'Arms',             armour:3, enc:0, cost:600,   avail:'Rare',   traits:'\u2014' },
+    { name:'Mesh Vest',              locations:'Body',             armour:4, enc:1, cost:500,   avail:'Rare',   traits:'\u2014' },
+    { name:'Xenos Mesh',             locations:'Arms, Body, Legs', armour:4, enc:2, cost:5000,  avail:'Exotic', traits:'\u2014' },
+    { name:'Carapace Helm',          locations:'Head',             armour:5, enc:2, cost:400,   avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Gauntlets',     locations:'Arms',             armour:5, enc:2, cost:300,   avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Greaves',       locations:'Legs',             armour:5, enc:2, cost:300,   avail:'Rare',   traits:'\u2014' },
+    { name:'Carapace Chestplate',    locations:'Body',             armour:6, enc:3, cost:800,   avail:'Rare',   traits:'Heavy (4), Loud' },
+    { name:'Enforcer Carapace',      locations:'All',              armour:5, enc:4, cost:1800,  avail:'Rare',   traits:'Heavy (4), Loud' },
+    { name:'Tempestus Carapace',     locations:'All',              armour:6, enc:5, cost:4000,  avail:'Exotic', traits:'Heavy (4), Loud' },
+    { name:'Refractor Field',        locations:'All',              armour:'1d10', enc:0, cost:1000, avail:'Exotic', traits:'Protection field; overload 10' },
+    { name:'Conversion Field',       locations:'All',              armour:'2d10', enc:0, cost:6000, avail:'Exotic', traits:'Protection field; overload 20; blinds on 10+ absorbed' }
   ],
   AUGMETICS: [
-    // Standard replacements
-    { name:'Augmetic Arm',              cost:1000,   avail:'Scarce', effect:'+1 Armour arm; +1 SL Strength Tests; melee +1 Damage' },
-    { name:'Augmetic Heart',            cost:3000,   avail:'Rare',   effect:'Action + Fortitude: remove Bleeding (Minor/Major)' },
-    { name:'Augmetic Leg',              cost:1000,   avail:'Scarce', effect:'+1 Armour leg; +1 SL Strength Tests using leg' },
+    { name:'Augmetic Arm',               cost:1000,  avail:'Scarce', effect:'+1 Armour arm; +1 SL Strength Tests; melee +1 Damage' },
+    { name:'Augmetic Heart',             cost:3000,  avail:'Rare',   effect:'Action + Fortitude: remove Bleeding (Minor/Major)' },
+    { name:'Augmetic Leg',               cost:1000,  avail:'Scarce', effect:'+1 Armour leg; +1 SL Strength Tests using leg' },
     { name:'Augmetic Respiratory System',cost:2000,  avail:'Rare',   effect:'+2 SL Fortitude vs airborne toxins and gases' },
-    { name:'Augmetic Sensory Organs',   cost:4000,   avail:'Rare',   effect:'+1 SL Tests using that sense; two = +2 SL' },
-    { name:'Augmetic Tracks/Wheels',    cost:1500,   avail:'Scarce', effect:'+1 Armour leg; Speed = Fast in clear Zones' },
-    // AdMech mechadendrites
-    { name:'Augur Array',               cost:6000,   avail:'Rare',   effect:'Auspex within Medium Range; +5 Perception. AdMech only.' },
-    { name:'Ballistic Mechadendrite',   cost:2000,   avail:'Rare',   effect:'Integrated Laspistol; never needs reloading. AdMech only.' },
-    { name:'Calculus Logi Upgrade',     cost:10000,  avail:'Rare',   effect:'+1 SL Logic (Mathematics); +5 Intelligence. AdMech only.' },
-    { name:'Manipulator Mechadendrite', cost:1400,   avail:'Rare',   effect:'+2 SL Strength; -1 SL Dexterity; Improvised Melee. AdMech only.' },
-    { name:'Medicae Mechadendrite',     cost:1400,   avail:'Rare',   effect:"Counts as Chirurgeon's Kit; unlimited uses. AdMech only." },
-    { name:'Mind Impulse Unit',         cost:10000,  avail:'Rare',   effect:'Interface with machines directly. AdMech only.' },
-    { name:'Optical Mechadendrite',     cost:1200,   avail:'Rare',   effect:'+1 SL Awareness (Sight); ignores Dark Zones. AdMech only.' },
-    { name:'Utility Mechadendrite',     cost:1000,   avail:'Rare',   effect:'+2 SL Tech Tests; Combi-Tool; Improvised Melee. AdMech only.' },
-    { name:'Vocal Implant',             cost:400,    avail:'Rare',   effect:'Voice/sounds audible up to 100m. AdMech only.' }
+    { name:'Augmetic Sensory Organs',    cost:4000,  avail:'Rare',   effect:'+1 SL Tests using that sense; two = +2 SL' },
+    { name:'Augmetic Tracks/Wheels',     cost:1500,  avail:'Scarce', effect:'+1 Armour leg; Speed = Fast in clear Zones' },
+    { name:'Augur Array',                cost:6000,  avail:'Rare',   effect:'Auspex within Medium Range; +5 Perception. AdMech only.' },
+    { name:'Ballistic Mechadendrite',    cost:2000,  avail:'Rare',   effect:'Integrated Laspistol; never needs reloading. AdMech only.' },
+    { name:'Calculus Logi Upgrade',      cost:10000, avail:'Rare',   effect:'+1 SL Logic (Mathematics); +5 Intelligence. AdMech only.' },
+    { name:'Manipulator Mechadendrite',  cost:1400,  avail:'Rare',   effect:'+2 SL Strength; -1 SL Dexterity; Improvised Melee. AdMech only.' },
+    { name:'Medicae Mechadendrite',      cost:1400,  avail:'Rare',   effect:"Counts as Chirurgeon's Kit; unlimited uses. AdMech only." },
+    { name:'Mind Impulse Unit',          cost:10000, avail:'Rare',   effect:'Interface with machines directly. AdMech only.' },
+    { name:'Optical Mechadendrite',      cost:1200,  avail:'Rare',   effect:'+1 SL Awareness (Sight); ignores Dark Zones. AdMech only.' },
+    { name:'Utility Mechadendrite',      cost:1000,  avail:'Rare',   effect:'+2 SL Tech Tests; Combi-Tool; Improvised Melee. AdMech only.' },
+    { name:'Vocal Implant',              cost:400,   avail:'Rare',   effect:'Voice/sounds audible up to 100m. AdMech only.' }
   ],
   GEAR: [
-    { name:'Auspex/Scanner',      cost:1000,  avail:'Scarce',    enc:1, notes:'Detects motion, energy, life signs within Medium Range' },
-    { name:'Auto-Quill',          cost:150,   avail:'Scarce',    enc:2, notes:'Transcribes spoken word or copies written text' },
-    { name:'Backpack/Slings',     cost:20,    avail:'Common',    enc:1, notes:'+4 max Encumbrance when worn' },
-    { name:'Cameleoline Cloak',   cost:500,   avail:'Rare',      enc:0, notes:'+2 SL Stealth Tests while stationary' },
-    { name:"Chirurgeon's Kit",    cost:500,   avail:'Rare',      enc:1, notes:'5 uses. Required for Critical Wounds/Injuries' },
-    { name:'Chrono',              cost:20,    avail:'Common',    enc:0, notes:'Displays/auto-syncs local time' },
-    { name:'Climbing Harness',    cost:100,   avail:'Common',    enc:0, notes:'50m rope; auto-arrests falls' },
-    { name:'Combi-Tool',          cost:300,   avail:'Rare',      enc:0, notes:'Required for augmetic repair' },
-    { name:'Comm Leech',          cost:1000,  avail:'Rare',      enc:1, notes:'Intercept vox signals up to 3km' },
-    { name:'Dataslate',           cost:100,   avail:'Common',    enc:0, notes:'Stores text, picts, vids. Biometric lock.' },
-    { name:'Diagnostor',          cost:2000,  avail:'Rare',      enc:1, notes:'Medicae Tests to detect illness' },
-    { name:'Disguise Kit',        cost:100,   avail:'Very Rare', enc:1, notes:'10 min to alter appearance' },
-    { name:'Entrenching Tool',    cost:20,    avail:'Common',    enc:1, notes:'Counts as Improvised (One-handed) melee' },
-    { name:'Filtration Plugs',    cost:20,    avail:'Common',    enc:0, notes:'+2 SL Fortitude vs harmful gases' },
-    { name:'Glow-Globe/Stablight',cost:30,    avail:'Common',    enc:0, notes:'Removes Poorly Lit + Dark from Zone. 5hr run' },
-    { name:'Grapnel Launcher',    cost:550,   avail:'Common',    enc:0, notes:'50m reach; lifts 2 Medium creatures' },
-    { name:'Grav Chute',          cost:2000,  avail:'Rare',      enc:2, notes:'Ignore fall damage 10 min' },
-    { name:'Holy Icon',           cost:10,    avail:'Common',    enc:0, notes:'+1 SL Discipline (Fear) Tests' },
-    { name:'Lascutter',           cost:170,   avail:'Common',    enc:2, notes:'Tech Tests to cut through solid objects' },
-    { name:'Laud Hailer',         cost:100,   avail:'Scarce',    enc:1, notes:'Voice audible up to 100m' },
-    { name:'Mag Boots',           cost:400,   avail:'Rare',      enc:0, notes:'Stick to ferromagnetic surfaces; ignore zero-G' },
-    { name:'Manacles',            cost:15,    avail:'Common',    enc:0, notes:'Restrains prisoners' },
-    { name:'Multikey',            cost:250,   avail:'Scarce',    enc:0, notes:'+20 to Dexterity (Lockpicking) Tests' },
-    { name:'Photo-Visors',        cost:300,   avail:'Scarce',    enc:0, notes:'Ignore Poorly Lit and Dark penalties' },
-    { name:'Pict Recorder',       cost:75,    avail:'Common',    enc:1, notes:'Records visual data; holds 100hrs footage' },
-    { name:'Rebreather',          cost:200,   avail:'Scarce',    enc:1, notes:'Ignore toxic/deadly air; breathe underwater. 1hr' },
-    { name:'Respirator/Gas Mask', cost:50,    avail:'Common',    enc:0, notes:'Auto-pass Tests vs airborne pathogens' },
-    { name:'Signal Jammer',       cost:500,   avail:'Rare',      enc:1, notes:'Blocks vox in zone; Tech Test to set up' },
-    { name:'Survival Gear',       cost:50,    avail:'Common',    enc:3, notes:'Bedroll, tent, canteen, rope, firestarters' },
-    { name:'Synskin',             cost:3000,  avail:'Exotic',    enc:0, notes:'= Armoured Bodyglove (Subtle); +1 SL Stealth if worn alone' },
-    { name:'Vox Bead',            cost:50,    avail:'Common',    enc:0, notes:'Short-range encrypted vox communication' }
+    { name:'Auspex/Scanner',      cost:1000, avail:'Scarce',   enc:1, notes:'Detects motion, energy, life signs within Medium Range' },
+    { name:'Auto-Quill',          cost:150,  avail:'Scarce',   enc:2, notes:'Transcribes spoken word or copies written text' },
+    { name:'Backpack/Slings',     cost:20,   avail:'Common',   enc:1, notes:'+4 max Encumbrance when worn' },
+    { name:'Cameleoline Cloak',   cost:500,  avail:'Rare',     enc:0, notes:'+2 SL Stealth Tests while stationary' },
+    { name:"Chirurgeon's Kit",    cost:500,  avail:'Rare',     enc:1, notes:'5 uses. Required for Critical Wounds/Injuries' },
+    { name:'Chrono',              cost:20,   avail:'Common',   enc:0, notes:'Displays/auto-syncs local time' },
+    { name:'Climbing Harness',    cost:100,  avail:'Common',   enc:0, notes:'50m rope; auto-arrests falls' },
+    { name:'Combi-Tool',          cost:300,  avail:'Rare',     enc:0, notes:'Required for augmetic repair' },
+    { name:'Comm Leech',          cost:1000, avail:'Rare',     enc:1, notes:'Intercept vox signals up to 3km' },
+    { name:'Dataslate',           cost:100,  avail:'Common',   enc:0, notes:'Stores text, picts, vids. Biometric lock.' },
+    { name:'Diagnostor',          cost:2000, avail:'Rare',     enc:1, notes:'Medicae Tests to detect illness' },
+    { name:'Disguise Kit',        cost:100,  avail:'Very Rare',enc:1, notes:'10 min to alter appearance' },
+    { name:'Entrenching Tool',    cost:20,   avail:'Common',   enc:1, notes:'Counts as Improvised (One-handed) melee' },
+    { name:'Filtration Plugs',    cost:20,   avail:'Common',   enc:0, notes:'+2 SL Fortitude vs harmful gases' },
+    { name:'Glow-Globe/Stablight',cost:30,   avail:'Common',   enc:0, notes:'Removes Poorly Lit + Dark from Zone. 5hr run' },
+    { name:'Grapnel Launcher',    cost:550,  avail:'Common',   enc:0, notes:'50m reach; lifts 2 Medium creatures' },
+    { name:'Grav Chute',          cost:2000, avail:'Rare',     enc:2, notes:'Ignore fall damage 10 min' },
+    { name:'Holy Icon',           cost:10,   avail:'Common',   enc:0, notes:'+1 SL Discipline (Fear) Tests' },
+    { name:'Lascutter',           cost:170,  avail:'Common',   enc:2, notes:'Tech Tests to cut through solid objects' },
+    { name:'Laud Hailer',         cost:100,  avail:'Scarce',   enc:1, notes:'Voice audible up to 100m' },
+    { name:'Mag Boots',           cost:400,  avail:'Rare',     enc:0, notes:'Stick to ferromagnetic surfaces; ignore zero-G' },
+    { name:'Manacles',            cost:15,   avail:'Common',   enc:0, notes:'Restrains prisoners' },
+    { name:'Multikey',            cost:250,  avail:'Scarce',   enc:0, notes:'+20 to Dexterity (Lockpicking) Tests' },
+    { name:'Photo-Visors',        cost:300,  avail:'Scarce',   enc:0, notes:'Ignore Poorly Lit and Dark penalties' },
+    { name:'Pict Recorder',       cost:75,   avail:'Common',   enc:1, notes:'Records visual data; holds 100hrs footage' },
+    { name:'Rebreather',          cost:200,  avail:'Scarce',   enc:1, notes:'Ignore toxic/deadly air; breathe underwater. 1hr' },
+    { name:'Respirator/Gas Mask', cost:50,   avail:'Common',   enc:0, notes:'Auto-pass Tests vs airborne pathogens' },
+    { name:'Signal Jammer',       cost:500,  avail:'Rare',     enc:1, notes:'Blocks vox in zone; Tech Test to set up' },
+    { name:'Survival Gear',       cost:50,   avail:'Common',   enc:3, notes:'Bedroll, tent, canteen, rope, firestarters' },
+    { name:'Synskin',             cost:3000, avail:'Exotic',   enc:0, notes:'= Armoured Bodyglove (Subtle); +1 SL Stealth if worn alone' },
+    { name:'Vox Bead',            cost:50,   avail:'Common',   enc:0, notes:'Short-range encrypted vox communication' }
   ]
 };
 
@@ -504,7 +636,6 @@ function setFilter(filter, btn) {
   renderArmoury();
 }
 
-// ── Availability colour helper ─────────────────────────────
 function availClass(a) {
   if (!a) return '';
   const l = a.toLowerCase();
@@ -515,11 +646,10 @@ function availClass(a) {
 }
 
 // ── Render armoury table ───────────────────────────────────
+
 function renderArmoury() {
-  const search  = (document.getElementById('armoury-search').value || '').toLowerCase();
-  const thead   = document.getElementById('armoury-thead');
-  const tbody   = document.getElementById('armoury-tbody');
-  thead.innerHTML = '';
+  const search = (document.getElementById('armoury-search').value || '').toLowerCase();
+  const tbody  = document.getElementById('armoury-tbody');
   tbody.innerHTML = '';
 
   const categories = currentFilter === 'ALL'
@@ -532,84 +662,231 @@ function renderArmoury() {
     );
     if (!items.length) return;
 
-    // Category divider row
+    // Category divider
     const divRow = document.createElement('tr');
     divRow.className = 'category-divider';
-    divRow.innerHTML = '<td colspan="9">' + cat + '</td>';
+    divRow.innerHTML = '<td colspan="10">' + cat + '</td>';
     tbody.appendChild(divRow);
 
-    // Header row for this category
+    // Header row — ADD is first column
     const hdr = document.createElement('tr');
-    if (cat === 'MELEE') {
-      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
-    } else if (cat === 'RANGED') {
-      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>RANGE</th><th>MAG</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
-    } else if (cat === 'GRENADES') {
-      hdr.innerHTML = '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
-    } else if (cat === 'ARMOUR') {
-      hdr.innerHTML = '<th>NAME</th><th>LOCATIONS</th><th>ARMOUR</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th><th></th>';
-    } else if (cat === 'AUGMETICS') {
-      hdr.innerHTML = '<th>NAME</th><th>COST</th><th>AVAIL</th><th>EFFECT</th><th></th>';
-    } else {
-      hdr.innerHTML = '<th>NAME</th><th>COST</th><th>AVAIL</th><th>ENC</th><th>NOTES</th><th></th>';
-    }
+    let hdrHtml = '<th class="th-add">ADD</th>';
+    if (cat === 'MELEE')     hdrHtml += '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th>';
+    else if (cat === 'RANGED') hdrHtml += '<th>NAME</th><th>SPEC</th><th>DAM</th><th>RANGE</th><th>MAG</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th>';
+    else if (cat === 'GRENADES') hdrHtml += '<th>NAME</th><th>SPEC</th><th>DAM</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th>';
+    else if (cat === 'ARMOUR')   hdrHtml += '<th>NAME</th><th>LOCATIONS</th><th>AP</th><th>ENC</th><th>COST</th><th>AVAIL</th><th>TRAITS</th>';
+    else if (cat === 'AUGMETICS') hdrHtml += '<th>NAME</th><th>COST</th><th>AVAIL</th><th>EFFECT</th>';
+    else hdrHtml += '<th>NAME</th><th>COST</th><th>AVAIL</th><th>ENC</th><th>NOTES</th>';
+    hdr.innerHTML = hdrHtml;
     tbody.appendChild(hdr);
 
     items.forEach(item => {
-      const tr = document.createElement('tr');
-      let cells = '';
-      const ac = availClass(item.avail);
-      const addBtn = '<button class="add-item-btn" onclick="addToSheet(\'' + cat + '\',' + JSON.stringify(item).replace(/'/g,"&#39;") + ')">+ ADD</button>';
+      const tr  = document.createElement('tr');
+      const ac  = availClass(item.avail);
+      // Serialise item safely for inline onclick
+      const itemJson = JSON.stringify(item).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const addCell = '<td style="width:52px;padding:3px 4px;"><button class="add-item-btn" onclick="openAddModal(\'' + cat + '\',\'' + itemJson + '\')">+ ADD</button></td>';
 
+      let cells = '';
       if (cat === 'MELEE') {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.enc + '</td>' +
           '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
-          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.traits + '</td>';
       } else if (cat === 'RANGED') {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.range + '</td>' +
           '<td>' + item.mag + '</td><td>' + item.enc + '</td><td>' + item.cost + '</td>' +
           '<td class="td-avail ' + ac + '">' + item.avail + '</td>' +
-          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.traits + '</td>';
       } else if (cat === 'GRENADES') {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.spec + '</td><td>' + item.dam + '</td><td>' + item.enc + '</td>' +
           '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
-          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.traits + '</td>';
       } else if (cat === 'ARMOUR') {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.locations + '</td><td>' + item.armour + '</td><td>' + item.enc + '</td>' +
           '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
-          '<td class="td-traits">' + item.traits + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.traits + '</td>';
       } else if (cat === 'AUGMETICS') {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
-          '<td class="td-traits">' + item.effect + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.effect + '</td>';
       } else {
         cells = '<td class="td-name">' + item.name + '</td>' +
           '<td>' + item.cost + '</td><td class="td-avail ' + ac + '">' + item.avail + '</td>' +
           '<td>' + (item.enc !== undefined ? item.enc : '\u2014') + '</td>' +
-          '<td class="td-traits">' + item.notes + '</td><td>' + addBtn + '</td>';
+          '<td class="td-traits">' + item.notes + '</td>';
       }
-      tr.innerHTML = cells;
+      tr.innerHTML = addCell + cells;
       tbody.appendChild(tr);
     });
   });
 }
 
-// ── Add item to operative sheet ────────────────────────────
+// ── Add Item Modal ─────────────────────────────────────────
 
-function addToSheet(cat, item) {
-  const d = currentData();
-  let msg = '';
+let _pendingCat  = null;
+let _pendingItem = null;
+let _pendingDest = null; // for ARMOUR: 'equipment' or 'armour-values'
+
+function openAddModal(cat, itemJson) {
+  _pendingCat  = cat;
+  _pendingItem = JSON.parse(itemJson.replace(/\\'/g,"'"));
+  _pendingDest = null;
+
+  const overlay = document.getElementById('add-modal-overlay');
+  const title   = document.getElementById('add-modal-title');
+  const body    = document.getElementById('add-modal-body');
+
+  title.textContent = 'ADD TO LOADOUT — ' + cat;
+  body.innerHTML = '';
+
+  const item = _pendingItem;
+  const ac   = availClass(item.avail);
+
+  // ── Item preview card ──
+  const preview = document.createElement('div');
+  preview.className = 'item-preview';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'item-preview-name';
+  nameEl.textContent = item.name;
+  preview.appendChild(nameEl);
+
+  const grid = document.createElement('div');
+  grid.className = 'item-preview-grid';
+
+  if (cat === 'MELEE') {
+    grid.innerHTML =
+      '<div>SPEC <span>' + item.spec + '</span></div>' +
+      '<div>DAMAGE <span>' + item.dam + '</span></div>' +
+      '<div>ENC <span>' + item.enc + '</span></div>' +
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  } else if (cat === 'RANGED') {
+    grid.innerHTML =
+      '<div>SPEC <span>' + item.spec + '</span></div>' +
+      '<div>DAMAGE <span>' + item.dam + '</span></div>' +
+      '<div>RANGE <span>' + item.range + '</span></div>' +
+      '<div>MAG <span>' + item.mag + '</span></div>' +
+      '<div>ENC <span>' + item.enc + '</span></div>' +
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  } else if (cat === 'GRENADES') {
+    grid.innerHTML =
+      '<div>SPEC <span>' + item.spec + '</span></div>' +
+      '<div>DAMAGE <span>' + item.dam + '</span></div>' +
+      '<div>ENC <span>' + item.enc + '</span></div>' +
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  } else if (cat === 'ARMOUR') {
+    grid.innerHTML =
+      '<div>LOCATIONS <span>' + item.locations + '</span></div>' +
+      '<div>ARMOUR <span>' + item.armour + '</span></div>' +
+      '<div>ENC <span>' + item.enc + '</span></div>' +
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  } else if (cat === 'AUGMETICS') {
+    grid.innerHTML =
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  } else {
+    grid.innerHTML =
+      '<div>ENC <span>' + (item.enc !== undefined ? item.enc : '\u2014') + '</span></div>' +
+      '<div>COST <span>' + item.cost + '</span></div>' +
+      '<div>AVAIL <span class="' + ac + '">' + item.avail + '</span></div>';
+  }
+  preview.appendChild(grid);
+
+  // Traits / effect / notes line
+  const traitsText = item.traits || item.effect || item.notes || '';
+  if (traitsText) {
+    const traits = document.createElement('div');
+    traits.className = 'item-preview-traits';
+    traits.textContent = traitsText;
+    preview.appendChild(traits);
+  }
+  body.appendChild(preview);
+
+  // ── Destination selector (ARMOUR only gets a choice) ──
+  if (cat === 'ARMOUR') {
+    const dl = document.createElement('div');
+    dl.className = 'dest-label';
+    dl.textContent = 'ADD TO:';
+    body.appendChild(dl);
+
+    const dbtns = document.createElement('div');
+    dbtns.className = 'dest-btns';
+
+    const opt1 = document.createElement('button');
+    opt1.className = 'dest-btn';
+    opt1.textContent = 'EQUIPMENT LIST';
+    opt1.onclick = () => {
+      _pendingDest = 'equipment';
+      document.querySelectorAll('.dest-btn').forEach(b => b.classList.remove('selected'));
+      opt1.classList.add('selected');
+      document.getElementById('confirm-add-btn').disabled = false;
+    };
+
+    const opt2 = document.createElement('button');
+    opt2.className = 'dest-btn';
+    opt2.textContent = 'ARMOUR VALUES';
+    opt2.onclick = () => {
+      _pendingDest = 'armour-values';
+      document.querySelectorAll('.dest-btn').forEach(b => b.classList.remove('selected'));
+      opt2.classList.add('selected');
+      document.getElementById('confirm-add-btn').disabled = false;
+    };
+
+    dbtns.appendChild(opt1);
+    dbtns.appendChild(opt2);
+    body.appendChild(dbtns);
+
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:9px;color:var(--green-dark);margin-bottom:10px;letter-spacing:1px;';
+    hint.textContent = 'EQUIPMENT LIST adds it as a text entry. ARMOUR VALUES fills in the armour rating by location.';
+    body.appendChild(hint);
+  }
+
+  // ── Confirm button ──
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'confirm-add-btn';
+  confirmBtn.id = 'confirm-add-btn';
+  confirmBtn.textContent = '+ CONFIRM ADD TO LOADOUT';
+  // Armour requires dest selection first; everything else is ready immediately
+  confirmBtn.disabled = (cat === 'ARMOUR');
+  confirmBtn.onclick = () => commitAdd();
+  body.appendChild(confirmBtn);
+
+  overlay.classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal-overlay').classList.remove('open');
+  _pendingCat  = null;
+  _pendingItem = null;
+  _pendingDest = null;
+}
+
+// Close on backdrop click
+document.getElementById('add-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+function commitAdd() {
+  const cat  = _pendingCat;
+  const item = _pendingItem;
+  const d    = currentData();
+  let msg    = '';
 
   if (cat === 'MELEE') {
     if (!d.weapons) d.weapons = [];
     d.weapons.push({
       name: item.name, type: 'Melee/' + item.spec,
       damage: item.dam, range: 'Melee', clip: '\u2014',
-      ap: '\u2014', traits: item.traits, notes: 'Enc ' + item.enc
+      enc: String(item.enc), traits: item.traits, notes: ''
     });
     msg = item.name + ' added to WEAPONS';
     saveCurrentData(d); renderWeapons(d);
@@ -619,8 +896,8 @@ function addToSheet(cat, item) {
     d.weapons.push({
       name: item.name, type: 'Ranged/' + item.spec,
       damage: item.dam, range: item.range,
-      clip: String(item.mag), ap: '\u2014',
-      traits: item.traits, notes: 'Enc ' + item.enc
+      clip: String(item.mag), enc: String(item.enc),
+      traits: item.traits, notes: ''
     });
     msg = item.name + ' added to WEAPONS';
     saveCurrentData(d); renderWeapons(d);
@@ -630,30 +907,49 @@ function addToSheet(cat, item) {
     d.weapons.push({
       name: item.name, type: 'Grenade/' + item.spec,
       damage: item.dam, range: 'Thrown', clip: '1',
-      ap: '\u2014', traits: item.traits, notes: 'Enc ' + item.enc
+      enc: String(item.enc), traits: item.traits, notes: ''
     });
     msg = item.name + ' added to WEAPONS';
     saveCurrentData(d); renderWeapons(d);
 
   } else if (cat === 'ARMOUR') {
-    if (!d.equipment) d.equipment = [];
-    d.equipment.push(item.name + ' (AP ' + item.armour + ', ' + item.locations + ')');
-    msg = item.name + ' added to EQUIPMENT';
-    saveCurrentData(d); renderEquip(d);
+    if (_pendingDest === 'armour-values') {
+      // Parse locations and apply armour value
+      const locs  = (item.locations || '').toLowerCase();
+      const val   = typeof item.armour === 'number' ? item.armour : 0;
+      if (!d.armour) d.armour = {};
+      if (locs === 'all') {
+        ['head','body','larm','rarm','lleg','rleg'].forEach(l => { d.armour[l] = val; });
+      } else {
+        if (locs.includes('head'))              d.armour.head = val;
+        if (locs.includes('body'))              d.armour.body = val;
+        if (locs.includes('arm') || locs.includes('arms')) { d.armour.larm = val; d.armour.rarm = val; }
+        if (locs.includes('leg') || locs.includes('legs')) { d.armour.lleg = val; d.armour.rleg = val; }
+      }
+      saveCurrentData(d); loadArmour(d);
+      msg = item.name + ' applied to ARMOUR VALUES';
+    } else {
+      if (!d.equipment) d.equipment = [];
+      d.equipment.push(item.name + ' (AP ' + item.armour + ', ' + item.locations + ')');
+      saveCurrentData(d); renderEquip(d);
+      msg = item.name + ' added to EQUIPMENT';
+    }
 
   } else if (cat === 'AUGMETICS') {
     if (!d.augmetics) d.augmetics = [];
     d.augmetics.push(item.name + ': ' + item.effect);
-    msg = item.name + ' added to AUGMETICS';
     saveCurrentData(d); renderAugmetics(d);
+    msg = item.name + ' added to AUGMETICS';
 
   } else {
+    // GEAR
     if (!d.equipment) d.equipment = [];
     d.equipment.push(item.name);
-    msg = item.name + ' added to EQUIPMENT';
     saveCurrentData(d); renderEquip(d);
+    msg = item.name + ' added to EQUIPMENT';
   }
 
+  closeAddModal();
   flash(msg);
 }
 
@@ -662,7 +958,7 @@ function flash(msg) {
   el.textContent = '+ ' + msg;
   el.classList.add('visible');
   clearTimeout(flash._t);
-  flash._t = setTimeout(() => el.classList.remove('visible'), 2000);
+  flash._t = setTimeout(() => el.classList.remove('visible'), 2500);
 }
 
 // ── Weapons ────────────────────────────────────────────────
