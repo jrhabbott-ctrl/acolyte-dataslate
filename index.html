@@ -1998,8 +1998,9 @@ async function sbFetch(table, method = 'GET', data = null, filters = null, retur
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  const result = await res.json();
-  if (!res.ok) throw new Error(result.error || 'Supabase error');
+  const text = await res.text();
+  const result = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new Error((result && result.error) || 'Supabase error');
   return result;
 }
 
